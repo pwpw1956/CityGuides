@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16324f">
+<meta name="description" content="A GPS-aware self-guided walking tour of La Rochelle.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
+<title>La Rochelle — Self-Guided Tour</title>
+<style>
+:root{--ink:#183247;--muted:#5e6d78;--paper:#fff;--line:#dce4e9;--accent:#176b87;--bg:#eef3f5}
+*{box-sizing:border-box} body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:18px;line-height:1.5}
+header{background:var(--ink);color:white;padding:18px max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right));position:sticky;top:0;z-index:1000}
+header h1{font-size:1.35rem;margin:0 0 3px} header p{margin:0;font-size:.9rem;opacity:.9}
+main{max-width:900px;margin:auto}.panel{background:var(--paper);margin:12px;border-radius:16px;padding:16px;box-shadow:0 2px 8px #0001}
+#map{height:360px;border-radius:12px;overflow:hidden}.leaflet-container{font:inherit}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+button{font:inherit;font-weight:650;border:1px solid #bccbd4;background:#f7fafb;color:var(--ink);padding:12px 10px;border-radius:11px;min-height:48px}
+button.primary{background:var(--accent);color:white;border-color:var(--accent)} button:disabled{opacity:.45}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.status{font-size:.9rem;color:var(--muted)}
+.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e5f1f4;color:#15566c;font-size:.78rem;font-weight:700}
+#photo{width:100%;max-height:330px;object-fit:cover;border-radius:12px;margin:8px 0}
+.caption{font-size:.75rem;color:var(--muted)} h2{font-size:1.35rem;margin:4px 0} h3{font-size:1rem;margin:12px 0 4px}
+#text{white-space:normal}.tip{background:#f1f5f7;border-left:4px solid var(--accent);padding:10px 12px;border-radius:5px}
+.small{font-size:.82rem;color:var(--muted)} .progress{height:8px;background:#e1e8ec;border-radius:99px;overflow:hidden;margin:9px 0}.progress>div{height:100%;background:var(--accent);width:0}
+ul{padding-left:22px}.notice{background:#fff8df;border:1px solid #eadb9b;padding:10px 12px;border-radius:10px}
+@media(min-width:700px){.controls{grid-template-columns:repeat(4,1fr)}#map{height:430px}}
+</style>
+</head>
+<body>
+<header><h1>La Rochelle — self-guided walking tour</h1><p>About 125–145 minutes • about 3 km • designed for a mostly level walk</p></header>
+<main>
+<section class="panel">
+  <div id="map"></div>
+  <div class="row" style="margin-top:10px">
+    <span class="badge" id="gpsBadge">GPS not started</span>
+    <span class="status" id="gpsStatus">Tap “Use my location” when you are ready.</span>
+  </div>
+  <div class="controls">
+    <button id="locate">Use my location</button>
+    <button id="auto">Auto-select: ON</button>
+    <button id="prev">← Previous</button>
+    <button class="primary" id="next">Next →</button>
+  </div>
+</section>
+
+<section class="panel">
+  <div class="progress"><div id="bar"></div></div>
+  <div class="small" id="counter"></div>
+  <h2 id="title"></h2>
+  <img id="photo" alt="">
+  <div class="caption" id="credit"></div>
+  <div id="text"></div>
+  <p class="tip" id="tip"></p>
+  <div class="controls">
+    <button class="primary" id="speak">▶ Play audio</button>
+    <button id="stop">■ Stop</button>
+    <button id="slower">Speech −</button>
+    <button id="faster">Speech +</button>
+  </div>
+  <p class="small">The audio uses your phone's built-in text-to-speech voice. No account or paid service is required.</p>
+</section>
+
+<section class="panel">
+  <h3>How the automatic mode works</h3>
+  <p>The guide uses <strong>zones</strong>, not a single exact GPS point. Large public spaces have a larger zone; individual buildings have a smaller one. When GPS puts you inside another zone, that section is selected automatically. You can switch automatic selection off and use Next/Previous instead.</p>
+  <p class="small">GPS accuracy can vary, especially beside tall buildings. The app therefore uses practical zone radii rather than expecting a five-metre fix.</p>
+</section>
+
+<section class="panel">
+  <h3>Accessibility</h3>
+  <p>The main route is deliberately level and avoids making the interiors of the medieval towers part of the timed tour. The Tour de la Lanterne and other tower interiors are optional because they involve stairs.</p>
+</section>
+
+<section class="panel">
+  <h3>For the developer / future cities</h3>
+  <p>This prototype is data-driven: the tour content, coordinates, zones, images and route are all in <code>tour.json</code>. To make another city, replace that file rather than rewriting the application.</p>
+</section>
+</main>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+let tour, map, routeLine, userMarker, accuracyCircle, watchId=null, current=0, autoMode=true, speechRate=0.95;
+const $=id=>document.getElementById(id);
+function dist(a,b){const R=6371000, p=Math.PI/180, dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;
+ const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;
+ return 2*R*Math.asin(Math.sqrt(x));}
+async function init(){
+ tour=await fetch('tour.json').then(r=>r.json());
+ map=L.map('map',{zoomControl:true}).setView(tour.start,16);
+ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+ routeLine=L.polyline(tour.route,{weight:5,opacity:.8}).addTo(map);
+ tour.stops.forEach((s,i)=>{
+   const m=L.marker([s.lat,s.lng]).addTo(map).bindTooltip((i+1)+'. '+s.title,{direction:'top'});
+   m.on('click',()=>show(i,true));
+ });
+ show(0,false);
+}
+function show(i,pan){
+ current=(i+tour.stops.length)%tour.stops.length; const s=tour.stops[current];
+ $('counter').textContent=`Stop ${current+1} of ${tour.stops.length} • ${s.minutes} minutes`;
+ $('title').textContent=s.title;
+ $('photo').src=s.image; $('photo').alt=s.title; $('credit').innerHTML=s.credit+' · <a href="'+s.source+'" target="_blank" rel="noopener">source</a>';
+ $('text').textContent=s.text; $('tip').textContent='Walking note: '+s.tip;
+ $('bar').style.width=((current+1)/tour.stops.length*100)+'%';
+ if(pan) map.setView([s.lat,s.lng],17);
+ speechSynthesis.cancel();
+ $('speak').textContent='▶ Play audio';
+}
+function speak(){
+ const s=tour.stops[current]; if(!('speechSynthesis' in window)){alert('This browser does not provide speech synthesis.');return;}
+ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(s.text); u.rate=speechRate; u.pitch=1; u.lang='en-GB';
+ u.onend=()=>{$('speak').textContent='▶ Play audio'}; speechSynthesis.speak(u); $('speak').textContent='❚❚ Playing…';
+}
+function startGPS(){
+ if(!navigator.geolocation){$('gpsStatus').textContent='This phone/browser does not provide GPS location.';return;}
+ if(watchId!==null)return;
+ $('gpsBadge').textContent='GPS active'; $('gpsStatus').textContent='Waiting for a position…';
+ watchId=navigator.geolocation.watchPosition(pos=>{
+   const p={lat:pos.coords.latitude,lng:pos.coords.longitude}, acc=pos.coords.accuracy||25;
+   if(!userMarker) userMarker=L.marker([p.lat,p.lng],{title:'Your location'}).addTo(map);
+   userMarker.setLatLng(p);
+   if(!accuracyCircle) accuracyCircle=L.circle([p.lat,p.lng],{radius:acc,weight:1,fillOpacity:.08}).addTo(map); else accuracyCircle.setLatLng([p.lat,p.lng]).setRadius(acc);
+   $('gpsStatus').textContent=`Position ±${Math.round(acc)} m`;
+   let best=-1,bestD=Infinity;
+   tour.stops.forEach((s,i)=>{const d=dist(p,s); if(d<=s.radius && d<bestD){best=i;bestD=d;}});
+   if(autoMode && best>=0 && best!==current) show(best,false);
+ },err=>{$('gpsStatus').textContent='GPS unavailable: '+err.message;},{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+}
+$('next').onclick=()=>show(current+1,true); $('prev').onclick=()=>show(current-1,true);
+$('speak').onclick=speak; $('stop').onclick=()=>{speechSynthesis.cancel();$('speak').textContent='▶ Play audio'};
+$('slower').onclick=()=>{speechRate=Math.max(.6,speechRate-.1);$('gpsStatus').textContent=`Speech speed ${speechRate.toFixed(1)}×`};
+$('faster').onclick=()=>{speechRate=Math.min(1.4,speechRate+.1);$('gpsStatus').textContent=`Speech speed ${speechRate.toFixed(1)}×`};
+$('locate').onclick=()=>{startGPS(); if(userMarker)map.setView(userMarker.getLatLng(),17)};
+$('auto').onclick=()=>{autoMode=!autoMode;$('auto').textContent='Auto-select: '+(autoMode?'ON':'OFF')};
+if('serviceWorker' in navigator) window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+init();
+</script>
+</body></html>
