@@ -1,3 +1,9 @@
+# La Rochelle Self-Guided Tour — City Guides v0.2.1
+
+Build: 19 August 2026.
+
+This release adds explicit version/build identification, versioned local storage, and cache-safe service-worker updates so phones should not remain stuck on an older release.
+
 # City Guides — La Rochelle adaptive tour v2
 
 This is the second-stage prototype of a reusable city walking-guide PWA.
