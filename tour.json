@@ -1,188 +1,361 @@
 {
+  "schemaVersion": "2.0",
   "city": "La Rochelle",
-  "version": "0.1",
-  "estimatedMinutes": "125–145",
-  "walkingKm": "about 2.8–3.2 km",
-  "start": [
-    46.1557,
-    -1.154
-  ],
-  "route": [
-    [
-      46.1557,
-      -1.15405
-    ],
-    [
-      46.1553,
-      -1.1535
-    ],
-    [
-      46.15525,
-      -1.15285
-    ],
-    [
-      46.15705,
-      -1.153
-    ],
-    [
-      46.15995,
-      -1.15195
-    ],
-    [
-      46.15925,
-      -1.15115
-    ],
-    [
-      46.1609,
-      -1.15285
-    ],
-    [
-      46.16025,
-      -1.1541
-    ],
-    [
-      46.15875,
-      -1.15315
-    ],
-    [
-      46.1569,
-      -1.1532
-    ],
-    [
-      46.1557,
-      -1.15405
-    ]
-  ],
+  "timezone": "Europe/Paris",
+  "defaultWalkingSpeedKmh": 3.8,
+  "defaultReturnBufferMinutes": 10,
+  "routing": {
+    "provider": "Valhalla",
+    "endpoint": "https://valhalla1.openstreetmap.de/route",
+    "costing": "pedestrian",
+    "note": "Public demo service; fair use applies. The app falls back to a conservative straight-line estimate if routing is unavailable."
+  },
+  "sourcesNote": "Historical and opening information should be treated as sourced tour data. Live overrides are refreshed separately.",
   "stops": [
     {
       "id": "port",
-      "title": "1. The Old Port — La Rochelle's gateway",
+      "title": "Old Port — La Rochelle's gateway",
       "lat": 46.1557,
       "lng": -1.15405,
-      "radius": 75,
-      "minutes": 5,
+      "radius": 80,
+      "listen": 5,
+      "priority": 5,
+      "required": false,
+      "indoor": false,
+      "text": "Begin at the Vieux-Port, the setting that explains almost everything about La Rochelle. The city grew as an Atlantic trading port and became wealthy, independent and strategically important. Three medieval towers once guarded the harbour entrance: the Tour de la Chaîne, Tour Saint-Nicolas and Tour de la Lanterne. Look across the water and imagine the heavy chain that was stretched between the Chain Tower and Saint-Nicolas to close the harbour at night. The harbour was also central to the city's later conflict with the French crown. After the Protestant city surrendered during the Great Siege of 1627–1628, much of the landward defences were demolished, while the great seafront towers survived. Today the same harbour is still the heart of the city, but the military waterfront has become a place for cafés, boats and strolling. It is an excellent orientation point before you decide how much of the tour you have time to see.",
+      "tip": "Flat; excellent place to pause. Tower interiors are optional.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/La%20Rochelle%2C%20Tour%20de%20la%20Cha%C3%AEne%20et%20Tour%20de%20la%20lanterne.jpg?width=1200",
-      "credit": "Wikimedia Commons — CC licence shown on the file page",
-      "text": "Begin at the entrance to the Vieux-Port, where three medieval towers once controlled access to La Rochelle: the Tour de la Chaîne on the south side, the Tour Saint-Nicolas opposite it, and the Tour de la Lanterne farther west. The harbour is the key to understanding the city. La Rochelle grew as a maritime trading town from the medieval period, and its position on the Atlantic made it prosperous, strategically important and repeatedly contested. The two great towers at the entrance are unusually well preserved because, after the city's defeat in the Great Siege of 1627–1628, the royal government demolished much of the landward fortifications but spared the seafront towers. Look across the water and imagine the heavy chain that was once stretched between the Chain Tower and Saint-Nicolas Tower at night to close the harbour. This is also a good place simply to appreciate the scale of the old harbour and the way the modern town still wraps around its medieval core.",
-      "tip": "Flat. Exterior viewing only; entering the towers involves stairs and is optional.",
-      "source": "https://www.tours-la-rochelle.fr/en/discover/la-rochelle-a-fortified-town"
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout",
+      "availability": {
+        "type": "always"
+      }
     },
     {
       "id": "chain",
-      "title": "2. Tour de la Chaîne and Cours des Dames",
+      "title": "Tour de la Chaîne and Cours des Dames",
       "lat": 46.15572,
       "lng": -1.15425,
       "radius": 35,
-      "minutes": 4,
+      "listen": 4,
+      "priority": 5,
+      "required": false,
+      "indoor": true,
+      "text": "The Tour de la Chaîne dates from the fourteenth century and was one half of the harbour-closing mechanism. The chain was attached here and stretched to the much larger Tour Saint-Nicolas. The tower also served later as a powder store. From the Cours des Dames, look back at the tower and notice how a formidable defensive building now sits among restaurants and everyday city life. That mixture is characteristic of La Rochelle: its historic buildings have not been isolated from the modern town. If you are interested in going inside, treat the visit as an optional extra. The important story can be understood perfectly well from outside, and the tower involves stairs.",
+      "tip": "Flat outside. Interior is optional and stair-heavy.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Tour%20Cha%C3%AEne%20La%20Rochelle.jpg?width=1200",
       "credit": "Jebulon / Wikimedia Commons — CC0",
-      "text": "The Tour de la Chaîne dates from the late fourteenth century and was one half of the mechanism that closed the harbour. The chain itself was attached here and stretched to the much larger Tour Saint-Nicolas. The tower later had other uses, including as a powder store. Today it forms one of the most recognisable silhouettes of La Rochelle. Walk a little along the Cours des Dames and look back toward the tower: you can see how the medieval defensive structure now sits comfortably among cafés, restaurants and the everyday life of the port. The contrast is part of La Rochelle's appeal — this is not a museum city frozen in the past.",
-      "tip": "Flat, with good places to pause.",
-      "source": "https://www.larochelle.fr/annuaires/lieux/annuaire/tour-de-la-chaine-1"
+      "source": "https://www.larochelle.fr/annuaires/lieux/annuaire/tour-de-la-chaine-1",
+      "availability": {
+        "type": "tower_oct_mar",
+        "lastEntryMinutes": 45
+      }
     },
     {
       "id": "lanterne",
-      "title": "3. Tour de la Lanterne — the lighthouse and prison",
+      "title": "Tour de la Lanterne — lighthouse and prison",
       "lat": 46.15555,
       "lng": -1.15715,
       "radius": 35,
-      "minutes": 5,
+      "listen": 5,
+      "priority": 5,
+      "required": false,
+      "indoor": true,
+      "text": "The Tour de la Lanterne is the oldest surviving lighthouse tower on the Atlantic coast of France. The present tower was built in the fifteenth century, replacing an earlier structure. Its name refers to the lantern that was lit to guide ships. It later became a prison, and its walls preserve hundreds of inscriptions left by prisoners, especially in the seventeenth and eighteenth centuries. For this walking tour, the exterior is enough: the tower marks the western end of the historic harbour and the line of the old seaward defences. If you decide to enter, regard it as an optional extension because the climb is substantial. The tower is particularly worthwhile if you enjoy the human details of history — the prisoners' marks make the past unusually tangible.",
+      "tip": "Flat outside. Interior requires many stairs.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/La%20Rochelle%2C%20Tour%20de%20la%20Cha%C3%AEne%20et%20Tour%20de%20la%20lanterne.jpg?width=1200",
-      "credit": "Wikimedia Commons — CC licence shown on the file page",
-      "text": "The Tour de la Lanterne is the oldest surviving lighthouse tower on the Atlantic coast of France. The present tower was built in the fifteenth century, replacing an earlier structure. Its name comes from the lantern once lit at the top to guide ships. But the tower also became a prison, and its walls preserve graffiti and inscriptions made by prisoners, particularly in the seventeenth and eighteenth centuries. For our walking tour, the important thing is the exterior: the tower marks the western edge of the historic harbour and the beginning of the old seaward defences. If you decide to go inside, treat it as an optional extra rather than part of the timed walk because the tower involves substantial stair climbing.",
-      "tip": "Flat outside. Interior is an optional stair-heavy detour.",
-      "source": "https://www.larochelle.fr/annuaires/lieux/annuaire/tour-de-la-lanterne-1"
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/annuaires/lieux/annuaire/tour-de-la-lanterne-1",
+      "availability": {
+        "type": "tower_oct_mar",
+        "lastEntryMinutes": 45
+      }
     },
     {
       "id": "clock",
-      "title": "4. Grosse Horloge — from city gate to town clock",
+      "title": "Grosse Horloge — from city gate to town clock",
       "lat": 46.15595,
       "lng": -1.15355,
-      "radius": 25,
-      "minutes": 5,
+      "radius": 30,
+      "listen": 4,
+      "priority": 5,
+      "required": false,
+      "indoor": false,
+      "text": "The Grosse Horloge began as a fortified gateway in the medieval wall separating the town from the port. Originally there were separate openings for carts and pedestrians. A clock and bell were added in the fifteenth century, and later rebuilding produced the elegant upper structure you see today. Notice the change as you pass from the harbour side into the dense old town. The gateway is therefore more than a photogenic monument: it marks a surviving boundary between two parts of medieval La Rochelle. It is also a useful navigation landmark. If you are improvising the route, seeing the Grosse Horloge usually means you are right at the edge of the most interesting part of the historic centre.",
+      "tip": "Flat and pedestrian-friendly; avoid stopping directly under the arch when busy.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/LaRochelle-GrosseHorloge.jpg?width=1200",
       "credit": "Jean-Christophe BENOIST / Wikimedia Commons — CC BY 3.0",
-      "text": "Now pass beneath the Grosse Horloge, one of La Rochelle's defining landmarks. It began as a fortified gateway in the medieval wall separating the town from the port. Originally there were separate openings for carts and pedestrians. In the fifteenth century a clock and bell were added. Later, as traffic increased, the openings were combined, and in the eighteenth century the upper part was rebuilt in the elegant form you see today. Notice the change in character as you pass through: on one side is the waterfront and on the other the dense historic town. The gateway is therefore more than a pretty monument — it is a surviving physical boundary between two parts of medieval La Rochelle.",
-      "tip": "Flat and pedestrian-friendly. Pause on either side rather than under the arch if busy.",
-      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout"
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout",
+      "availability": {
+        "type": "always"
+      }
+    },
+    {
+      "id": "st_sauveur",
+      "title": "Église Saint-Sauveur — the old harbour church",
+      "lat": 46.15655,
+      "lng": -1.1532,
+      "radius": 35,
+      "listen": 4,
+      "priority": 4,
+      "required": false,
+      "indoor": false,
+      "text": "Saint-Sauveur stands close to the old commercial heart of La Rochelle. The church's history reflects the city's repeated rebuilding and religious upheavals. Its position is more important to the walking tour than its architectural grandeur: it sits where the harbour, the old trading streets and the dense medieval town come together. Look at the surrounding streets and imagine the movement of merchants, sailors and goods that once concentrated here. La Rochelle's religious history also changed dramatically during the Reformation and the later restoration of Catholic institutions after the Great Siege. Even if the church itself is closed, the exterior and the surrounding streets provide a useful chapter in the story of a city whose fortunes were tied closely to both commerce and belief.",
+      "tip": "Flat; exterior stop. Treat interior access as optional.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Eglise%20Saint-Sauveur%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout",
+      "availability": {
+        "type": "always"
+      }
     },
     {
       "id": "arcades",
-      "title": "5. The arcaded streets — practical elegance",
+      "title": "The arcaded streets — practical elegance",
       "lat": 46.1572,
       "lng": -1.15305,
-      "radius": 65,
-      "minutes": 6,
+      "radius": 70,
+      "listen": 5,
+      "priority": 5,
+      "required": false,
+      "indoor": false,
+      "text": "Now look at the streets rather than searching for one particular monument. La Rochelle is famous for its arcades: covered passages beneath houses along important commercial streets. They protected pedestrians and shopkeepers from Atlantic rain and strong sun while providing useful space for commerce. The city's prosperity is visible in the mixture of buildings around you — timber-framed houses, pale stone façades and grander merchant residences. This is one of the pleasures of La Rochelle: its historic character is spread through ordinary streets rather than concentrated in a single museum. Walk slowly beneath the arcades and look up at the upper floors, doorways and carved details. You will often find something interesting without needing to go anywhere in particular.",
+      "tip": "Very flat. Ideal for a slow, flexible section.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Arcades%20%40%20La%20Rochelle%20%288382355702%29.jpg?width=1200",
-      "credit": "Guilhem Vellut / Wikimedia Commons — CC licence shown on the file page",
-      "text": "As you walk through the centre, look down the streets rather than only at individual monuments. La Rochelle is famous for its arcades — covered passages created beneath houses along important commercial streets. They protected pedestrians and shopkeepers from Atlantic rain and summer sun, while also providing valuable sheltered space for commerce. The town's prosperity is visible in the mixture of buildings: medieval timber-framed houses survive beside grander seventeenth- and eighteenth-century stone townhouses. This is one of the pleasures of La Rochelle: the historic character is spread through ordinary streets rather than concentrated in a single monument.",
-      "tip": "Very flat. Take your time and look into side streets.",
-      "source": "https://www.larochelle.fr/fileadmin/mediatheque/1_Actualites/Rub_Actualites/Exp_coeur-de-ville/Livret_parcours_-_semaine-5-sens.pdf"
+      "credit": "Guilhem Vellut / Wikimedia Commons",
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout",
+      "availability": {
+        "type": "always"
+      }
     },
     {
       "id": "townhall",
-      "title": "6. Hôtel de Ville — power, independence and the Great Siege",
+      "title": "Hôtel de Ville — power, independence and the Great Siege",
       "lat": 46.1596,
       "lng": -1.15125,
-      "radius": 35,
-      "minutes": 7,
+      "radius": 40,
+      "listen": 7,
+      "priority": 5,
+      "required": false,
+      "indoor": false,
+      "text": "La Rochelle's Hôtel de Ville has an extraordinary claim: a town hall has stood here since 1298, making it the oldest French town hall still in use. The building was largely rebuilt around 1490 in a deliberately fortified style, with crenellations, machicolations and a corner tower. That appearance reflects the city's unusual municipal independence and confidence. La Rochelle later became a major Protestant stronghold. The most dramatic chapter came in 1627–1628, when royal forces under Cardinal Richelieu besieged the city. Mayor Jean Guiton became a symbol of resistance. The building suffered a major fire in 2013 and was reopened after extensive restoration in 2019. Spend a little time looking at the square as well as the building: this is one of the best places to understand the political history of La Rochelle.",
+      "tip": "Flat; the square provides good places to pause.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/H%C3%B4tel%20de%20ville%20de%20la%20Rochelle.JPG?width=1200",
-      "credit": "Wikimedia Commons — CC licence shown on the file page",
-      "text": "La Rochelle's Hôtel de Ville has an extraordinary claim: the city has had a town hall here since 1298, making it the oldest French town hall still in use. The building you see was largely rebuilt around 1490 in a deliberately fortified style, with crenellations, machicolations and a corner tower. That appearance tells us something about the political confidence of medieval La Rochelle. The city enjoyed unusual municipal independence and became a major Protestant stronghold during the Reformation. The most dramatic chapter came in 1627–1628, when royal forces under Cardinal Richelieu besieged the Protestant city. The mayor Jean Guiton became a symbol of resistance. Look for his statue in the square. The building was badly damaged by fire in 2013 and reopened after major restoration in 2019.",
-      "tip": "Flat. The square is a good rest point.",
-      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/lhotel-de-ville/un-peu-dhistoire"
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/lhotel-de-ville/un-peu-dhistoire",
+      "availability": {
+        "type": "always"
+      }
+    },
+    {
+      "id": "guiton",
+      "title": "Place de l'Hôtel de Ville — Jean Guiton and the siege",
+      "lat": 46.15945,
+      "lng": -1.151,
+      "radius": 50,
+      "listen": 3,
+      "priority": 4,
+      "required": false,
+      "indoor": false,
+      "text": "Use this square as a short companion to the Hôtel de Ville. The Great Siege of 1627–1628 is one of the defining episodes in La Rochelle's history. The city was a Protestant stronghold resisting the authority of the French crown. Royal forces built a massive line of fortifications around the city and a sea barrier to prevent supplies arriving. Jean Guiton, one of the city's leading figures, became associated with the determination to resist. The siege ended with surrender, starvation and a profound change in the city's political position. The episode explains why La Rochelle's medieval independence did not survive intact into the modern period. It also explains why the city's harbour towers and surviving walls have such a strong historical presence.",
+      "tip": "Flat; use as a short stop if time is tight.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Place%20de%20l%27H%C3%B4tel%20de%20Ville%20de%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout",
+      "availability": {
+        "type": "always"
+      }
     },
     {
       "id": "renaissance",
-      "title": "7. Renaissance La Rochelle — merchants, money and the Atlantic",
+      "title": "Renaissance merchant quarter — Atlantic wealth",
       "lat": 46.1591,
       "lng": -1.15215,
-      "radius": 55,
-      "minutes": 5,
+      "radius": 60,
+      "listen": 5,
+      "priority": 4,
+      "required": false,
+      "indoor": false,
+      "text": "Here the city's commercial success becomes architectural. Wealthy merchants and shipowners built substantial houses with courtyards, elaborate façades and carved details. La Rochelle's Atlantic connections brought goods, people and ideas from far beyond the immediate region. That prosperity also has a darker history. The city participated in Atlantic colonial trade, including the slave trade, and some merchant families accumulated wealth through it. Modern heritage interpretation increasingly places those uncomfortable facts alongside the more familiar story of maritime prosperity. As you look at the grand houses, remember that historic architecture can record both commercial achievement and the unequal systems that produced it. This is a good example of why a city guide should not merely point at attractive buildings but explain the society that created them.",
+      "tip": "Flat; a good optional section when you have 90 minutes or more.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Arcades%20%40%20La%20Rochelle%20%288382353116%29.jpg?width=1200",
-      "credit": "Guilhem Vellut / Wikimedia Commons — CC licence shown on the file page",
-      "text": "This part of the old town is where La Rochelle's commercial success becomes architectural. Wealthy merchants and shipowners built substantial houses, often with elaborate façades, courtyards and carved details. The city's Atlantic connections brought goods, people and ideas from far beyond the immediate region. That prosperity also had a darker side. La Rochelle was involved in Atlantic colonial trade, including the slave trade, and several merchant families accumulated wealth through it. The city's museums and heritage interpretation do not hide that history. When looking at the grand houses, it is worth remembering that impressive architecture can record both commercial achievement and uncomfortable sources of wealth.",
-      "tip": "Flat. This is an optional shorter stop if time is running short.",
-      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout"
+      "credit": "Guilhem Vellut / Wikimedia Commons",
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout",
+      "availability": {
+        "type": "always"
+      }
     },
     {
       "id": "cathedral",
-      "title": "8. Saint-Louis Cathedral and Protestant La Rochelle",
+      "title": "Saint-Louis Cathedral — Protestant La Rochelle becomes Catholic again",
       "lat": 46.1592,
       "lng": -1.15115,
-      "radius": 45,
-      "minutes": 6,
+      "radius": 50,
+      "listen": 5,
+      "priority": 4,
+      "required": false,
+      "indoor": true,
+      "text": "Saint-Louis Cathedral is a useful reminder that La Rochelle's religious history was anything but simple. During the Reformation the city became a major centre of French Protestantism. After the Great Siege and the defeat of the Huguenot city, Catholic institutions were restored and the religious landscape changed dramatically. The cathedral occupies a site associated with that transition. If it is open, you can look inside; if not, the exterior still makes a useful stop because the building helps explain the religious and political transformation of La Rochelle. The story is not simply about Catholics and Protestants: it is about royal power, municipal independence and the changing identity of France.",
+      "tip": "Flat outside. Interior depends on opening/access.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/La%20Rochelle.Cath%C3%A9drale%20Saint-Louis%20de%20La%20Rochelle.jpg?width=1200",
-      "credit": "Wikimedia Commons — CC licence shown on the file page",
-      "text": "Saint-Louis Cathedral is a useful reminder that La Rochelle's religious history was anything but simple. During the Reformation the city became a major centre of French Protestantism. After the Great Siege and the defeat of the Huguenot city, Catholic institutions were restored and the religious landscape changed dramatically. The present cathedral occupies a site associated with that transition. Inside, if open, look up at the nineteenth-century dome paintings associated with William Bouguereau. Even if you remain outside, the building helps explain why the story of La Rochelle is not just one of ships and merchants but also of religious conflict, royal power and changing French identity.",
-      "tip": "Flat. Interior visit optional and subject to opening hours.",
-      "source": "https://www.larochelle-tourisme.com/"
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle-tourisme.com/",
+      "availability": {
+        "type": "conditional",
+        "note": "Exterior always available; interior hours should be checked locally."
+      }
+    },
+    {
+      "id": "newworld",
+      "title": "Musée du Nouveau Monde — La Rochelle and the Atlantic world",
+      "lat": 46.1601,
+      "lng": -1.15155,
+      "radius": 45,
+      "listen": 4,
+      "priority": 4,
+      "required": true,
+      "indoor": true,
+      "text": "The Musée du Nouveau Monde explores La Rochelle's long connection with the Americas. The subject is particularly important because the port was deeply involved in Atlantic commerce. The museum's collections include material relating to trade, migration, colonial societies and the relationships between Europe and the Americas. You do not need to enter to understand the significance of the building's presence in the old town, but an interior visit can be worthwhile if your time allows and the museum is open. For this tour, it is deliberately a medium-priority stop: interesting, but not so essential that a short visit should be held up by a closure or queue.",
+      "tip": "Flat approach. Interior is optional; the museum is not fully accessible to wheelchair users according to its official information.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Mus%C3%A9e%20du%20Nouveau%20Monde%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://museedunouveaumonde.larochelle.fr/preparer-la-visite/acces-tarifs-et-horaires",
+      "availability": {
+        "type": "newworld"
+      }
     },
     {
       "id": "market",
-      "title": "9. Central Market — La Rochelle alive today",
+      "title": "Central Market — La Rochelle alive today",
       "lat": 46.16095,
       "lng": -1.153,
-      "radius": 60,
-      "minutes": 6,
+      "radius": 65,
+      "listen": 5,
+      "priority": 4,
+      "required": false,
+      "indoor": false,
+      "text": "The Marché Central changes the tone of the tour. Instead of looking at a monument, listen to the city functioning today. The present market hall dates from 1834 and remains a working food market. Its large glazed areas, zinc roofing, clock and small bell turret are practical rather than monumental. On market mornings the surrounding streets also fill with stalls. This is one of the best places to see that La Rochelle is a living town rather than a heritage display. If your visit is on a market morning, browsing may be more enjoyable than listening to every word, so the app treats this as a flexible stop rather than a compulsory lecture.",
+      "tip": "Completely flat. Can be crowded, particularly Wednesday and Saturday mornings.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/503%20-%20March%C3%A9%20central%20-%20La%20Rochelle.jpg?width=1200",
       "credit": "Patrick Despoix / Wikimedia Commons — CC BY-SA 3.0",
-      "text": "The Marché Central is a change of pace: instead of looking at a monument, listen to the city. The present market hall dates from 1834 and is still a working food market. Its architecture — large glazed areas, zinc roofing and a small clock tower — is deliberately practical rather than monumental. On market mornings the surrounding streets fill with stalls as well. For visitors, this is a chance to see La Rochelle functioning as a living town rather than as a heritage display. If your cruise stop falls on a market morning, allow extra time here: browsing is part of the experience.",
-      "tip": "Completely flat. Market activity may make the area crowded.",
-      "source": "https://balades.larochelle-tourisme.com/explorer/loisirs/marches/6b44f3a5-b585-4f01-acf5-eee97370743e/marche-du-centre-ville"
+      "source": "https://balades.larochelle-tourisme.com/explorer/loisirs/marches/6b44f3a5-b585-4f01-acf5-eee97370743e/marche-du-centre-ville",
+      "availability": {
+        "type": "market"
+      }
     },
     {
-      "id": "oldtown",
-      "title": "10. Back through the old town — the final view",
-      "lat": 46.1582,
-      "lng": -1.15355,
-      "radius": 70,
-      "minutes": 4,
-      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/La%20Rochelle-Rue%20en%20arcades.JPG?width=1200",
-      "credit": "Wikimedia Commons — CC licence shown on the file page",
-      "text": "On the return through the old town, notice how little you have needed to climb. That is one of the pleasures of La Rochelle: the historic centre is compact and predominantly level. Look for the combination of timber framing, pale local stone, shutters, arcades and narrow streets. These details are the connective tissue between the major monuments you have visited. As you return toward the harbour, the Grosse Horloge provides a useful visual anchor. From here you can choose either to return directly to the port or repeat part of the waterfront at your own pace.",
-      "tip": "Flat. This is the flexible finish: return to the ship or explore a little longer.",
-      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout"
+      "id": "verdun",
+      "title": "Place de Verdun — the northern edge of the historic centre",
+      "lat": 46.16045,
+      "lng": -1.15445,
+      "radius": 60,
+      "listen": 3,
+      "priority": 3,
+      "required": false,
+      "indoor": false,
+      "text": "Place de Verdun is useful as a geographical hinge. From here the old centre opens toward the northern part of La Rochelle, while the historic core remains close at hand. It is not one of the city's headline monuments, so the guide uses it as an optional connector. If you have plenty of time, it provides a change of scene and a useful point from which to reach the Muséum and Jardin des Plantes. If you are running late, this is one of the first sections the planner will remove.",
+      "tip": "Flat. Primarily a connector and optional stop.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Place%20de%20Verdun%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/",
+      "availability": {
+        "type": "always"
+      }
+    },
+    {
+      "id": "museum",
+      "title": "Muséum d'Histoire naturelle — science and empire",
+      "lat": 46.16055,
+      "lng": -1.15555,
+      "radius": 50,
+      "listen": 5,
+      "priority": 3,
+      "required": true,
+      "indoor": true,
+      "text": "The Muséum d'Histoire naturelle is worth considering because its collections tell a different story from the harbour and fortifications. La Rochelle's museums preserve natural-history collections connected with exploration, collecting and scientific exchange. The building and collections also provide a route into a more complicated history of European encounters with other parts of the world. If you enjoy museums, this can easily become a longer visit than the audio section suggests. The app therefore treats the five-minute audio description as an introduction rather than a substitute for entering the museum. If your available time is short, the planner will normally favour the old harbour and old town first.",
+      "tip": "Flat approach. Interior has opening hours and should be checked.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Museum%20d%27Histoire%20Naturelle%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://museum.larochelle.fr/preparer-la-visite/informations-pratiques/acces-tarifs-et-horaires",
+      "availability": {
+        "type": "museum"
+      }
+    },
+    {
+      "id": "jardin",
+      "title": "Jardin des Plantes — a quiet change of pace",
+      "lat": 46.1601,
+      "lng": -1.15615,
+      "radius": 65,
+      "listen": 4,
+      "priority": 3,
+      "required": false,
+      "indoor": false,
+      "text": "The Jardin des Plantes offers a welcome change from stone streets and harbour architecture. The garden preserves memories of La Rochelle's scientific and maritime connections, including plants associated with expeditions and botanical collecting. It is also simply a pleasant place to pause. The city keeps the garden open for long hours, and in October the closing time is still early evening rather than late at night. This makes it a useful flexible component of the tour: if you have time and want a quieter experience, come in; if your ship's departure or your return to the hotel is approaching, it is easy to skip.",
+      "tip": "Flat and restful. Good place for a seated break.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Jardin%20des%20plantes%20de%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/annuaires/lieux/annuaire/le-jardin-des-plantes",
+      "availability": {
+        "type": "garden"
+      }
+    },
+    {
+      "id": "chapelle",
+      "title": "Chapelle des Dames Blanches — a small cultural surprise",
+      "lat": 46.1558,
+      "lng": -1.151,
+      "radius": 50,
+      "listen": 4,
+      "priority": 2,
+      "required": false,
+      "indoor": true,
+      "text": "The Chapelle des Dames Blanches is a smaller and more contemporary stop. A former chapel near the old port has been used as a gallery and cultural space, taking advantage of its high ceilings, stained glass and distinctive light. It illustrates a useful theme in La Rochelle: historic buildings are often given new lives rather than preserved as static monuments. If an exhibition is open, you may find it worth a brief look inside. If it is closed, the building can simply be treated as an exterior point and the tour can continue. This is deliberately a low-priority stop so that the main historical story does not depend on it.",
+      "tip": "Flat. Opening is seasonal; treat as an optional bonus.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Chapelle%20des%20Dames%20Blanches%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/annuaires/lieux/annuaire/chapelle-des-dames-blanches",
+      "availability": {
+        "type": "chapelle"
+      }
+    },
+    {
+      "id": "maritime",
+      "title": "Bassin des Chalutiers and Musée Maritime",
+      "lat": 46.1541,
+      "lng": -1.1575,
+      "radius": 80,
+      "listen": 5,
+      "priority": 4,
+      "required": false,
+      "indoor": true,
+      "text": "The Bassin des Chalutiers shows La Rochelle as a working maritime city rather than only a medieval one. The Musée Maritime and the vessels around the basin tell the story of fishing, shipping and the city's more recent relationship with the Atlantic. This stop is deliberately optional because the museum itself can take much longer than the audio description. Even if you do not enter, the basin provides an excellent waterfront perspective and gives context to the modern port economy. It is also a useful alternative destination if the medieval towers are busy or temporarily inaccessible.",
+      "tip": "Flat waterfront. Museum entry can consume substantial time.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/La%20Rochelle%20Mus%C3%A9e%20Maritime.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://museemaritime.larochelle.fr/de/preparer-la-visite/acces-tarifs-et-horaires",
+      "availability": {
+        "type": "maritime"
+      }
+    },
+    {
+      "id": "two_mills",
+      "title": "Porte des Deux Moulins and the seaward walls",
+      "lat": 46.15465,
+      "lng": -1.1582,
+      "radius": 55,
+      "listen": 4,
+      "priority": 4,
+      "required": false,
+      "indoor": false,
+      "text": "The Porte des Deux Moulins is a useful reminder that La Rochelle was a fortified town beyond the famous harbour towers. This stretch of the waterfront preserves the relationship between the old defensive line and the sea. Rather than concentrating on one building, look along the walls and consider how the city once controlled movement through a narrow defended perimeter. This is also a pleasant place to experience the Atlantic edge without the crowds that gather around the main harbour entrance. It makes a good optional extension for a longer tour and can be omitted without damaging the central historical story.",
+      "tip": "Mostly flat, but some waterfront surfaces can be uneven.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Porte%20des%20Deux-Moulins%20La%20Rochelle.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "https://www.larochelle.fr/action-municipale/ville-culturelle/patrimoine/notre-patrimoine-un-atout",
+      "availability": {
+        "type": "always"
+      }
     }
   ]
 }

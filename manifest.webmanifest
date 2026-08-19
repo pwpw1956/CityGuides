@@ -1,11 +1,11 @@
 {
-  "name": "La Rochelle Self-Guided Tour",
-  "short_name": "La Rochelle Tour",
-  "start_url": ".",
+  "name": "City Guides — La Rochelle",
+  "short_name": "La Rochelle Guide",
+  "start_url": "./",
   "display": "standalone",
   "background_color": "#eef3f5",
-  "theme_color": "#16324f",
-  "lang": "en-GB",
+  "theme_color": "#183247",
+  "description": "A GPS-aware, time-adaptive self-guided walking tour.",
   "icons": [
     {
       "src": "icon-192.png",
@@ -16,11 +16,6 @@
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
-    },
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
     }
   ]
 }

@@ -1,48 +1,50 @@
-# La Rochelle Self-Guided Tour — prototype
+# City Guides — La Rochelle adaptive tour v2
 
-This is a browser-based Progressive Web App (PWA). It is deliberately not a native Android/iPhone app: the same files work on Samsung, iPhone, iPad and desktop browsers.
+This is the second-stage prototype of a reusable city walking-guide PWA.
 
-## What it does
-- 10 GPS zones covering a mostly level historic-centre walk.
-- Approx. 125–145 minutes and about 3 km at a leisurely pace.
-- Map with a route line and numbered stops.
-- Photographs linked from Wikimedia Commons.
-- Text-to-speech audio using the phone's built-in browser speech engine.
-- Automatic selection based on a zone radius, plus manual Next/Previous controls.
-- Tour content lives in `tour.json`, so another city can be made by replacing the data file.
+## New in v2
 
-## Important
-A PWA must be served from HTTPS for reliable geolocation and installation. Opening `index.html` directly from a phone's Files app is not sufficient.
+- User chooses available tour time.
+- User presses **I AM HERE** anywhere and that location becomes Home.
+- Planner selects a subset of a larger repertoire of sights.
+- Planned time includes walking + listening.
+- A return buffer can be reserved.
+- GPS can automatically select a nearby section.
+- The plan can be re-evaluated as the user moves and time passes.
+- Proposed plan changes require user confirmation.
+- **Hold to get me Home** is guarded against accidental taps.
+- Pedestrian routes are requested from Valhalla rather than drawn as straight lines.
+- Seasonal opening rules are stored locally.
+- A separate `status.json` can carry live overrides.
+- GitHub Actions can refresh strong temporary-closure signals from official La Rochelle pages daily.
+- The application remains data-driven: another city can use the same engine with a different `tour.json`.
 
-### Easiest free deployment
-1. Create a free GitHub repository.
-2. Upload all files in this folder.
-3. Enable GitHub Pages for the repository.
-4. Open the resulting HTTPS address on each phone.
-5. On iPhone use Safari -> Share -> Add to Home Screen.
-6. On Samsung/Chrome use the browser's Install/Add to Home screen option.
+## Important prototype limitations
 
-## Map
-The prototype uses OpenStreetMap tiles via Leaflet. Keep visible attribution. Do not add an offline map download/prefetch function to the public OSM tile server; use a provider that explicitly permits offline maps if offline operation is required.
+1. The Valhalla public server is a shared demo service and is subject to fair-use/rate limits. For a production version, use a suitable routing provider or a self-hosted routing service.
+2. The live-status workflow deliberately detects only explicit temporary-closure wording. It does not attempt to scrape arbitrary opening hours; the normal seasonal rules remain in `tour.json`.
+3. The current stop coordinates and descriptions are a second-stage prototype and should be field-checked before relying on the guide on a cruise day.
+4. Map tiles are loaded from OpenStreetMap while online. A future production version should add an explicitly licensed offline map strategy.
 
-## Generalising to another city
-Create a new `tour.json` with:
-- city, estimatedMinutes, walkingKm
-- route: an array of [latitude, longitude] pairs
-- stops: id, title, lat, lng, radius, minutes, image, credit, text, tip
+## Deployment
 
-Suggested zone design:
-- large square/plaza: 50–90 m
-- broad waterfront: 60–100 m
-- single building: 20–35 m
-- GPS-unfriendly streets: 30–50 m
+For GitHub Pages, put these files at the repository root and publish the `main` branch root.
 
-Use 10–14 stops for a 2–2.5 hour tour. Aim for 120–180 seconds of speech per stop; reserve 240–300 seconds for exceptional sites.
+Website:
+`https://YOUR-USERNAME.github.io/YOUR-REPOSITORY/`
 
-## Future improvements
-- Pre-generated MP3 audio for consistent voices and true offline use.
-- Bundled/licensed images rather than remote image URLs.
-- Optional offline map provider with explicit offline rights.
-- Route alternatives and accessibility tags.
-- "Nearby stops" panel and arrival chime.
-- A content validation script that checks every stop's sources, licence and word count.
+The repository should be public for GitHub Free Pages.
+
+## Routing
+
+Valhalla is an open-source routing engine using OpenStreetMap data. The application uses pedestrian costing and stores the last successful route in memory during the session.
+
+## Next production stage
+
+- field-verify all coordinates
+- replace prototype route planning with a road-network-aware selection algorithm using a matrix service
+- improve opening-hours extraction and add special-date/event feeds
+- add explicit "visit duration" separate from audio duration
+- add a user-approved "skip/postpone" planner
+- add offline-capable map data
+- add a city selector and reusable tour package format
