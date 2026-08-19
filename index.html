@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES — La Rochelle
-  Version: 0.2.1
-  Build: 2026-08-19 17:16 Europe/Amsterdam
-  Release: cache-safe release / version tracking
+  Version: 0.2.2
+  Build: 2026-08-19 18:20 UTC
+  Release: reliable I AM HERE / GPS startup
 -->
 <!doctype html>
 <html lang="en">
@@ -136,9 +136,9 @@ let tour,statusData,map,routeLine,userMarker,accuracyCircle,watchId=null,autoMod
 let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null;
 const $=id=>document.getElementById(id);
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
-const APP_VERSION='0.2.1';
-const BUILD='2026-08-19 17:16 Europe/Amsterdam';
-const storageKey='cityguides-lr-v0.2.1';
+const APP_VERSION='0.2.2';
+const BUILD='2026-08-19 18:20 UTC';
+const storageKey='cityguides-lr-v0.2.2';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -263,23 +263,80 @@ function showStop(s){
   speechSynthesis.cancel();$('speak').textContent='▶ Play audio';
 }
 function markVisited(s){visited.add(s.id);try{localStorage.setItem(storageKey,JSON.stringify({visited:[...visited],home,startedAt}))}catch{}}
-function startGPS(){
-  if(!navigator.geolocation){$('gpsStatus').textContent='This browser does not provide GPS.';return;}
-  if(watchId!==null)return;
-  $('gpsBadge').textContent='GPS active';watchId=navigator.geolocation.watchPosition(async pos=>{
-    position={lat:pos.coords.latitude,lng:pos.coords.longitude};const acc=pos.coords.accuracy||30;
-    if(!userMarker)userMarker=L.marker([position.lat,position.lng],{title:'Your location'}).addTo(map);else userMarker.setLatLng(position);
-    if(!accuracyCircle)accuracyCircle=L.circle([position.lat,position.lng],{radius:acc,weight:1,fillOpacity:.08}).addTo(map);else accuracyCircle.setLatLng([position.lat,position.lng]).setRadius(acc);
-    $('gpsStatus').textContent='Position ±'+Math.round(acc)+' m';
-    if(autoMode){
-      let hit=null,dd=Infinity;
-      for(const s of tour.stops){const d=hav(position,s);if(d<=s.radius&&d<dd){hit=s;dd=d;}}
-      if(hit&&(!plan.length||currentIndex<0||hit.id!==tour.stops[currentIndex].id))showStop(hit);
-    }
-    if(plan.length && Date.now()-lastPlanAt>120000 && startedAt) await makePlan('progress');
-  },err=>{$('gpsStatus').textContent='GPS unavailable: '+err.message;},{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+function applyPosition(pos){
+  position={lat:pos.coords.latitude,lng:pos.coords.longitude};
+  const acc=pos.coords.accuracy||30;
+  if(!userMarker)userMarker=L.marker([position.lat,position.lng],{title:'Your location'}).addTo(map);
+  else userMarker.setLatLng(position);
+  if(!accuracyCircle)accuracyCircle=L.circle([position.lat,position.lng],{radius:acc,weight:1,fillOpacity:.08}).addTo(map);
+  else accuracyCircle.setLatLng([position.lat,position.lng]).setRadius(acc);
+  $('gpsStatus').textContent='Position ±'+Math.round(acc)+' m';
+  if(autoMode){
+    let hit=null,dd=Infinity;
+    for(const st of tour.stops){const d=hav(position,st);if(d<=st.radius&&d<dd){hit=st;dd=d;}}
+    if(hit&&(!plan.length||currentIndex<0||hit.id!==tour.stops[currentIndex].id))showStop(hit);
+  }
 }
+
+function startGPS(){
+  if(!navigator.geolocation){$('gpsStatus').textContent='This browser does not provide GPS.';return false;}
+  if(watchId!==null)return true;
+  $('gpsBadge').textContent='GPS starting…';
+  try{
+    watchId=navigator.geolocation.watchPosition(async pos=>{
+      applyPosition(pos);
+      $('gpsBadge').textContent='GPS active';
+      if(plan.length && Date.now()-lastPlanAt>120000 && startedAt) await makePlan('progress');
+    },err=>{
+      watchId=null;
+      $('gpsBadge').textContent='GPS not started';
+      $('gpsStatus').textContent='GPS unavailable: '+err.message;
+    },{enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+    return true;
+  }catch(e){
+    watchId=null;
+    $('gpsBadge').textContent='GPS not started';
+    $('gpsStatus').textContent='GPS could not be started.';
+    return false;
+  }
+}
+
+function requestCurrentPosition(){
+  return new Promise((resolve,reject)=>{
+    if(!navigator.geolocation){reject(new Error('This browser does not provide GPS.'));return;}
+    $('gpsBadge').textContent='Finding you…';
+    $('gpsStatus').textContent='Requesting your position…';
+    navigator.geolocation.getCurrentPosition(pos=>{
+      applyPosition(pos);
+      $('gpsBadge').textContent='GPS active';
+      resolve(pos);
+    },err=>{
+      $('gpsBadge').textContent='GPS not started';
+      $('gpsStatus').textContent='GPS unavailable: '+err.message;
+      reject(err);
+    },{enableHighAccuracy:true,maximumAge:5000,timeout:20000});
+  });
+}
+
 $('iamhere').onclick=async()=>{
+  $('iamhere').disabled=true;
+  $('setupStatus').textContent='Finding your location…';
+  startGPS();
+  try{
+    await requestCurrentPosition();
+    home={...position};
+    startedAt=Date.now();
+    visited=new Set();
+    $('homeBtn').classList.remove('hidden');
+    $('setupStatus').textContent='Home recorded at your current position. Building a route from here…';
+    await makePlan('initial');
+  }catch(e){
+    $('setupStatus').textContent='I could not get your location. Check that Chrome is allowed to use Location, then try again.';
+  }finally{
+    $('iamhere').disabled=false;
+  }
+};
+$('replan').onclick=async()=>{
   if(!position){startGPS();$('setupStatus').textContent='Waiting for GPS… press “I AM HERE” again when your position appears.';return;}
   home={...position};startedAt=Date.now();visited=new Set();$('homeBtn').classList.remove('hidden');$('setupStatus').textContent='Home recorded at your current position. Building a route from here…';await makePlan('initial');
 };
@@ -287,7 +344,7 @@ $('replan').onclick=()=>makePlan('manual');
 $('auto').onclick=()=>{autoMode=!autoMode;$('auto').textContent='Automatic section: '+(autoMode?'ON':'OFF')};
 $('next').onclick=()=>{if(!plan.length)return;const i=Math.max(0,plan.findIndex(s=>s.id===tour.stops[currentIndex]?.id));const s=plan[i+1]||plan[0];showStop(s);markVisited(s)};
 $('prev').onclick=()=>{const s=tour.stops[Math.max(0,currentIndex-1)];if(s)showStop(s)};
-$('locate').onclick=()=>{startGPS();if(userMarker)map.setView(userMarker.getLatLng(),17)};
+$('locate').onclick=async()=>{startGPS();try{await requestCurrentPosition();if(userMarker)map.setView(userMarker.getLatLng(),17)}catch{}};
 $('speak').onclick=()=>{const s=tour.stops[currentIndex];if(!s)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(s.text);u.lang='en-GB';u.rate=speechRate;u.onend=()=>$('speak').textContent='▶ Play audio';speechSynthesis.speak(u);$('speak').textContent='❚❚ Playing…'};
 $('stop').onclick=()=>{speechSynthesis.cancel();$('speak').textContent='▶ Play audio'};
 $('slower').onclick=()=>speechRate=Math.max(.6,speechRate-.1);
@@ -309,7 +366,7 @@ async function init(){
   tour=await fetch('tour.json').then(r=>r.json());try{statusData=await fetch('status.json').then(r=>r.json())}catch{statusData={overrides:{}}}
   map=L.map('map').setView([tour.stops[0].lat,tour.stops[0].lng],16);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
   tour.stops.forEach(s=>L.marker([s.lat,s.lng]).addTo(map).bindTooltip(s.title).on('click',()=>showStop(s)));
-  startGPS();$('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';
+  $('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';
   try{const saved=JSON.parse(localStorage.getItem(storageKey)||'null');if(saved?.home)home=saved.home;}catch{}
 }
 if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});await reg.update();}catch(e){}});

@@ -1,4 +1,4 @@
-# La Rochelle Self-Guided Tour — City Guides v0.2.1
+# La Rochelle Self-Guided Tour — City Guides v0.2.2
 
 Build: 19 August 2026.
 

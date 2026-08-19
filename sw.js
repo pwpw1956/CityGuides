@@ -1,9 +1,9 @@
 /*
   CITY GUIDES — La Rochelle
-  Version: 0.2.1
-  Build: 2026-08-19 17:16 Europe/Amsterdam
+  Version: 0.2.2
+  Build: 2026-08-19 18:20 UTC
 */
-const CACHE='cityguides-lr-v0.2.1';
+const CACHE='cityguides-lr-v0.2.2';
 const SHELL=['./','./index.html','./tour.json','./status.json','./manifest.webmanifest','./icon-192.png','./icon-512.png','./version.json'];
 
 self.addEventListener('install',event=>{
