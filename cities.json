@@ -1,0 +1,13 @@
+{
+  "schemaVersion": "1.0",
+  "cities": [
+    {
+      "id": "la-rochelle",
+      "name": "La Rochelle",
+      "country": "France",
+      "timezone": "Europe/Paris",
+      "data": "data/la-rochelle.json",
+      "status": "status/la-rochelle.json"
+    }
+  ]
+}

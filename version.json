@@ -1,0 +1,6 @@
+{
+  "application": "City Guides",
+  "version": "0.3.0",
+  "build": "2026-08-21T10:30:00Z",
+  "release": "clean multi-city architecture; hard-reset capable; reliable GPS startup"
+}
