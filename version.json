@@ -1,6 +1,7 @@
 {
   "application": "City Guides",
-  "version": "0.4.0",
-  "build": "2026-08-21T10:35:00Z",
-  "release": "GPS-driven adaptive planning; multi-city data; route-aware selection"
+  "version": "0.5.0",
+  "build": "2026-08-21T12:30:00Z",
+  "city": "multi-city",
+  "release": "transparent planning decisions; coloured site markers; dynamic candidate classification"
 }
