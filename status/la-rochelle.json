@@ -1,1 +1,7 @@
-
+{
+  "schemaVersion": "1.0",
+  "checkedAt": null,
+  "source": "GitHub Actions / official-source checks",
+  "overrides": {},
+  "notes": "If this file is stale, the app uses the tour's built-in seasonal rules and labels the live data as stale."
+}
