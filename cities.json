@@ -8,6 +8,14 @@
       "timezone": "Europe/Paris",
       "data": "data/la-rochelle.json",
       "status": "status/la-rochelle.json"
+    },
+    {
+      "id": "lewes",
+      "name": "Lewes",
+      "country": "England, UK",
+      "timezone": "Europe/London",
+      "data": "data/lewes.json",
+      "status": "status/lewes.json"
     }
   ]
 }

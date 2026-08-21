@@ -1,6 +1,6 @@
 {
   "application": "City Guides",
-  "version": "0.3.0",
-  "build": "2026-08-21T10:30:00Z",
-  "release": "clean multi-city architecture; hard-reset capable; reliable GPS startup"
+  "version": "0.4.0",
+  "build": "2026-08-21T10:35:00Z",
+  "release": "GPS-driven adaptive planning; multi-city data; route-aware selection"
 }

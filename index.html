@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES — La Rochelle
-  Version: 0.3.0
-  Build: 2026-08-21 10:30 UTC
-  Release: clean multi-city architecture; hard-reset capable; reliable GPS startup
+  Version: 0.4.0
+  Build: 2026-08-21 10:35 UTC
+  Release: GPS-driven adaptive planning; multi-city data; route-aware selection
 -->
 <!doctype html>
 <html lang="en">
@@ -66,7 +66,7 @@ dialog{border:0;border-radius:16px;padding:0;max-width:520px;width:calc(100% - 2
     <button id="locate">Show my location</button>
   </div>
   <p class="status" id="setupStatus">Press “I AM HERE” when you are at the place where you want the tour to begin. That place becomes Home.</p>
-  <p class="small" id="versionInfo">City Guides v0.3.0</p>
+  <p class="small" id="versionInfo">City Guides v0.4.0</p>
 </section>
 
 <section class="panel">
@@ -103,7 +103,7 @@ dialog{border:0;border-radius:16px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statbox"><strong id="planDistance">—</strong><br><span class="small">estimated walking</span></div>
   </div>
   <ol id="planList"><li>Press “I AM HERE” to create a plan.</li></ol>
-  <p class="small" id="planNote"></p>
+  <p class="small" id="planNote"></p><p class="small" id="routeNote">The planner first chooses worthwhile sights, then reduces unnecessary backtracking and finally asks the pedestrian routing service for the road/path route.</p>
 </section>
 
 <section class="panel">
@@ -137,11 +137,11 @@ let tour,statusData,map,routeLine,userMarker,accuracyCircle,watchId=null,autoMod
 let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null;
 const $=id=>document.getElementById(id);
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
-const APP_VERSION='0.3.0';
-const BUILD='2026-08-21 10:30 UTC';
+const APP_VERSION='0.4.0';
+const BUILD='2026-08-21 10:35 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.3.0';
+const storageKeyBase='cityguides-v0.4.0';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -161,6 +161,8 @@ function openingText(s){
   }
   if(t.type==='market') return {open:hm>=360&&hm<810,label:(hm>=360&&hm<810)?'Open this morning':'Normally open every morning; outside today’s morning hours'};
   if(t.type==='garden'){const open=hm>=420&&hm<1140;return {open,label:open?'Open today (Oct–Mar: 07:00–19:00)':'Closed now (Oct–Mar: 07:00–19:00)'};}
+  if(t.type==='lewes_castle'){const dow=new Date(new Date().toLocaleString('en-US',{timeZone:tour.timezone})).getDay();const open=dow!==1&&hm>=600&&hm<960;return {open,label:open?'Likely open (Tue–Sun 10:00–16:00; last admission 15:30)':'Closed now (Tue–Sun 10:00–16:00)'};}
+  if(t.type==='lewes_anne'){const dow=new Date(new Date().toLocaleString('en-US',{timeZone:tour.timezone})).getDay();const open=dow!==1&&hm>=600&&hm<960;return {open,label:open?'Likely open (Tue–Sun 10:00–16:00; last admission 15:30)':'Closed now (Tue–Sun 10:00–16:00)'};}
   if(t.type==='museum'){const dow=new Date(new Date().toLocaleString('en-US',{timeZone:tour.timezone})).getDay();let open=false;if(dow===1)open=false;else if(dow===6)open=hm>=810&&hm<1050;else open=(hm>=600&&hm<750)||(hm>=810&&hm<1050);return {open,label:open?'Likely open (low season hours)':'Likely closed now; check official site'};}
   if(t.type==='newworld'){const dow=new Date(new Date().toLocaleString('en-US',{timeZone:tour.timezone})).getDay();let open=dow!==2&&((hm>=600&&hm<750)||(hm>=810&&hm<1050));if(dow===6)open=hm>=810&&hm<1050;return {open,label:open?'Likely open (school-term schedule)':'Likely closed now; check official site'};}
   if(t.type==='maritime'){const dow=new Date(new Date().toLocaleString('en-US',{timeZone:tour.timezone})).getDay();let open=dow!==1&&((dow===6)?(hm>=810&&hm<1050):(hm>=600&&hm<1050));return {open,label:open?'Likely open (low season)':'Likely closed now; check official site'};}
@@ -180,6 +182,7 @@ function candidateScore(s,mode){
   if(mode==='history')score+=s.id==='townhall'||s.id==='chain'||s.id==='lanterne'||s.id==='clock'?8:0;
   if(mode==='scenic')score+=s.id==='port'||s.id==='arcades'||s.id==='jardin'||s.id==='maritime'?8:0;
   if(s.indoor && !openingText(s).open)score-=25;
+  if(s.steep)score-=8;
   if(visited.has(s.id))score-=1000;
   return score;
 }
@@ -194,26 +197,43 @@ async function routeRequest(locations){
 }
 function decodePolyline(str,precision=6){let idx=0,lat=0,lng=0,out=[];const factor=Math.pow(10,precision);while(idx<str.length){let shift=0,result=0,b;do{b=str.charCodeAt(idx++)-63;result|=(b&31)<<shift;shift+=5}while(b>=32);lat+=result&1?~(result>>1):(result>>1);shift=0;result=0;do{b=str.charCodeAt(idx++)-63;result|=(b&31)<<shift;shift+=5}while(b>=32);lng+=result&1?~(result>>1):(result>>1);out.push([lat/factor,lng/factor]);}return out;}
 function estimatePlan(start,budget,speed,mode){
-  const reserve=Number($('buffer').value);let remain=budget-reserve, cur=start, out=[], pool=tour.stops.filter(s=>available(s)&&!visited.has(s.id));
+  const reserve=Number($('buffer').value);let remain=budget-reserve, cur=start;
+  let pool=tour.stops.filter(s=>available(s)&&!visited.has(s.id));
+  const out=[];
   while(pool.length){
-    let best=null,bestCost=Infinity;
-    for(const s of pool){
-      const travel=walkMin(hav(cur,s),speed);
-      const total=travel+s.listen;
-      const value=(candidateScore(s,mode))/(1+total/10);
-      if(travel+s.listen<=remain && value>bestCost*-1){best={s,travel,value};bestCost=-value;}
+    let best=null;
+    for(const st of pool){
+      const travel=walkMin(hav(cur,st),speed), total=travel+st.listen;
+      if(total>remain)continue;
+      const score=candidateScore(st,mode);
+      // Strongly reward interest, but penalise long detours. The penalty increases
+      // as the remaining time becomes scarce, producing useful short-tour behaviour.
+      const efficiency=score/(1+total/9);
+      if(!best || efficiency>best.efficiency){best={s:st,travel,total,efficiency};}
     }
     if(!best)break;
-    out.push(best.s);remain-=best.travel+best.s.listen;cur=best.s;pool=pool.filter(x=>x.id!==best.s.id);
+    out.push(best.s);remain-=best.total;cur=best.s;pool=pool.filter(x=>x.id!==best.s.id);
     if(out.length>=12)break;
   }
   return out;
+}
+function routeLengthEstimate(points,speed){let m=0;for(let i=1;i<points.length;i++)m+=hav(points[i-1],points[i]);return walkMin(m,speed);}
+function improveOrder(stops,start,mode){
+  // A lightweight 2-opt pass reduces unnecessary backtracking without making
+  // the planner dependent on an online routing service during selection.
+  if(stops.length<3)return stops;
+  let best=stops.slice();
+  const scoreOrder=arr=>{let d=hav(start,arr[0]);for(let i=1;i<arr.length;i++)d+=hav(arr[i-1],arr[i]);let value=arr.reduce((a,x)=>a+candidateScore(x,mode),0);return d-value*8;};
+  let bestScore=scoreOrder(best), changed=true, guard=0;
+  while(changed&&guard++<3){changed=false;for(let i=0;i<best.length-1;i++){for(let j=i+1;j<best.length;j++){const cand=best.slice();const rev=cand.splice(i,j-i+1).reverse();cand.splice(i,0,...rev);const sc=scoreOrder(cand);if(sc<bestScore-20){best=cand;bestScore=sc;changed=true;}}}}
+  return best;
 }
 async function makePlan(reason='initial'){
   if(!position)return;
   const totalBudget=Number($('budget').value),elapsed=startedAt?((Date.now()-startedAt)/60000):0;
   const budget=Math.max(5,totalBudget-elapsed),speed=Number($('speed').value),mode=$('mode').value;
-  const proposed=estimatePlan(position,budget,speed,mode);
+  let proposed=estimatePlan(position,budget,speed,mode);
+  proposed=improveOrder(proposed,position,mode);
   if(!proposed.length){$('planNote').textContent='No suitable stop fits the remaining time from your current position.';return;}
   const oldIds=plan.map(x=>x.id),newIds=proposed.map(x=>x.id);
   const changed=oldIds.join(',')!==newIds.join(',');
@@ -259,7 +279,7 @@ function showStop(s){
   currentIndex=tour.stops.findIndex(x=>x.id===s.id);$('currentTitle').textContent=s.title;
   $('currentMeta').textContent='Audio ~'+s.listen+' min • priority '+s.priority+'/5';
   $('text').textContent=s.text;$('tip').textContent=s.tip;
-  $('photo').src=s.image;$('photo').alt=s.title;$('photo').classList.remove('hidden');
+  $('photo').src=s.image;$('photo').alt=s.title;$('photo').classList.remove('hidden');$('photo').onerror=()=>{$('photo').classList.add('hidden');$('credit').textContent='Image unavailable; continue with the description.';};
   $('credit').textContent=s.credit+' · source: '+s.source;
   const av=openingText(s),live=liveStatusText(s);$('availability').textContent=(live?live+' — ':'')+av.label;
   $('availability').className=av.open?'good':'notice';
@@ -267,6 +287,7 @@ function showStop(s){
 }
 function markVisited(s){visited.add(s.id);try{localStorage.setItem(storageKeyBase+'-'+currentCityId,JSON.stringify({visited:[...visited],home,startedAt}))}catch{}}
 function applyPosition(pos){
+  document.body.classList.add('started');
   position={lat:pos.coords.latitude,lng:pos.coords.longitude};
   const acc=pos.coords.accuracy||30;
   if(!userMarker)userMarker=L.marker([position.lat,position.lng],{title:'Your location'}).addTo(map);
@@ -305,6 +326,7 @@ function startGPS(){
 }
 
 function requestCurrentPosition(){
+  document.body.classList.add('started');
   return new Promise((resolve,reject)=>{
     if(!navigator.geolocation){reject(new Error('This browser does not provide GPS.'));return;}
     $('gpsBadge').textContent='Finding you…';
@@ -339,11 +361,7 @@ $('iamhere').onclick=async()=>{
     $('iamhere').disabled=false;
   }
 };
-$('replan').onclick=async()=>{
-  if(!position){startGPS();$('setupStatus').textContent='Waiting for GPS… press “I AM HERE” again when your position appears.';return;}
-  home={...position};startedAt=Date.now();visited=new Set();$('homeBtn').classList.remove('hidden');$('setupStatus').textContent='Home recorded at your current position. Building a route from here…';await makePlan('initial');
-};
-$('replan').onclick=()=>{if(position)makePlan('manual');else $('setupStatus').textContent='Press “I AM HERE” first to establish your starting point.'};
+$('replan').onclick=async()=>{if(!position){$('setupStatus').textContent='Press “I AM HERE” first to establish your starting point.';return;} await makePlan('manual');};
 $('auto').onclick=()=>{autoMode=!autoMode;$('auto').textContent='Automatic section: '+(autoMode?'ON':'OFF')};
 $('next').onclick=()=>{if(!plan.length)return;const i=Math.max(0,plan.findIndex(s=>s.id===tour.stops[currentIndex]?.id));const s=plan[i+1]||plan[0];showStop(s);markVisited(s)};
 $('prev').onclick=()=>{const s=tour.stops[Math.max(0,currentIndex-1)];if(s)showStop(s)};
