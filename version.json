@@ -1,7 +1,5 @@
 {
-  "application": "City Guides",
-  "version": "0.6.0",
-  "build": "2026-08-24T01:45:00Z",
-  "city": "multi-city",
-  "release": "four-page mobile interface; safe-area navigation; compact audio; persistent I AM HERE / GET ME HOME controls"
+  "version": "0.6.1",
+  "build": "2026-08-24 12:10 UTC",
+  "release": "Map pins, page colour pairing, compact map/detail layouts, robust audio controls"
 }
