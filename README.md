@@ -1,16 +1,16 @@
-# City Guides v0.5.0 — clean multi-city architecture
+# City Guides v0.6.0
 
-This release separates the application engine from city data. The catalogue is `cities.json`; city data live under `data/`; live status under `status/`.
+Four-page mobile interface for the adaptive city walking guide.
 
-## First-time recovery from the old v0.2.x service worker
-If a phone still shows v0.2.1, open `reset.html` once. It unregisters old service workers, deletes old caches and local City Guides settings, then opens the current app.
+## v0.6.0
+- Home / Map / Detail / Help pages
+- Safe-area-aware bottom navigation for Android and iPhone
+- Muted cool colour scheme
+- Persistent **I AM HERE** and guarded **GET ME HOME** controls
+- Map progress bar and four-state marker legend
+- Scrollable detail text with optional audio-follow
+- Compact play/pause, stop and playback controls
+- City selection remains on Home
 
-## Current city
-La Rochelle is the first catalogue entry. Add future cities by adding a city JSON file, a status JSON file, and one entry to `cities.json`.
-
-## Release
-Version 0.5.0 — build 2026-08-21 10:30 UTC.
-
-
-## v0.5.0
-Adds GPS-driven adaptive planning, route-aware ordering, and Lewes as the second city data set for field testing.
+## Upload
+Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existing v0.5.x repository. Keep the existing `data/`, `status/`, icons, manifest and `reset.html`.

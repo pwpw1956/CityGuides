@@ -1,9 +1,9 @@
 /*
   CITY GUIDES
-  Version: 0.5.0
-  Build: 2026-08-21 10:30 UTC
+  Version: 0.6.0
+  Build: 2026-08-24 01:45 UTC
 */
-const CACHE="cityguides-v0.5.0";
+const CACHE="cityguides-v0.6.0";
 const SHELL=["./","./index.html","./cities.json","./version.json","./manifest.webmanifest","./icon-192.png","./icon-512.png"];
 self.addEventListener("install",e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(SHELL)).then(()=>self.skipWaiting())));
 self.addEventListener("activate",e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k.startsWith("cityguides-")&&k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim())));

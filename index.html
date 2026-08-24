@@ -1,148 +1,160 @@
 <!--
-  CITY GUIDES — La Rochelle
-  Version: 0.5.0
-  Build: 2026-08-21 12:30 UTC
-  Release: GPS-driven adaptive planning; multi-city data; route-aware selection
+  CITY GUIDES
+  Version: 0.6.0
+  Build: 2026-08-24 01:45 UTC
+  Release: four-page mobile UI; safe-area navigation; compact audio; persistent Home controls
 -->
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#183247">
-<meta name="description" content="A time-adaptive GPS-aware walking guide.">
-<link rel="manifest" href="manifest.webmanifest">
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-<title>City Guides</title>
-<style>
-:root{--ink:#183247;--muted:#5d6c76;--paper:#fff;--line:#d8e2e7;--accent:#176b87;--warn:#9a6b00;--bg:#edf3f5}
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:18px;line-height:1.45}
-header{background:var(--ink);color:#fff;padding:16px max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right));position:sticky;top:0;z-index:1000}
-header h1{font-size:1.25rem;margin:0 0 3px}header p{margin:0;font-size:.88rem;opacity:.9}
-main{max-width:950px;margin:auto}.panel{background:var(--paper);margin:12px;border-radius:16px;padding:15px;box-shadow:0 2px 8px #0001}
-#map{height:0;border-radius:12px;overflow:hidden}.controls{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}
-button,select,input{font:inherit}button{font-weight:700;border:1px solid #b9c8d0;background:#f7fafb;color:var(--ink);padding:11px 10px;border-radius:11px;min-height:48px}button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}button.danger{background:#8a2e2e;color:#fff;border-color:#8a2e2e}button:disabled{opacity:.45}
-.row{display:flex;gap:9px;align-items:center;flex-wrap:wrap}.status{font-size:.88rem;color:var(--muted)}.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e5f1f4;color:#15566c;font-size:.76rem;font-weight:800}
-h2{font-size:1.3rem;margin:4px 0}h3{font-size:1.03rem;margin:10px 0 5px}.small{font-size:.82rem;color:var(--muted)}
-#photo{width:100%;max-height:330px;object-fit:cover;border-radius:12px;margin:8px 0}.caption{font-size:.72rem;color:var(--muted)}
-.progress{height:8px;background:#e1e8ec;border-radius:99px;overflow:hidden;margin:9px 0}.progress>div{height:100%;background:var(--accent);width:0}
-.notice{background:#fff7db;border:1px solid #ead68e;padding:10px 12px;border-radius:10px}.good{background:#eaf6ee;border:1px solid #b9d8c0;padding:10px 12px;border-radius:10px}
-#planList{margin:7px 0 0;padding-left:23px}.planItem{margin:5px 0}.muted{opacity:.55}.hidden{display:none}.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin-top:8px}.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:12px;height:12px;border-radius:50%;display:inline-block;border:1px solid #fff;box-shadow:0 0 0 1px #888}.blue{background:#1976d2}.orange{background:#f39c12}.red{background:#d32f2f}.green{background:#2e8b57}.reason{margin-top:7px;padding:8px 10px;border-radius:9px;background:#f3f7f8;border:1px solid var(--line);font-size:.88rem}.started #map{height:390px}@media(min-width:700px){.started #map{height:470px}}
-label{font-weight:700;display:block;margin-bottom:5px}select,input[type=number]{width:100%;padding:10px;border:1px solid #b9c8d0;border-radius:9px;background:#fff}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.statbox{background:#f3f7f8;border:1px solid var(--line);border-radius:10px;padding:9px}
-dialog{border:0;border-radius:16px;padding:0;max-width:520px;width:calc(100% - 24px);box-shadow:0 10px 40px #0004}dialog::backdrop{background:#0007}.dialogBody{padding:18px}
-@media(min-width:700px){.controls{grid-template-columns:repeat(4,1fr)}#map{height:470px}}
-</style>
-</head>
-<body>
-<header><h1 id="appTitle">City Guides — adaptive walking guide</h1><p id="appSubtitle">Choose your city and time. Start anywhere. The guide adapts as you walk.</p></header>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
+:root{
+  --ink:#17384a;--muted:#5f7078;--bg:#eef4f6;--paper:#fbfcfc;--line:#d5e1e5;
+  --home:#557b86;--home-pale:#eef5f6;--map:#2f6f83;--map-pale:#edf5f7;
+  --detail:#617a82;--detail-pale:#f0f5f5;--help:#5f786f;--help-pale:#eff5f2;
+  --accent:#2f6f83;--good:#4f806f;--warn:#c47a20;--bad:#a94d4d;
+}
+*{box-sizing:border-box}html,body{margin:0;padding:0;min-height:100%;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:17px;line-height:1.42}
+body{padding-bottom:calc(74px + env(safe-area-inset-bottom));}
+header{position:sticky;top:0;z-index:1000;padding:max(11px,env(safe-area-inset-top)) max(14px) 10px;background:var(--ink);color:#fff;box-shadow:0 2px 7px #0002}
+.headerLine{display:flex;align-items:baseline;gap:10px}.brand{font-size:1.25rem;font-weight:800;letter-spacing:-.02em}.pageName{font-size:.95rem;opacity:.78}.cityLine{font-size:.78rem;opacity:.82;margin-top:1px}
+main{max-width:900px;margin:0 auto;padding:10px 10px 14px}.page{display:none}.page.active{display:block}
+.panel{background:var(--paper);margin:0 0 10px;border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:0 2px 7px #19394a0b}
+.page.home .panel{background:linear-gradient(180deg,var(--home-pale),var(--paper) 46%)}
+.page.map .panel{background:linear-gradient(180deg,var(--map-pale),var(--paper) 46%)}
+.page.detail .panel{background:linear-gradient(180deg,var(--detail-pale),var(--paper) 46%)}
+.page.help .panel{background:linear-gradient(180deg,var(--help-pale),var(--paper) 46%)}
+h2{font-size:1.16rem;margin:2px 0 8px}h3{font-size:1rem;margin:4px 0 7px}.small{font-size:.78rem;color:var(--muted)}.status{font-size:.82rem;color:var(--muted)}
+label{font-weight:700;display:block;margin-bottom:4px;font-size:.9rem}select,input,button{font:inherit}select,input[type=number]{width:100%;padding:9px 10px;border:1px solid #b9c9cf;border-radius:9px;background:#fff;color:var(--ink);min-height:43px}
+button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--ink);padding:9px 10px;border-radius:10px;min-height:44px;touch-action:manipulation}button.primary{background:var(--accent);color:#fff;border-color:var(--accent)}button.danger{background:#fff;color:var(--bad);border-color:#d9aaaa}button.danger.enabled{background:#a94d4d;color:#fff;border-color:#a94d4d}button:disabled{opacity:.43;filter:saturate(.5)}button:focus-visible{outline:3px solid #8db7c4;outline-offset:2px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e4eef1;color:#28596a;font-size:.72rem;font-weight:800}
+.setupHero{padding:8px 0 2px}.setupHero p{margin:4px 0}.startButtons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.startButtons button{min-height:48px}.homeStatus{margin-top:9px;padding:8px 10px;border-radius:9px;background:#fff;border:1px solid var(--line);font-size:.8rem;color:var(--muted)}
+.statusCard{min-height:110px;display:flex;flex-direction:column;justify-content:center}.statusGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.statbox{background:#f3f7f8;border:1px solid var(--line);border-radius:10px;padding:8px}.statbox strong{font-size:1rem}.statbox span{font-size:.75rem;color:var(--muted)}
+#map{height:54vh;min-height:330px;max-height:570px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.progress{height:8px;background:#dfe8eb;border-radius:99px;overflow:hidden;margin:8px 0 3px}.progress>div{height:100%;background:var(--map);width:0;transition:width .3s ease}.progressText{font-size:.75rem;color:var(--muted)}
+.legend{display:flex;gap:10px 14px;flex-wrap:wrap;font-size:.73rem;color:var(--muted);margin-top:8px}.legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #fff;box-shadow:0 0 0 1px #888}.blue{background:#2879c7}.orange{background:#d78321}.red{background:#ad4b4b}.green{background:#4e806e}
+#photoWrap{position:relative;margin-bottom:7px}.photoFrame{position:relative}.photoFrame img{display:block;width:100%;height:auto;max-height:30vh;min-height:120px;object-fit:cover;border-radius:11px;cursor:zoom-in}.photoClose{position:absolute;right:7px;top:7px;width:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:#17384acc;color:#fff;font-size:1.15rem}.caption{font-size:.7rem;color:var(--muted);margin-top:3px}
+.detailHeading{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.detailTitle{margin:0}.detailMeta{font-size:.76rem;color:var(--muted);margin:2px 0 7px}.detailText{height:31vh;min-height:210px;max-height:330px;overflow-y:auto;padding:2px 5px 2px 1px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);scroll-behavior:smooth}.detailText p{margin:8px 0}.detailText p.speaking{background:#e7f1f3;border-radius:7px;padding:4px 6px}.audioControls{display:grid;grid-template-columns:1.45fr .8fr .8fr .8fr;gap:7px;margin-top:8px}.audioControls button{min-height:42px}.audioControls .speed{font-size:.82rem}.follow{margin-top:7px}
+.notice{background:#fff7e6;border:1px solid #ead3a2;padding:8px 10px;border-radius:9px;font-size:.8rem}.good{background:#edf6f1;border:1px solid #c0d9cd;padding:8px 10px;border-radius:9px;font-size:.8rem}.reason{margin-top:7px;padding:8px 10px;border-radius:9px;background:#f3f7f8;border:1px solid var(--line);font-size:.8rem}.hidden{display:none!important}.muted{opacity:.55}
+#planList{margin:7px 0 0;padding-left:21px}.planItem{margin:4px 0;font-size:.86rem}.routeSummary{display:grid;grid-template-columns:1fr 1fr;gap:8px}.routeSummary .statbox{text-align:center}
+.bottomNav{position:fixed;z-index:1200;left:0;right:0;bottom:0;padding:7px max(8px,env(safe-area-inset-left)) max(7px,env(safe-area-inset-bottom));background:#f8fbfbf5;border-top:1px solid var(--line);box-shadow:0 -2px 8px #0001;backdrop-filter:blur(8px)}.navGrid{max-width:900px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.navBtn{min-height:47px;padding:5px 3px;font-size:.73rem;background:#edf2f3;border-color:#d1dfe2;color:#50636b}.navBtn span{display:block;font-size:1rem;line-height:1}.navBtn.active:nth-child(1){background:#e0ecee;color:var(--home);border-color:#b8d0d4}.navBtn.active:nth-child(2){background:#dfeef2;color:var(--map);border-color:#b6d1d9}.navBtn.active:nth-child(3){background:#e5eeee;color:var(--detail);border-color:#c1d0d2}.navBtn.active:nth-child(4){background:#e2eee9;color:var(--help);border-color:#bdd3c9}
+footer{font-size:.7rem;color:var(--muted);text-align:center;margin:10px 0}.helpList{padding-left:20px}.helpList li{margin:7px 0}.keyRow{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:.82rem}.keyDot{width:13px;height:13px;border-radius:50%;flex:none}
+dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 24px);box-shadow:0 10px 40px #0004}dialog::backdrop{background:#0007}.dialogBody{padding:17px}.dialogBody .controls{margin-top:12px}.lightbox img{max-width:100%;max-height:75vh;display:block;border-radius:9px}.lightbox{padding:0;background:#101c22;border:0}.lightbox .close{position:absolute;right:8px;top:8px;background:#fff;color:#17384a;border:0;border-radius:50%;min-width:40px;padding:0}
+@media(min-width:700px){body{font-size:18px}.controls{grid-template-columns:repeat(4,1fr)}#map{height:58vh}.detailText{height:340px}}
+@media(max-width:430px){.audioControls{grid-template-columns:1.35fr .75fr .75fr .75fr}.navBtn{font-size:.68rem}.navBtn span{font-size:.92rem}.grid2{gap:7px}}
+</style></head><body>
+<header><div class="headerLine"><div class="brand">CityGuides</div><div class="pageName" id="pageLabel">Home</div></div><div class="cityLine" id="pageCity">Choose a city</div></header>
 <main>
-
-<section class="panel" id="setupPanel">
-  <h2>1. Set up today's tour</h2>
-  <div style="margin-bottom:10px"><label for="citySelect">City</label><select id="citySelect"></select></div>
-  <div class="grid2">
-    <div><label for="budget">Time available</label><select id="budget">
-      <option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">1 hour</option>
-      <option value="90">1½ hours</option><option value="120" selected>2 hours</option><option value="150">2½ hours</option><option value="180">3 hours</option>
-    </select></div>
-    <div><label for="speed">Walking pace</label><select id="speed">
-      <option value="3.0">Gentle — 3.0 km/h</option><option value="3.8" selected>Comfortable — 3.8 km/h</option><option value="4.5">Brisk — 4.5 km/h</option>
-    </select></div>
+<section class="page home active" id="page-home">
+  <div class="panel">
+    <h2>Set up today's tour</h2>
+    <div class="grid2">
+      <div><label for="citySelect">City</label><select id="citySelect"></select></div>
+      <div><label>Current guide</label><div class="statbox" id="homeCityLabel">—</div></div>
+    </div>
+    <div class="startButtons">
+      <button class="primary" id="iamhere">📍 I AM HERE</button>
+      <button class="danger" id="gethome" disabled>⌂ GET ME HOME</button>
+    </div>
+    <div class="homeStatus" id="homeState">Ready to start. Press I AM HERE when you are where you want to begin.</div>
+    <div class="grid2" style="margin-top:10px">
+      <div><label for="budget">Time available</label><select id="budget"><option value="30">30 minutes</option><option value="45">45 minutes</option><option value="60">1 hour</option><option value="90">1½ hours</option><option value="120" selected>2 hours</option><option value="150">2½ hours</option><option value="180">3 hours</option></select></div>
+      <div><label for="speed">Walking pace</label><select id="speed"><option value="3.0">Gentle — 3.0 km/h</option><option value="3.8" selected>Comfortable — 3.8 km/h</option><option value="4.5">Brisk — 4.5 km/h</option></select></div>
+    </div>
+    <div class="grid2" style="margin-top:9px">
+      <div><label for="buffer">Keep for return</label><select id="buffer"><option value="0">No reserved return time</option><option value="10" selected>10 minutes</option><option value="15">15 minutes</option><option value="20">20 minutes</option></select></div>
+      <div><label for="mode">Planning style</label><select id="mode"><option value="history" selected>History first</option><option value="balanced">Balanced</option><option value="scenic">Scenic & relaxed</option></select></div>
+    </div>
+    <div class="controls"><button id="refresh">Refresh today's information</button><button id="locate">Show my location</button></div>
+    <p class="status" id="setupStatus">Press I AM HERE when you are at the place where you want the tour to begin. That place becomes Home.</p>
+    <div class="row"><span class="badge" id="gpsBadge">GPS not started</span><span class="status" id="gpsStatus">No position yet.</span></div>
   </div>
-  <div class="grid2" style="margin-top:10px">
-    <div><label for="buffer">Keep for return</label><select id="buffer">
-      <option value="0">No reserved return time</option><option value="10" selected>10 minutes</option><option value="15">15 minutes</option><option value="20">20 minutes</option>
-    </select></div>
-    <div><label for="mode">Planning style</label><select id="mode">
-      <option value="history" selected>History first</option><option value="balanced">Balanced</option><option value="scenic">Scenic & relaxed</option>
-    </select></div>
+  <div class="panel statusCard">
+    <h3>Today's tour</h3>
+    <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
+    <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <p class="small">The time is a target for the tour itself. The app reserves your chosen return buffer and continually re-plans if you take longer than expected.</p>
-  <div class="controls">
-    <button class="primary" id="iamhere">📍 I AM HERE</button>
-    <button id="install" class="hidden">Install guide</button>
-    <button id="refresh">Refresh today's information</button>
-    <button id="locate">Show my location</button>
-  </div>
-  <p class="status" id="setupStatus">Press “I AM HERE” when you are at the place where you want the tour to begin. That place becomes Home.</p>
-  <p class="small" id="versionInfo">City Guides v0.4.0</p>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.6.0 · Build 2026-08-24 01:45 UTC</p></div>
 </section>
 
-<section class="panel">
-  <div id="map"></div>
-  <div class="row" style="margin-top:9px">
-    <span class="badge" id="gpsBadge">GPS not started</span>
-    <span class="status" id="gpsStatus">No position yet.</span>
-    <span class="status" id="liveStatus"></span>
+<section class="page map" id="page-map">
+  <div class="panel">
+    <h2>Map</h2><div class="small" id="mapCityLabel">—</div>
+    <div id="map" style="margin-top:8px"></div>
+    <div class="legend"><span><i class="dot blue"></i> Today's tour</span><span><i class="dot orange"></i> Available, not selected</span><span><i class="dot red"></i> Closed / unavailable</span><span><i class="dot green"></i> Optional</span></div>
+    <div class="progress"><div id="progressFill"></div></div><div class="progressText" id="progressText">No route planned</div>
+    <div class="controls"><button id="replan">Re-plan</button><button id="auto">Auto-follow: ON</button><button id="prev">← Previous</button><button class="primary" id="next">Next →</button></div>
+    <div class="reason" id="decisionSummary">Start the tour to see why sites have or have not been selected.</div>
   </div>
-  <div class="legend"><span><i class="dot blue"></i> Today</span><span><i class="dot orange"></i> Not selected</span><span><i class="dot red"></i> Closed</span><span><i class="dot green"></i> Optional</span></div>
-  <div class="controls">
-    <button id="replan">Re-plan</button><button id="auto">Automatic section: ON</button>
-    <button id="prev">← Previous</button><button class="primary" id="next">Next →</button>
-  </div>
+  <div class="panel"><div class="routeSummary"><div class="statbox"><strong id="planTime">—</strong><br><span>planned tour time</span></div><div class="statbox"><strong id="planDistance">—</strong><br><span>walking distance</span></div></div><ol id="planList"><li>Press I AM HERE to create a plan.</li></ol><p class="small" id="planNote"></p></div>
 </section>
 
-<section class="panel">
-  <h2 id="currentTitle">Not started</h2>
-  <div id="currentMeta" class="small"></div>
-  <img id="photo" alt="" class="hidden">
-  <div class="caption" id="credit"></div>
-  <div id="text"></div>
-  <p class="notice" id="availability"></p>
-  <p class="small" id="tip"></p>
-  <div class="controls">
-    <button class="primary" id="speak">▶ Play audio</button><button id="stop">■ Stop</button>
-    <button id="slower">Speech −</button><button id="faster">Speech +</button>
+<section class="page detail" id="page-detail">
+  <div class="panel">
+    <div class="detailHeading"><div><h2 class="detailTitle" id="currentTitle">Not started</h2><div class="detailMeta" id="currentMeta"></div></div><span class="badge" id="detailBadge">Guide</span></div>
+    <div id="photoWrap" class="hidden"><div class="photoFrame"><img id="photo" alt=""><button class="photoClose" id="photoClose" aria-label="Close photograph">×</button></div><div class="caption" id="credit"></div></div>
+    <div id="detailText" class="detailText" data-follow="1"><p>Choose a stop from the Map, or start the tour with I AM HERE.</p></div>
+    <p class="notice" id="availability"></p>
+    <p class="small" id="tip"></p>
+    <div class="audioControls"><button class="primary" id="speak">▶ Play</button><button id="slower" class="speed">−</button><button id="followAudio" class="speed">Follow</button><button id="faster" class="speed">+</button></div>
+    <div class="controls"><button id="stop">■ Stop</button><button id="install" class="hidden">Install guide</button></div>
+    <p class="small follow">Playback speed can be adjusted between sections. If you scroll the text while audio is playing, automatic following pauses.</p>
   </div>
 </section>
 
-<section class="panel">
-  <h3>Today's proposed route</h3>
-  <div class="grid2">
-    <div class="statbox"><strong id="planTime">—</strong><br><span class="small">planned tour time</span></div>
-    <div class="statbox"><strong id="planDistance">—</strong><br><span class="small">estimated walking</span></div>
-  </div>
-  <ol id="planList"><li>Press “I AM HERE” to create a plan.</li></ol>
-  <p class="small" id="planNote"></p><div id="decisionSummary" class="reason hidden"></div><p class="small" id="routeNote">The planner first chooses worthwhile sights, then reduces unnecessary backtracking and finally asks the pedestrian routing service for the road/path route.</p>
+<section class="page help" id="page-help">
+  <div class="panel"><h2>How CityGuides works</h2><ol class="helpList"><li>Choose a city and how much time you have.</li><li>Go to the place where you want to start and press <strong>I AM HERE</strong>. That becomes Home.</li><li>The guide chooses a suitable set of sights from a larger repertoire. You can start anywhere along the route.</li><li>Use <strong>Map</strong> to see the pedestrian route and coloured site markers. Use <strong>Detail</strong> for the current place and its audio description.</li><li>With <strong>Auto-follow ON</strong>, GPS automatically changes the guide section when you enter an appropriate site zone. Turn it off if you prefer to control sections yourself.</li><li>The plan can be re-evaluated as you walk. If you fall behind, the guide can propose dropping lower-priority stops and asks before changing the plan.</li><li><strong>GET ME HOME</strong> is deliberately disabled until a tour has started. Hold it briefly, then confirm, to end the sightseeing tour and route you back to Home.</li></ol></div>
+  <div class="panel"><h3>Map marker colours</h3><div class="keyRow"><i class="keyDot blue"></i> Blue — selected for today's tour</div><div class="keyRow"><i class="keyDot orange"></i> Orange — available but not selected</div><div class="keyRow"><i class="keyDot green"></i> Green — optional if time permits</div><div class="keyRow"><i class="keyDot red"></i> Red — closed or otherwise unavailable</div></div>
+  <div class="panel"><h3>About this version</h3><p class="small">CityGuides v0.6.0 · Build 2026-08-24 01:45 UTC</p><p class="small">This release introduces the four-page mobile interface, safe-area-aware navigation, compact audio controls, a scrollable detail view and the persistent I AM HERE / GET ME HOME controls.</p></div>
 </section>
-
-<section class="panel">
-  <h3>What the adaptive guide does</h3>
-  <p>You do not have to start at Stop 1. “I AM HERE” records your starting point and finds the best nearby way into the tour. The guide has more sights than a normal 2–2½ hour tour needs, so it can choose a shorter or longer selection according to your time and today's availability.</p>
-  <p>While you walk, the app measures elapsed time and your actual progress. If the remaining plan no longer fits, it can propose dropping or postponing lower-priority stops. It will <strong>ask before changing the plan</strong>.</p>
-</section>
-
-<section class="panel">
-  <h3>Home / finish</h3>
-  <p>Your “Home” is the place where you pressed “I AM HERE”. Once the tour has started, the button below appears as a guarded long-press control.</p>
-  <button id="homeBtn" class="danger hidden">Hold to get me Home</button>
-</section>
-
-<section class="panel">
-  <h3>Data and connectivity</h3>
-  <p id="dataNote">The core tour data is stored with the app. Opening rules are calculated locally; live overrides are refreshed from the guide's city-specific live status file. Walking routes are calculated online when possible and the last successful route remains visible if routing becomes unavailable.</p>
-</section>
-
 </main>
 
-<dialog id="confirmDialog"><div class="dialogBody">
-  <h2 id="dialogTitle">Change today's plan?</h2>
-  <div id="dialogText"></div>
-  <div class="controls"><button id="dialogCancel">Keep current plan</button><button class="primary" id="dialogOk">Use new plan</button></div>
-</div></dialog>
+<nav class="bottomNav" aria-label="Main navigation"><div class="navGrid"><button class="navBtn active" data-page="home"><span>⌂</span>Home</button><button class="navBtn" data-page="map"><span>▣</span>Map</button><button class="navBtn" data-page="detail"><span>▶</span>Detail</button><button class="navBtn" data-page="help"><span>?</span>Help</button></div></nav>
 
+<dialog id="confirmDialog"><div class="dialogBody"><h2 id="dialogTitle">Change today's plan?</h2><div id="dialogText"></div><div class="controls"><button id="dialogCancel">Cancel</button><button class="primary" id="dialogOk">Confirm</button></div></div></dialog>
+<dialog id="photoLightbox" class="lightbox"><button class="close" id="lightboxClose">×</button><img id="lightboxImage" alt="Expanded photograph"></dialog>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 let tour,statusData,map,routeLine,userMarker,accuracyCircle,watchId=null,autoMode=true,speechRate=.95;
+let markerLayer=null, markerById=new Map(), siteStatus=new Map();
 let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null;
 const $=id=>document.getElementById(id);
+const pages=['home','map','detail','help'];
+function showPage(name){
+  $('pageLabel').textContent=name.charAt(0).toUpperCase()+name.slice(1);
+  pages.forEach(p=>{const el=$('page-'+p); if(el)el.classList.toggle('active',p===name);});
+  document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
+  if(name==='map' && map){setTimeout(()=>map.invalidateSize(),80);}
+  if(name==='detail') updateDetailFollow();
+}
+function updateTourButtons(){
+  const active=!!startedAt && !!home;
+  $('iamhere').disabled=active;
+  $('gethome').disabled=!active;
+  $('gethome').classList.toggle('enabled',active);
+  $('homeState').textContent=active?'Tour started — your starting point is recorded as Home.':'Ready to start. Press I AM HERE when you are where you want to begin.';
+}
+function updateProgress(){
+  const total=plan.length;
+  if(!total){$('progressFill').style.width='0%';$('progressText').textContent='No route planned';return;}
+  const idx=plan.findIndex(s=>s.id===tour.stops[currentIndex]?.id);
+  const completed=Math.max(0,idx<0?0:idx);
+  const pct=Math.min(100,Math.max(0,(completed/total)*100));
+  $('progressFill').style.width=pct+'%';
+  const elapsed=startedAt?(Date.now()-startedAt)/60000:0;
+  const remaining=Math.max(0,Number($('budget').value)-elapsed-Number($('buffer').value));
+  $('progressText').textContent='Stop '+Math.min(total,completed+1)+' of '+total+' · about '+fmtMin(remaining)+' remaining';
+}
+function updateDetailFollow(){
+  const box=$('detailText');
+  if(!box)return;
+  const active=box.dataset.follow==='1';
+  $('followAudio').textContent=active?'Follow audio: ON':'Follow audio: OFF';
+}
+
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
-const APP_VERSION='0.5.0';
-const BUILD='2026-08-21 12:30 UTC';
+const APP_VERSION='0.6.0';
+const BUILD='2026-08-24 01:45 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.5.0';
+const storageKeyBase='cityguides-v0.6.0';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -298,7 +310,7 @@ async function renderPlan(){
   ds.innerHTML='<strong>Why some places are not selected:</strong> '+counts.orange+' excluded for time/priority/route reasons; '+counts.green+' optional; '+counts.closed+' unavailable. Tap a coloured marker for the reason.';
   const speed=Number($('speed').value);let total=plan.reduce((a,s)=>a+s.listen,0),dist=0,cur=position;
   for(const s of plan){dist+=hav(cur,s);total+=walkMin(hav(cur,s),speed);cur=s;}
-  $('planTime').textContent=fmtMin(total);$('planDistance').textContent=(dist/1000).toFixed(1)+' km';
+  $('planTime').textContent=fmtMin(total);$('planDistance').textContent=(dist/1000).toFixed(1)+' km';$('homeTourTime').textContent=fmtMin(total);$('homeTourStops').textContent=plan.length;$('homeTourDistance').textContent=(dist/1000).toFixed(1)+' km';$('homeTourState').textContent='Planned';
   $('planNote').textContent=plan.length+' selected sites from '+tour.stops.length+' available candidates. The selection can change as you move, spend time, or encounter a closure.';
   if(plan.length && currentIndex<0)showStop(plan[0]);
   await drawRoute();
@@ -314,7 +326,7 @@ async function drawRoute(){
     if(total>remaining+1 && plan.length>1 && !window._routePruning){
       window._routePruning=true; plan=plan.slice(0,-1); await renderPlan(); window._routePruning=false; return;
     }
-    $('planDistance').textContent=(r.meters/1000).toFixed(1)+' km';$('planTime').textContent=fmtMin(total);$('planNote').textContent='Walking route calculated from the live pedestrian network. Remaining tour budget: '+fmtMin(remaining)+'.';
+    $('planDistance').textContent=(r.meters/1000).toFixed(1)+' km';$('planTime').textContent=fmtMin(total);$('homeTourTime').textContent=fmtMin(total);$('homeTourDistance').textContent=(r.meters/1000).toFixed(1)+' km';$('homeTourStops').textContent=plan.length;$('homeTourState').textContent='Active';$('planNote').textContent='Walking route calculated from the live pedestrian network. Remaining tour budget: '+fmtMin(remaining)+'.';
   } else {$('planNote').textContent='Live pedestrian routing is temporarily unavailable; the planner is using conservative distance estimates.';}
 }
 function drawRouteShape(shape){
@@ -323,10 +335,11 @@ function drawRouteShape(shape){
   map.fitBounds(routeLine.getBounds().pad(.12));
 }
 function showStop(s){
-  currentIndex=tour.stops.findIndex(x=>x.id===s.id);$('currentTitle').textContent=s.title;
+  currentIndex=tour.stops.findIndex(x=>x.id===s.id);$('currentTitle').textContent=s.title; updateProgress();
   $('currentMeta').textContent='Audio ~'+s.listen+' min • priority '+s.priority+'/5';
-  $('text').textContent=s.text;$('tip').textContent=s.tip;
+  $('detailText').innerHTML=(s.text||'').split(/\n\s*\n/).map((p,i)=>'<p data-para="'+i+'">'+p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p>').join('');$('tip').textContent=s.tip;
   $('photo').src=s.image;$('photo').alt=s.title;$('photo').classList.remove('hidden');$('photo').onerror=()=>{$('photo').classList.add('hidden');$('credit').textContent='Image unavailable; continue with the description.';};
+  $('photoWrap').classList.remove('hidden');
   $('credit').textContent=s.credit+' · source: '+s.source;
   const av=openingText(s),live=liveStatusText(s);$('availability').textContent=(live?live+' — ':'')+av.label;
   $('availability').className=av.open?'good':'notice';
@@ -342,6 +355,7 @@ function applyPosition(pos){
   if(!accuracyCircle)accuracyCircle=L.circle([position.lat,position.lng],{radius:acc,weight:1,fillOpacity:.08}).addTo(map);
   else accuracyCircle.setLatLng([position.lat,position.lng]).setRadius(acc);
   $('gpsStatus').textContent='Position ±'+Math.round(acc)+' m';
+  updateProgress();
   if(autoMode){
     let hit=null,dd=Infinity;
     for(const st of tour.stops){const d=hav(position,st);if(d<=st.radius&&d<dd){hit=st;dd=d;}}
@@ -399,35 +413,64 @@ $('iamhere').onclick=async()=>{
     home={...position};
     startedAt=Date.now();
     visited=new Set();
-    $('homeBtn').classList.remove('hidden');
+    updateTourButtons();
     $('setupStatus').textContent='Home recorded at your current position. Building a route from here…';
     await makePlan('initial');
+    updateTourButtons();
   }catch(e){
     $('setupStatus').textContent='I could not get your location. Check that Chrome is allowed to use Location, then try again.';
-  }finally{
-    $('iamhere').disabled=false;
+    updateTourButtons();
   }
 };
 $('replan').onclick=async()=>{if(!position){$('setupStatus').textContent='Press “I AM HERE” first to establish your starting point.';return;} await makePlan('manual');};
-$('auto').onclick=()=>{autoMode=!autoMode;$('auto').textContent='Automatic section: '+(autoMode?'ON':'OFF')};
+$('auto').onclick=()=>{autoMode=!autoMode;$('auto').textContent='Auto-follow: '+(autoMode?'ON':'OFF')};
 $('next').onclick=()=>{if(!plan.length)return;const i=Math.max(0,plan.findIndex(s=>s.id===tour.stops[currentIndex]?.id));const s=plan[i+1]||plan[0];showStop(s);markVisited(s)};
 $('prev').onclick=()=>{const s=tour.stops[Math.max(0,currentIndex-1)];if(s)showStop(s)};
 $('locate').onclick=async()=>{startGPS();try{await requestCurrentPosition();if(userMarker)map.setView(userMarker.getLatLng(),17)}catch{}};
-$('speak').onclick=()=>{const s=tour.stops[currentIndex];if(!s)return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(s.text);u.lang='en-GB';u.rate=speechRate;u.onend=()=>$('speak').textContent='▶ Play audio';speechSynthesis.speak(u);$('speak').textContent='❚❚ Playing…'};
-$('stop').onclick=()=>{speechSynthesis.cancel();$('speak').textContent='▶ Play audio'};
+let audioParts=[],audioPartIndex=0,audioPlaying=false;
+function startAudio(){
+  const s=tour.stops[currentIndex]; if(!s)return;
+  speechSynthesis.cancel();
+  audioParts=(s.text||'').split(/\n\s*\n/).filter(Boolean); audioPartIndex=0; audioPlaying=true;
+  $('speak').textContent='❚❚ Pause';
+  speakNextPart();
+}
+function speakNextPart(){
+  if(!audioPlaying || audioPartIndex>=audioParts.length){audioPlaying=false;$('speak').textContent='▶ Play';return;}
+  const u=new SpeechSynthesisUtterance(audioParts[audioPartIndex]); u.lang='en-GB';u.rate=speechRate;
+  document.querySelectorAll('#detailText [data-para]').forEach((p,i)=>p.classList.toggle('speaking',i===audioPartIndex));
+  if($('detailText').dataset.follow==='1'){const p=$('detailText').querySelector('[data-para="'+audioPartIndex+'"]');if(p)p.scrollIntoView({block:'nearest',behavior:'smooth'});}
+  u.onend=()=>{audioPartIndex++;speakNextPart();};
+  u.onerror=()=>{audioPlaying=false;$('speak').textContent='▶ Play';};
+  speechSynthesis.speak(u);
+}
+$('speak').onclick=()=>{if(audioPlaying){audioPlaying=false;speechSynthesis.pause();$('speak').textContent='▶ Play';}else if(speechSynthesis.paused){audioPlaying=true;speechSynthesis.resume();$('speak').textContent='❚❚ Pause';}else startAudio();};
+$('stop').onclick=()=>{audioPlaying=false;speechSynthesis.cancel();$('speak').textContent='▶ Play';document.querySelectorAll('#detailText [data-para]').forEach(p=>p.classList.remove('speaking'));};
+$('followAudio').onclick=()=>{$('detailText').dataset.follow=$('detailText').dataset.follow==='1'?'0':'1';updateDetailFollow();};
 $('slower').onclick=()=>speechRate=Math.max(.6,speechRate-.1);
 $('faster').onclick=()=>speechRate=Math.min(1.4,speechRate+.1);
 let holdTimer;
-$('homeBtn').addEventListener('pointerdown',()=>{holdTimer=setTimeout(()=>confirmHome(),900)});
-['pointerup','pointercancel','pointerleave'].forEach(e=>$('homeBtn').addEventListener(e,()=>clearTimeout(holdTimer)));
+$('gethome').addEventListener('pointerdown',()=>{holdTimer=setTimeout(()=>confirmHome(),900)});
+['pointerup','pointercancel','pointerleave'].forEach(e=>$('gethome').addEventListener(e,()=>clearTimeout(holdTimer)));
 function confirmHome(){
   if(!home||!position)return;
   $('dialogTitle').textContent='Return to Home?';
-  $('dialogText').innerHTML='<p>You are about '+fmtMin(walkMin(hav(position,home),Number($('speed').value)))+' from your starting point by a simple walking estimate.</p><p>The guide will stop the tour and show the walking route home.</p>';
-  $('confirmDialog').showModal();$('dialogOk').onclick=async()=>{$('confirmDialog').close();plan=[];const r=await routeRequest([position,home]);if(r){drawRouteShape(r.shape);$('planTime').textContent=fmtMin(r.minutes);$('planDistance').textContent=(r.meters/1000).toFixed(1)+' km';$('planList').innerHTML='<li>Home — your recorded starting point</li>';}$('currentTitle').textContent='Return to Home';$('text').textContent='Follow the route shown on the map back to your starting point. The tour has been curtailed.'};
+  $('dialogText').innerHTML='<p>You are about '+fmtMin(walkMin(hav(position,home),Number($('speed').value)))+' from your starting point by a simple walking estimate.</p><p>The tour will be curtailed and a walking route back to Home will be shown.</p>';
+  $('confirmDialog').showModal();
+  $('dialogOk').onclick=async()=>{
+    $('confirmDialog').close();
+    plan=[];
+    const r=await routeRequest([position,home]);
+    if(r){drawRouteShape(r.shape);$('planTime').textContent=fmtMin(r.minutes);$('planDistance').textContent=(r.meters/1000).toFixed(1)+' km';$('planList').innerHTML='<li>Home — your recorded starting point</li>';}
+    $('currentTitle').textContent='Return to Home';$('detailText').innerHTML='<p>Follow the route shown on the Map page back to your starting point. The sightseeing tour has been curtailed.</p>';
+    $('setupStatus').textContent='Tour ended. You can press I AM HERE again when you want to start a new tour from your current location.';
+    startedAt=null; home=null; visited=new Set(); currentIndex=-1; $('homeTourState').textContent='Ended'; updateTourButtons(); updateProgress();
+    showPage('map');
+  };
   $('dialogCancel').onclick=()=>$('confirmDialog').close();
 }
-$('refresh').onclick=async()=>{try{statusData=await fetch(currentCity.status+'?x='+Date.now()).then(r=>r.json());$('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';$('setupStatus').textContent='Today’s availability information refreshed.';}catch{$('setupStatus').textContent='Could not refresh live information; using cached tour rules.';}};
+$('refresh').onclick=async()=>{try{statusData=await fetch(currentCity.status+'?x='+Date.now()).then(r=>r.json());$('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';
+  $('homeCityLabel').textContent=tour.city; $('pageCity').textContent=tour.city; updateTourButtons();$('setupStatus').textContent='Today’s availability information refreshed.';}catch{$('setupStatus').textContent='Could not refresh live information; using cached tour rules.';}};
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('install').classList.remove('hidden')});
 $('install').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('install').classList.add('hidden')}};
 async function loadCity(cityId, preservePosition=false){
@@ -437,21 +480,28 @@ async function loadCity(cityId, preservePosition=false){
   tour=await fetch(entry.data+'?x='+Date.now()).then(r=>r.json());
   try{statusData=await fetch(entry.status+'?x='+Date.now()).then(r=>r.json())}catch{statusData={overrides:{}}}
   document.title='City Guides — '+tour.city;
-  $('appTitle').textContent=tour.city+' — adaptive walking guide';
-  $('appSubtitle').textContent='Choose your time. Start anywhere. The guide adapts as you walk.';
-  $('versionInfo').textContent='City Guides v'+APP_VERSION+' · '+tour.city+' · Build '+BUILD;
-  $('dataNote').innerHTML='Tour data: <code>'+entry.data+'</code>. Live availability: <code>'+entry.status+'</code>. Walking routes are calculated online when possible.';
+  $('pageCity').textContent=tour.city;
+  $('homeCityLabel').textContent=tour.city;
+  $('pageLabel').textContent='Home'; $('mapCityLabel').textContent=tour.city;
   $('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';
   if(map){map.remove();map=null;routeLine=null;userMarker=null;accuracyCircle=null;markerLayer=null;markerById.clear();}
   map=L.map('map').setView([tour.stops[0].lat,tour.stops[0].lng],16);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
   renderSiteMarkers();
-  currentIndex=-1;plan=[];visited=new Set();home=null;startedAt=null;position=null;lastPlanAt=0;
+  currentIndex=-1;plan=[];visited=new Set();home=null;startedAt=null;position=null;lastPlanAt=0; updateTourButtons(); updateProgress();
   document.body.classList.remove('started');
   const key=storageKeyBase+'-'+currentCityId;
   try{const saved=JSON.parse(localStorage.getItem(key)||'null');if(saved?.home)home=saved.home;}catch{}
-  if(!preservePosition){ $('planList').innerHTML='<li>Press “I AM HERE” to create a plan.</li>'; $('planNote').textContent=''; $('currentTitle').textContent='Not started'; $('currentMeta').textContent=''; $('photo').classList.add('hidden'); }
+  if(!preservePosition){ $('planList').innerHTML='<li>Press I AM HERE to create a plan.</li>'; $('planNote').textContent=''; $('currentTitle').textContent='Not started'; $('currentMeta').textContent=''; $('photoWrap').classList.add('hidden'); $('detailText').innerHTML='<p>Choose a stop from the Map, or start the tour with I AM HERE.</p>'; $('homeTourTime').textContent='Not planned';$('homeTourStops').textContent='—';$('homeTourDistance').textContent='—';$('homeTourState').textContent='Ready'; }
 }
 $('citySelect').addEventListener('change',()=>{const u=new URL(location.href);u.searchParams.set('city',$('citySelect').value);location.href=u.toString();});
+document.querySelectorAll('[data-page]').forEach(b=>b.addEventListener('click',()=>showPage(b.dataset.page)));
+$('photoClose').onclick=()=>{$('photoWrap').classList.add('hidden');};
+$('photo').onclick=()=>{$('photoLightbox').showModal();$('lightboxImage').src=$('photo').src;};
+$('lightboxClose').onclick=()=>$('photoLightbox').close();
+$('detailText').addEventListener('scroll',()=>{if(audioPlaying){$('detailText').dataset.follow='0';updateDetailFollow();}});
+$('gethome').disabled=true;
+updateTourButtons();
+
 async function init(){
   const catalogue=await fetch('cities.json?x='+Date.now()).then(r=>r.json());
   $('citySelect').innerHTML=catalogue.cities.map(c=>'<option value="'+c.id+'">'+c.name+(c.country?' — '+c.country:'')+'</option>').join('');
@@ -459,6 +509,7 @@ async function init(){
   const cityId=catalogue.cities.some(c=>c.id===requested)?requested:catalogue.cities[0].id;
   $('citySelect').value=cityId;
   await loadCity(cityId);
+  showPage('home');
 }
 async function updateAppIfNeeded(){
   try{
@@ -471,6 +522,4 @@ async function updateAppIfNeeded(){
 }
 if('serviceWorker' in navigator)window.addEventListener('load',async()=>{try{const reg=await navigator.serviceWorker.register('sw.js',{updateViaCache:'none'});await reg.update();if(reg.waiting){reg.waiting.postMessage({type:'SKIP_WAITING'});}}catch(e){};updateAppIfNeeded();});
 init();
-</script>
-</body>
-</html>
+</script></body></html>
