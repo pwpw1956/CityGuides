@@ -1,5 +1,5 @@
 {
-  "version": "0.6.1",
-  "build": "2026-08-24 12:10 UTC",
-  "release": "Map pins, page colour pairing, compact map/detail layouts, robust audio controls"
+  "application": "CityGuides",
+  "version": "0.7.0",
+  "build": "2026-08-25 UTC"
 }

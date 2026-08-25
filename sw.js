@@ -1,21 +1,5 @@
-const CACHE_NAME = 'cityguides-v0.6.1';
-const APP_SHELL = [
-  './', './index.html', './cities.json', './manifest.webmanifest',
-  './icon-192.png', './icon-512.png', './reset.html', './version.json'
-];
-self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
-});
-self.addEventListener('activate', event => {
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))).then(() => self.clients.claim()));
-});
-self.addEventListener('message', event => { if(event.data?.type === 'SKIP_WAITING') self.skipWaiting(); });
-self.addEventListener('fetch', event => {
-  const req = event.request;
-  if(req.method !== 'GET') return;
-  event.respondWith(fetch(req).then(res => {
-    const copy = res.clone();
-    caches.open(CACHE_NAME).then(cache => cache.put(req, copy)).catch(()=>{});
-    return res;
-  }).catch(() => caches.match(req)));
-});
+// CityGuides v0.7.0 | Build 2026-08-25 UTC
+const C='cityguides-v0.7.0';
+self.addEventListener('install',e=>e.waitUntil(caches.open(C).then(c=>c.addAll(['./','./index.html','./version.json','./manifest.webmanifest']))));
+self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(k=>Promise.all(k.filter(x=>x!==C).map(x=>caches.delete(x))))));
+self.addEventListener('fetch',e=>e.respondWith(fetch(e.request).then(r=>{let x=r.clone();caches.open(C).then(c=>c.put(e.request,x));return r}).catch(()=>caches.match(e.request))));
