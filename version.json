@@ -1,5 +1,5 @@
 {
-  "version": "0.7.0",
-  "build": "2026-08-25 20:45 UTC",
-  "release": "Tour progress, visited-stop state and grey completed pins; preserves v0.6.1 routing, GPS, map, interface and audio"
+  "version": "0.7.1",
+  "build": "2026-08-26 17:55 UTC",
+  "release": "map/pin stabilisation; directional arrows; navigation colours; Help typography"
 }
