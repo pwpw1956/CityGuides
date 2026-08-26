@@ -32,7 +32,13 @@
         "type": "lewes_castle"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Lewes Castle Barbican gate — OpenStreetMap/Mapcarta"
+      "coordSource": "Lewes Castle Barbican gate — OpenStreetMap/Mapcarta",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.87285,
+        "lng": 0.00836
+      },
+      "routeNote": "Barbican gate is used as the practical pedestrian approach."
     },
     {
       "id": "anne",
@@ -54,7 +60,13 @@
         "type": "lewes_anne"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Anne of Cleves House — Historic England/OpenStreetMap"
+      "coordSource": "Anne of Cleves House — Historic England/OpenStreetMap",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.86895,
+        "lng": 0.00392
+      },
+      "routeNote": "Public/café-side approach is used rather than the centre of the house polygon."
     },
     {
       "id": "priory",
@@ -76,7 +88,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Lewes Priory/Priory Park — Lewes Priory Trust"
+      "coordSource": "Lewes Priory/Priory Park — Lewes Priory Trust",
+      "routeType": "area",
+      "approach": {
+        "lat": 50.86823,
+        "lng": 0.00775
+      },
+      "routeNote": "Priory Park public-side approach; the attraction itself remains a broad outdoor zone."
     },
     {
       "id": "southover",
@@ -98,7 +116,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Southover Grange Gardens — OpenStreetMap/Mapcarta"
+      "coordSource": "Southover Grange Gardens — OpenStreetMap/Mapcarta",
+      "routeType": "area",
+      "approach": {
+        "lat": 50.87057,
+        "lng": 0.00827
+      },
+      "routeNote": "Garden-side access point; wider GPS zone remains around the gardens."
     },
     {
       "id": "highstreet",
@@ -120,7 +144,27 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Lewes High Street — OS/Open Postcode street reference"
+      "coordSource": "Lewes High Street — OS/Open Postcode street reference",
+      "routeType": "linear",
+      "traverse": [
+        {
+          "lat": 50.87336,
+          "lng": 0.00965
+        },
+        {
+          "lat": 50.87355,
+          "lng": 0.0112
+        },
+        {
+          "lat": 50.8738,
+          "lng": 0.01325
+        }
+      ],
+      "approach": {
+        "lat": 50.87357,
+        "lng": 0.011366666666666666
+      },
+      "routeNote": "Traverse a representative central section of the historic High Street."
     },
     {
       "id": "townhall",
@@ -142,7 +186,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Lewes Town Hall — OpenStreetMap/Mapcarta"
+      "coordSource": "Lewes Town Hall — OpenStreetMap/Mapcarta",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.87354,
+        "lng": 0.01037
+      },
+      "routeNote": "Town Hall/Market Square frontage."
     },
     {
       "id": "keere",
@@ -164,7 +214,27 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Keere Street — geotagged OS/Geograph reference"
+      "coordSource": "Keere Street — geotagged OS/Geograph reference",
+      "routeType": "linear",
+      "traverse": [
+        {
+          "lat": 50.8718,
+          "lng": 0.00611
+        },
+        {
+          "lat": 50.87144,
+          "lng": 0.00638
+        },
+        {
+          "lat": 50.87107,
+          "lng": 0.0065
+        }
+      ],
+      "approach": {
+        "lat": 50.87143666666666,
+        "lng": 0.00633
+      },
+      "routeNote": "Traverse Keere Street from one end to the other; do not merely visit its midpoint."
     },
     {
       "id": "harveys",
@@ -186,7 +256,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Harvey's Brewery — Historic England/OpenStreetMap"
+      "coordSource": "Harvey's Brewery — Historic England/OpenStreetMap",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.87423,
+        "lng": 0.01654
+      },
+      "routeNote": "Brewery/Cliffe High Street frontage."
     },
     {
       "id": "cliffe",
@@ -208,7 +284,27 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Cliffe High Street — postcode/OpenStreetMap street reference"
+      "coordSource": "Cliffe High Street — postcode/OpenStreetMap street reference",
+      "routeType": "linear",
+      "traverse": [
+        {
+          "lat": 50.87414,
+          "lng": 0.0157
+        },
+        {
+          "lat": 50.87419,
+          "lng": 0.01685
+        },
+        {
+          "lat": 50.87416,
+          "lng": 0.01795
+        }
+      ],
+      "approach": {
+        "lat": 50.874163333333335,
+        "lng": 0.016833333333333336
+      },
+      "routeNote": "Traverse the Cliffe High Street section towards the Ouse rather than touching a single point."
     },
     {
       "id": "stannes",
@@ -230,7 +326,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "St Anne's Church — Historic England/geotagged reference"
+      "coordSource": "St Anne's Church — Historic England/geotagged reference",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.87237,
+        "lng": 0.00165
+      },
+      "routeNote": "Church/churchyard public approach."
     },
     {
       "id": "bullhouse",
@@ -252,7 +354,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Bull House — Historic England/geotagged reference"
+      "coordSource": "Bull House — Historic England/geotagged reference",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.87188,
+        "lng": 0.00668
+      },
+      "routeNote": "Bull House frontage on the public street."
     },
     {
       "id": "westgate",
@@ -274,7 +382,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Westgate Chapel / historic West Gate area — Historic England/OpenStreetMap"
+      "coordSource": "Westgate Chapel / historic West Gate area — Historic England/OpenStreetMap",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.8718,
+        "lng": 0.00677
+      },
+      "routeNote": "Historic Westgate/chapel street frontage."
     },
     {
       "id": "pells",
@@ -296,13 +410,19 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Pells Pool — OpenStreetMap/Mapcarta"
+      "coordSource": "Pells Pool — OpenStreetMap/Mapcarta",
+      "routeType": "area",
+      "approach": {
+        "lat": 50.87725,
+        "lng": 0.00955
+      },
+      "routeNote": "Public-side approach near Pells; the wider riverside/pool area remains the GPS zone."
     },
     {
       "id": "station",
       "title": "Lewes Railway Station and modern arrival",
-      "lat": 50.87064,
-      "lng": 0.0123,
+      "lat": 50.870355,
+      "lng": 0.011254,
       "radius": 65,
       "listen": 2,
       "priority": 3,
@@ -318,7 +438,13 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Lewes railway station — OpenStreetMap/Wikidata"
+      "coordSource": "Station Road public approach — geotagged Station Road reference / Historic England station frontage",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.870355,
+        "lng": 0.011254
+      },
+      "routeNote": "Station Road public entrance/forecourt; avoids routing onto platforms behind the ticket barrier."
     },
     {
       "id": "battle",
@@ -340,7 +466,15 @@
         "type": "always"
       },
       "coordChecked": "2026-08-26",
-      "coordSource": "Battle of Lewes interpretation marker at castle — geotagged historical marker"
+      "coordSource": "Battle of Lewes interpretation marker at castle — geotagged historical marker",
+      "routeType": "area",
+      "approach": {
+        "lat": 50.87287,
+        "lng": 0.00765
+      },
+      "routeNote": "Interpretation/story zone near the castle rather than the full battlefield."
     }
-  ]
+  ],
+  "routingSchema": "1.0",
+  "routingNotes": "routeType point/area/linear; approach gives pedestrian access; linear traverse points must be passed through in order."
 }
