@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES
-  Version: 0.7.3
-  Build: 2026-08-26 20:25 UTC
-  Release: Lewes coordinate audit; numbered selected pins; current-stop highlight; visible re-plan result; UI refinements
+  Version: 0.7.4
+  Build: 2026-08-26 23:30 UTC
+  Release: access-point and linear-site routing; network-matrix planning; backtracking penalty; Detail-space refinements
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
 :root{
@@ -19,7 +19,7 @@ main{max-width:900px;margin:0 auto;padding:10px 10px 14px}.page{display:none}.pa
 .panel{background:var(--paper);margin:0 0 10px;border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:0 2px 7px #19394a0b}
 .page.home .panel{background:linear-gradient(180deg,var(--home-pale),var(--paper) 46%)}
 .page.map .panel{background:linear-gradient(180deg,var(--map-pale),var(--paper) 46%)}
-.page.detail .panel{background:linear-gradient(180deg,var(--detail-pale),var(--paper) 46%)}
+.page.detail .panel{background:linear-gradient(180deg,var(--detail-pale),var(--paper) 46%);min-height:calc(100vh - 145px);display:flex;flex-direction:column}
 .page.help .panel{background:linear-gradient(180deg,var(--help-pale),var(--paper) 46%)}
 h2{font-size:1.16rem;margin:2px 0 8px}h3{font-size:1rem;margin:4px 0 7px}.small{font-size:.78rem;color:var(--muted)}.status{font-size:.82rem;color:var(--muted)}
 label{font-weight:700;display:block;margin-bottom:4px;font-size:.9rem}select,input,button{font:inherit}select,input[type=number]{width:100%;padding:9px 10px;border:1px solid #b9c9cf;border-radius:9px;background:#fff;color:var(--ink);min-height:43px}
@@ -38,7 +38,7 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .legendButton .dot{width:9px;height:9px}.legendSep{opacity:.45}
 .legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #fff;box-shadow:0 0 0 1px #888}.blue{background:#2879c7}.orange{background:#d78321}.red{background:#ad4b4b}.green{background:#4e806e}.grey{background:#7d8588}
 #photoWrap{position:relative;margin-bottom:7px}.photoFrame{position:relative}.photoFrame img{display:block;width:100%;height:auto;max-height:30vh;min-height:120px;object-fit:cover;border-radius:11px;cursor:zoom-in}.photoClose{position:absolute;right:7px;top:7px;width:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:#17384acc;color:#fff;font-size:1.15rem}.caption{font-size:.7rem;color:var(--muted);margin-top:3px}
-.detailHeading{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}.detailTitle{margin:0}.detailMeta{font-size:.76rem;color:var(--muted);margin:2px 0 7px}.detailText{height:35vh;min-height:235px;max-height:390px;overflow-y:auto;padding:2px 5px 2px 1px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);scroll-behavior:smooth}.detailText p{margin:8px 0}.detailText p.speaking{background:#e7f1f3;border-radius:7px;padding:4px 6px}.audioRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:9px}.audioRow button{min-height:36px;padding:5px 8px}.audioRow2{display:grid;grid-template-columns:minmax(160px,45%) 1fr;gap:8px;margin-top:7px}.speedControl{display:grid;grid-template-columns:46px 1fr 46px;gap:5px;align-items:center}.speedControl button{min-height:36px;padding:3px 7px;font-size:1.05rem}.speedLabel{text-align:center;font-weight:800;font-size:.95rem}.audioFollow{min-height:36px;padding:5px 8px}.follow{margin-top:7px}
+.detailHeading{display:flex;gap:8px;align-items:flex-start;flex:none}.detailTitle{margin:0}.detailMeta{font-size:.76rem;color:var(--muted);margin:2px 0 7px}.detailText{height:auto;min-height:250px;max-height:none;flex:1 1 300px;overflow-y:auto;padding:2px 5px 2px 1px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);scroll-behavior:smooth}.detailText p{margin:8px 0}.detailText p.speaking{background:#e7f1f3;border-radius:7px;padding:4px 6px}.audioRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:9px}.audioRow button{min-height:34px;padding:4px 8px}.audioRow2{display:grid;grid-template-columns:minmax(160px,45%) 1fr;gap:8px;margin-top:7px}.speedControl{display:grid;grid-template-columns:46px 1fr 46px;gap:5px;align-items:center}.speedControl button{min-height:34px;padding:3px 9px;font-size:1.05rem}.speedLabel{text-align:center;font-weight:800;font-size:.95rem}.audioFollow{min-height:34px;padding:4px 8px}.follow{margin-top:7px}
 .notice{background:#fff7e6;border:1px solid #ead3a2;padding:8px 10px;border-radius:9px;font-size:.8rem}.good{background:#edf6f1;border:1px solid #c0d9cd;padding:8px 10px;border-radius:9px;font-size:.8rem}.reason{margin-top:7px;padding:8px 10px;border-radius:9px;background:#f3f7f8;border:1px solid var(--line);font-size:.8rem}.hidden{display:none!important}.muted{opacity:.55}
 #planList{margin:7px 0 0;padding-left:21px}.planItem{margin:4px 0;font-size:.86rem}.routeSummary{display:grid;grid-template-columns:1fr 1fr;gap:8px}.routeSummary .statbox{text-align:center}
 .bottomNav{position:fixed;z-index:1200;left:0;right:0;bottom:0;padding:7px max(8px,env(safe-area-inset-left)) max(7px,env(safe-area-inset-bottom));background:#f8fbfbf5;border-top:1px solid var(--line);box-shadow:0 -2px 8px #0001;backdrop-filter:blur(8px)}.navGrid{max-width:900px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.navBtn{min-height:47px;padding:5px 3px;font-size:.73rem;color:#fff;border-color:transparent}.navBtn:nth-child(1){background:#416f98}.navBtn:nth-child(2){background:#268594}.navBtn:nth-child(3){background:#7061a2}.navBtn:nth-child(4){background:#4f8569}.navBtn span{display:block;font-size:1rem;line-height:1}.navBtn.active{box-shadow:inset 0 0 0 3px #fff8,0 2px 5px #0002;transform:translateY(-1px)}
@@ -50,7 +50,7 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .page.help .helpList{padding-left:23px}.page.help .helpList li{margin:9px 0}
 footer{font-size:.7rem;color:var(--muted);text-align:center;margin:10px 0}.helpList{padding-left:20px}.helpList li{margin:7px 0}.keyRow{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:.82rem}.keyDot{width:13px;height:13px;border-radius:50%;flex:none}.planItem.visited{color:#7d8588;text-decoration:none}.planItem.current{font-weight:800}
 dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 24px);box-shadow:0 10px 40px #0004}dialog::backdrop{background:#0007}.dialogBody{padding:17px}.dialogBody .controls{margin-top:12px}.lightbox img{max-width:100%;max-height:75vh;display:block;border-radius:9px}.lightbox{padding:0;background:#101c22;border:0}.lightbox .close{position:absolute;right:8px;top:8px;background:#fff;color:#17384a;border:0;border-radius:50%;min-width:40px;padding:0}
-@media(min-width:700px){body{font-size:18px}.controls{grid-template-columns:repeat(4,1fr)}#map{height:62vh}.detailText{height:340px}}
+@media(min-width:700px){body{font-size:18px}.controls{grid-template-columns:repeat(4,1fr)}#map{height:62vh}.detailText{min-height:340px}}
 @media(max-width:430px){.audioRow2{grid-template-columns:minmax(135px,46%) 1fr}.navBtn{font-size:.68rem}.navBtn span{font-size:.92rem}.grid2{gap:7px}}
 </style></head><body>
 <header><div class="headerLine"><div class="brand">CityGuides</div><div class="pageName" id="pageLabel">Home</div><div class="pageContext" id="pageContext"></div></div></header>
@@ -84,7 +84,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.3 · Build 2026-08-26 20:25 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.4 · Build 2026-08-26 23:30 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -99,7 +99,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
 
 <section class="page detail" id="page-detail">
   <div class="panel">
-    <div class="detailHeading"><div><h2 class="detailTitle" id="currentTitle">Not started</h2><div class="detailMeta" id="currentMeta"></div></div><span class="badge" id="detailBadge">Guide</span></div>
+    <div class="detailHeading"><div><h2 class="detailTitle" id="currentTitle">Not started</h2><div class="detailMeta" id="currentMeta"></div></div></div>
     <div id="photoWrap" class="hidden"><div class="photoFrame"><img id="photo" alt=""><button class="photoClose" id="photoClose" aria-label="Close photograph">×</button></div><div class="caption" id="credit"></div></div>
     <div id="detailText" class="detailText" data-follow="1"><p>Choose a stop from the Map, or start the tour with I AM HERE.</p></div>
     <p class="notice" id="availability"></p>
@@ -137,14 +137,15 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <h3>Audio controls</h3>
     <p>Playback speed changes take effect from the next spoken section. <strong>Follow audio</strong> gently tracks the written text; manually scrolling the text turns that following off.</p>
   </div>
+  <div class="panel"><h3>How the walking route is chosen</h3><p>CityGuides now separates the place you are interested in from the point a walker should actually use. Buildings and museums can have a public entrance/approach point; gardens and larger sites can use a practical entrance with a broader GPS zone; streets such as Keere Street can define a short sequence that the route must actually traverse. The planner first asks the pedestrian network for walking times between candidate sights, then balances those times against interest, available time and a penalty for sharp reversals/backtracking. The detailed route is then requested through the chosen access/traversal points.</p></div>
   <div class="panel">
     <h3>Why some places are not selected</h3>
     <p>At present, orange means a place was left out because time, walking involved or priority made another combination preferable. Green marks a useful optional stop. Red means unavailable; blue means selected.</p>
   </div>
   <div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.7.3 · Build 2026-08-26 20:25 UTC</p>
-    <p>This release audits the fixed Lewes site coordinates, numbers selected map pins, adds a yellow current-stop highlight, makes Re-plan visibly report its result, and makes small Home/Detail/Help refinements without redesigning the route-selection algorithm.</p>
+    <p>CityGuides v0.7.4 · Build 2026-08-26 23:30 UTC</p>
+    <p>This release adds practical pedestrian access points, area/linear-site routing, network-matrix selection/order and a backtracking penalty. The station routes to its public Station Road entrance, while Keere Street and Cliffe can be traversed as linear features. It also removes the unnecessary Guide badge and expands Detail text space.</p>
   </div>
 </section>
 </main>
@@ -199,11 +200,12 @@ function updateDetailFollow(){
 }
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
-const APP_VERSION='0.7.3';
-const BUILD='2026-08-26 20:25 UTC';
+const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
+const APP_VERSION='0.7.4';
+const BUILD='2026-08-26 23:30 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.7.3';
+const storageKeyBase='cityguides-v0.7.4';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -248,8 +250,95 @@ function candidateScore(s,mode){
   if(visited.has(s.id))score-=1000;
   return score;
 }
+function routeAnchor(stop){
+  if(stop?.approach && Number.isFinite(stop.approach.lat) && Number.isFinite(stop.approach.lng))return stop.approach;
+  if(Array.isArray(stop?.traverse) && stop.traverse.length){
+    return {lat:stop.traverse.reduce((a,p)=>a+p.lat,0)/stop.traverse.length,lng:stop.traverse.reduce((a,p)=>a+p.lng,0)/stop.traverse.length};
+  }
+  return {lat:stop.lat,lng:stop.lng};
+}
+function routeLocationsForPlan(start,stops){
+  const out=[{lat:start.lat,lng:start.lng,kind:'start'}];
+  let cur={lat:start.lat,lng:start.lng};
+  for(const st of stops){
+    if(st.routeType==='linear' && Array.isArray(st.traverse) && st.traverse.length>=2){
+      const a=st.traverse[0],z=st.traverse[st.traverse.length-1];
+      // Enter the linear feature from whichever end is more sensible from the previous route point.
+      const seq=hav(cur,a)<=hav(cur,z)?st.traverse:st.traverse.slice().reverse();
+      for(const p of seq)out.push({lat:p.lat,lng:p.lng,kind:'via',siteId:st.id});
+      cur=seq[seq.length-1];
+    }else{
+      const a=routeAnchor(st);out.push({lat:a.lat,lng:a.lng,kind:'stop',siteId:st.id});cur=a;
+    }
+  }
+  return out;
+}
+async function matrixRequest(start,stops){
+  const anchors=[{lat:start.lat,lng:start.lng},...stops.map(routeAnchor)];
+  const payload={sources:anchors.map(p=>({lat:p.lat,lon:p.lng})),targets:anchors.map(p=>({lat:p.lat,lon:p.lng})),costing:'pedestrian',units:'kilometers',verbose:false};
+  try{
+    const r=await fetch(VALHALLA_MATRIX,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-v074'},body:JSON.stringify(payload)});
+    if(!r.ok)throw new Error('Matrix service returned '+r.status);
+    const j=await r.json(),m=j.sources_to_targets;
+    if(!m?.durations||!m?.distances)return null;
+    return {durations:m.durations,distances:m.distances};
+  }catch(e){return null;}
+}
+function matrixMinutes(matrix,i,j){
+  const v=matrix?.durations?.[i]?.[j];return Number.isFinite(v)?v/60:Infinity;
+}
+function matrixMeters(matrix,i,j){
+  const v=matrix?.distances?.[i]?.[j];return Number.isFinite(v)?v*1000:Infinity;
+}
+function turnbackPenalty(prev,cur,next){
+  if(!prev||!cur||!next)return 0;
+  const vx=cur.lng-prev.lng,vy=cur.lat-prev.lat,wx=next.lng-cur.lng,wy=next.lat-cur.lat;
+  const a=Math.hypot(vx,vy),b=Math.hypot(wx,wy);if(!a||!b)return 0;
+  const cos=Math.max(-1,Math.min(1,(vx*wx+vy*wy)/(a*b))),angle=Math.acos(cos)*180/Math.PI;
+  return angle>145?3:angle>115?1.5:0;
+}
+async function estimatePlanNetwork(start,budget,speed,mode){
+  const reserve=Number($('buffer').value),remainStart=Math.max(0,budget-reserve);
+  const candidates=tour.stops.filter(st=>available(st)&&!visited.has(st.id));
+  const matrix=await matrixRequest(start,candidates);
+  if(!matrix)return null;
+  let remain=remainStart,curIdx=0,prevPoint=start,curPoint=start;
+  const unused=candidates.map((st,i)=>({st,idx:i+1})),out=[];
+  while(unused.length){
+    let best=null;
+    for(const c of unused){
+      const travel=matrixMinutes(matrix,curIdx,c.idx);if(!Number.isFinite(travel))continue;
+      const total=travel+c.st.listen;if(total>remain)continue;
+      const score=candidateScore(c.st,mode),anchor=routeAnchor(c.st);
+      const reversal=turnbackPenalty(prevPoint,curPoint,anchor);
+      const efficiency=score/(1+total/9)-reversal;
+      if(!best||efficiency>best.efficiency)best={...c,travel,total,efficiency,anchor};
+    }
+    if(!best)break;
+    out.push(best.st);remain-=best.total;
+    prevPoint=curPoint;curPoint=best.anchor;curIdx=best.idx;
+    unused.splice(unused.findIndex(x=>x.idx===best.idx),1);
+    if(out.length>=12)break;
+  }
+  return {stops:improveOrderNetwork(out,start,candidates,matrix),matrix,candidates};
+}
+function improveOrderNetwork(stops,start,candidates,matrix){
+  if(stops.length<3)return stops;
+  const idx=new Map(candidates.map((s,i)=>[s.id,i+1]));
+  const cost=arr=>{
+    let t=0,from=0,prev=start,cur=start;
+    for(const st of arr){const to=idx.get(st.id),m=matrixMinutes(matrix,from,to);if(!Number.isFinite(m))return Infinity;t+=m+turnbackPenalty(prev,cur,routeAnchor(st));prev=cur;cur=routeAnchor(st);from=to;}
+    return t;
+  };
+  let best=stops.slice(),bestCost=cost(best),changed=true,guard=0;
+  while(changed&&guard++<4){changed=false;for(let i=0;i<best.length-1;i++)for(let j=i+1;j<best.length;j++){
+    const cand=best.slice();cand.splice(i,j-i+1,...cand.slice(i,j+1).reverse());const c=cost(cand);
+    if(c<bestCost-.35){best=cand;bestCost=c;changed=true;}
+  }}
+  return best;
+}
 async function routeRequest(locations){
-  const payload={locations:locations.map(x=>({lat:x.lat,lon:x.lng,type:'break'})),costing:'pedestrian',units:'kilometers',directions_options:{units:'kilometers'}};
+  const payload={locations:locations.map(x=>({lat:x.lat,lon:x.lng,type:x.kind==='via'?'via':'break'})),costing:'pedestrian',units:'kilometers',directions_options:{units:'kilometers'}};
   try{
     const r=await fetch(VALHALLA,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-LaRochelle-v2'},body:JSON.stringify(payload)});
     if(!r.ok)throw new Error('Routing service returned '+r.status);
@@ -369,30 +458,20 @@ async function makePlan(reason='initial'){
   if(!position)return;
   const totalBudget=Number($('budget').value),elapsed=startedAt?((Date.now()-startedAt)/60000):0;
   const budget=Math.max(5,totalBudget-elapsed),speed=Number($('speed').value),mode=$('mode').value;
-  let proposed=estimatePlan(position,budget,speed,mode);
-  proposed=improveOrder(proposed,position,mode);
+  $('planNote').textContent='Planning with pedestrian-network walking times…';
+  const network=await estimatePlanNetwork(position,budget,speed,mode);
+  let proposed,plannerLabel;
+  if(network){proposed=network.stops;plannerLabel='pedestrian-network planner';}
+  else{proposed=improveOrder(estimatePlan(position,budget,speed,mode),position,mode);plannerLabel='fallback distance planner';}
   if(!proposed.length){$('planNote').textContent='No suitable stop fits the remaining time from your current position.';refreshMarkerStyles();return;}
-  const oldIds=plan.map(x=>x.id),newIds=proposed.map(x=>x.id);
-  const changed=oldIds.join(',')!==newIds.join(',');
-  if(changed && plan.length && reason!=='initial'){
+  const oldIds=plan.map(x=>x.id),newIds=proposed.map(x=>x.id),changed=oldIds.join(',')!==newIds.join(',');
+  const accept=async()=>{plan=proposed;await renderPlan();$('planNote').textContent=(changed?'Route re-planned':'Route checked — no change needed')+' using the '+plannerLabel+': '+plan.length+' stops · '+$('planTime').textContent+' · '+$('planDistance').textContent+'.';};
+  if(changed&&plan.length&&reason!=='initial'){
     $('dialogTitle').textContent='The guide would like to change the plan';
-    $('dialogText').innerHTML='<p>Your current position/progress produces a different proposed plan.</p><p><strong>Proposed:</strong> '+proposed.map(x=>x.title).join(' → ')+'</p><p>Use the new plan?</p>';
-    $('confirmDialog').showModal();
-    $('dialogOk').onclick=async()=>{
-      $('confirmDialog').close();plan=proposed;await renderPlan();
-      $('planNote').textContent='Route re-planned: '+plan.length+' stops · '+$('planTime').textContent+' · '+$('planDistance').textContent+'.';
-    };
-    $('dialogCancel').onclick=()=>{$('confirmDialog').close();$('planNote').textContent='Re-plan cancelled; the existing route is unchanged.';};
-  }else{
-    plan=proposed;await renderPlan();
-    if(reason==='manual'){
-      $('planNote').textContent=changed
-        ? 'Route re-planned: '+plan.length+' stops · '+$('planTime').textContent+' · '+$('planDistance').textContent+'.'
-        : 'Route checked — no change needed. '+plan.length+' stops · '+$('planTime').textContent+' · '+$('planDistance').textContent+'.';
-    }
-  }
-  lastPlanAt=Date.now();
-  refreshMarkerStyles();
+    $('dialogText').innerHTML='<p>The '+plannerLabel+' produces a different proposed order/selection from your current position.</p><p><strong>Proposed:</strong> '+proposed.map(x=>x.title).join(' → ')+'</p><p>Use the new plan?</p>';
+    $('confirmDialog').showModal();$('dialogOk').onclick=async()=>{$('confirmDialog').close();await accept();};$('dialogCancel').onclick=()=>{$('confirmDialog').close();$('planNote').textContent='Re-plan cancelled; the existing route is unchanged.';};
+  }else await accept();
+  lastPlanAt=Date.now();refreshMarkerStyles();
 }
 async function renderPlan(){
   $('planList').innerHTML='';
@@ -404,7 +483,7 @@ async function renderPlan(){
   });
   refreshMarkerStyles();
   const speed=Number($('speed').value);let total=plan.reduce((a,s)=>a+s.listen,0),dist=0,cur=position;
-  for(const s of plan){dist+=hav(cur,s);total+=walkMin(hav(cur,s),speed);cur=s;}
+  for(const s of plan){const a=routeAnchor(s);dist+=hav(cur,a);total+=walkMin(hav(cur,a),speed);cur=a;}
   $('planTime').textContent=fmtMin(total);$('planDistance').textContent=(dist/1000).toFixed(1)+' km';$('homeTourTime').textContent=fmtMin(total);$('homeTourStops').textContent=plan.length;$('homeTourDistance').textContent=(dist/1000).toFixed(1)+' km';$('homeTourState').textContent='Planned';
   $('planNote').textContent=plan.length+' selected sites from '+tour.stops.length+' available candidates. The selection can change as you move, spend time, or encounter a closure.';
   if(plan.length && currentIndex<0)showStop(plan[0]);
@@ -417,7 +496,7 @@ async function drawRoute(){
     currentRoute=null;
     return;
   }
-  const pts=[position,...plan];
+  const pts=routeLocationsForPlan(position,plan);
   $('planNote').textContent='Calculating pedestrian route…';
   const r=await routeRequest(pts);
   if(r){
