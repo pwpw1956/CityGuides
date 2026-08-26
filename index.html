@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES
-  Version: 0.7.1
-  Build: 2026-08-26 17:55 UTC
-  Release: map/pin stabilisation; directional route arrows; clearer navigation colours; consistent Help typography
+  Version: 0.7.2
+  Build: 2026-08-26 19:05 UTC
+  Release: corrected map initialisation; pre-GPS pins; route failure reporting; stable map zoom; preserved planner
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
 :root{
@@ -84,7 +84,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.1 · Build 2026-08-26 17:55 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.2 · Build 2026-08-26 19:05 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -115,7 +115,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   <div class="panel"><h2>How CityGuides works</h2><ol class="helpList"><li>Choose a city and how much time you have.</li><li>Go to the place where you want to start and press <strong>I AM HERE</strong>. That becomes Home.</li><li>The guide chooses a suitable set of sights from a larger repertoire. You can start anywhere along the route.</li><li>Use <strong>Map</strong> to see the pedestrian route and coloured site markers. Use <strong>Detail</strong> for the current place and its audio description.</li><li>With <strong>Auto-follow ON</strong>, GPS automatically changes the guide section when you enter an appropriate site zone. Turn it off if you prefer to control sections yourself.</li><li>The plan can be re-evaluated as you walk. If you fall behind, the guide can propose dropping lower-priority stops and asks before changing the plan.</li><li><strong>GET ME HOME</strong> is deliberately disabled until a tour has started. Hold it briefly, then confirm, to end the sightseeing tour and route you back to Home.</li></ol></div>
   
   <div class="panel"><h3>Why some places are not selected</h3><p class="small">Orange means the place is available but was left out because the time, walking involved or its priority made another combination better. Green means it is a useful optional stop if time permits. Red means it is closed or otherwise unavailable. Blue means it is on today's current plan.</p></div>
-  <div class="panel"><h3>About this version</h3><p class="small">CityGuides v0.7.1 · Build 2026-08-26 17:55 UTC</p><p class="small">This stabilisation release keeps the existing tour behaviour while repairing site-pin rendering, adding direction arrows to the existing pedestrian route, making the four page colours easier to distinguish, and standardising both headings and explanatory text on the Help page.</p></div>
+  <div class="panel"><h3>About this version</h3><p class="small">CityGuides v0.7.2 · Build 2026-08-26 19:05 UTC</p><p class="small">This stabilisation release corrects map initialisation so site pins exist before GPS starts, preserves map zoom when returning to the Map page, reports routing failures explicitly, and retains the clearer navigation colours, Help typography and directional route arrows.</p></div>
 </section>
 </main>
 
@@ -136,7 +136,7 @@ function showPage(name){
   $('pageContext').textContent=(name==='map'||name==='detail')&&tour?tour.city:'';
   pages.forEach(p=>{const el=$('page-'+p); if(el)el.classList.toggle('active',p===name);});
   document.querySelectorAll('[data-page]').forEach(b=>b.classList.toggle('active',b.dataset.page===name));
-  if(name==='map' && map){setTimeout(()=>{map.invalidateSize(); if(routeLine) map.fitBounds(routeLine.getBounds().pad(.12)); else if(markerLayer && markerLayer.getLayers().length) map.fitBounds(markerLayer.getBounds().pad(.15));},100);}
+  if(name==='map' && map){setTimeout(()=>map.invalidateSize(),100);}
   if(name==='detail') updateDetailFollow();
 }
 function updateTourButtons(){
@@ -169,11 +169,11 @@ function updateDetailFollow(){
 }
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
-const APP_VERSION='0.7.1';
-const BUILD='2026-08-26 17:55 UTC';
+const APP_VERSION='0.7.2';
+const BUILD='2026-08-26 19:05 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.7.1';
+const storageKeyBase='cityguides-v0.7.2';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -266,7 +266,10 @@ function siteReason(s,budgetRemaining,speed,mode){
   if(s.indoor && !av.open) return {state:'closed',label:'Closed / unavailable',reason:av.label};
   if(visited.has(s.id) && plan.some(x=>x.id===s.id)) return {state:'grey',label:'Visited',reason:'Already visited during this tour.'};
   if(plan.some(x=>x.id===s.id)) return {state:'selected',label:"Today's tour",reason:'Selected for today’s itinerary.'};
-  const nearest=plan.length?Math.min(...plan.map(x=>hav(x,s))):hav(position,s);
+  if(!position && !plan.length){
+    return {state:'orange',label:'Available',reason:'Available for consideration when you start the tour.'};
+  }
+  const nearest=plan.length?Math.min(...plan.map(x=>hav(x,s))):(position?hav(position,s):0);
   const extra=walkMin(nearest,speed)+s.listen;
   const score=candidateScore(s,mode);
   const selectedScores=plan.map(x=>candidateScore(x,mode));
@@ -300,7 +303,7 @@ function updateSiteStatuses(){
   for(const st of tour.stops) siteStatus.set(st.id,siteReason(st,remaining,speed,mode));
 }
 function renderSiteMarkers(){
-  if(!markerLayer)markerLayer=L.layerGroup().addTo(map);
+  if(!markerLayer)markerLayer=L.featureGroup().addTo(map);
   markerLayer.clearLayers(); markerById.clear(); updateSiteStatuses();
   tour.stops.forEach(st=>{
     const info=siteStatus.get(st.id)||{state:'orange',label:'Not selected',reason:'Not currently selected.'};
@@ -350,18 +353,36 @@ async function renderPlan(){
   await drawRoute();
 }
 async function drawRoute(){
-  if(!position||!plan.length)return;
+  if(!position||!plan.length){
+    if(routeLine){routeLine.remove();routeLine=null;}
+    if(routeArrowLayer)routeArrowLayer.clearLayers();
+    currentRoute=null;
+    return;
+  }
   const pts=[position,...plan];
+  $('planNote').textContent='Calculating pedestrian route…';
   const r=await routeRequest(pts);
   if(r){
     currentRoute=r;drawRouteShape(r.shape);
     let listen=plan.reduce((a,s)=>a+s.listen,0), total=r.minutes+listen;
     const elapsed=startedAt?((Date.now()-startedAt)/60000):0, remaining=Math.max(0,Number($('budget').value)-elapsed-Number($('buffer').value));
     if(total>remaining+1 && plan.length>1 && !window._routePruning){
-      window._routePruning=true; plan=plan.slice(0,-1); await renderPlan(); window._routePruning=false; return;
+      window._routePruning=true;plan=plan.slice(0,-1);await renderPlan();window._routePruning=false;return;
     }
-    $('planDistance').textContent=(r.meters/1000).toFixed(1)+' km';$('planTime').textContent=fmtMin(total);$('homeTourTime').textContent=fmtMin(total);$('homeTourDistance').textContent=(r.meters/1000).toFixed(1)+' km';$('homeTourStops').textContent=plan.length;$('homeTourState').textContent='Active';$('planNote').textContent='Walking route calculated from the live pedestrian network. Remaining tour budget: '+fmtMin(remaining)+'.';
-  } else {$('planNote').textContent='Live pedestrian routing is temporarily unavailable; the planner is using conservative distance estimates.';}
+    $('planDistance').textContent=(r.meters/1000).toFixed(1)+' km';
+    $('planTime').textContent=fmtMin(total);
+    $('homeTourTime').textContent=fmtMin(total);
+    $('homeTourDistance').textContent=(r.meters/1000).toFixed(1)+' km';
+    $('homeTourStops').textContent=plan.length;
+    $('homeTourState').textContent='Active';
+    $('planNote').textContent='Walking route calculated from the live pedestrian network. Remaining tour budget: '+fmtMin(remaining)+'.';
+  }else{
+    currentRoute=null;
+    if(routeLine){routeLine.remove();routeLine=null;}
+    if(routeArrowLayer)routeArrowLayer.clearLayers();
+    $('planNote').textContent='Pedestrian route could not be calculated. The selected stops are still shown as pins; try Re-plan again when routing is available.';
+    $('setupStatus').textContent='Tour stops selected, but the pedestrian route service did not return a route.';
+  }
 }
 function routeBearing(a,b){
   const lat1=a[0]*Math.PI/180,lat2=b[0]*Math.PI/180,dLon=(b[1]-a[1])*Math.PI/180;
@@ -382,7 +403,7 @@ function drawRouteShape(shape){
       const bearing=routeBearing(a,b);
       const icon=L.divIcon({
         className:'routeDirectionArrow',
-        html:'<span style="transform:rotate('+bearing+'deg)">➜</span>',
+        html:'<span style="transform:rotate('+(bearing-90)+'deg)">➜</span>',
         iconSize:[24,24],iconAnchor:[12,12]
       });
       L.marker(b,{icon,interactive:false,zIndexOffset:500}).addTo(routeArrowLayer);
@@ -575,10 +596,7 @@ async function loadCity(cityId, preservePosition=false){
   $('homeCityLabel').textContent=tour.city;
   $('pageLabel').textContent='Home';
   $('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';
-  if(map){map.remove();map=null;routeLine=null;routeArrowLayer=null;userMarker=null;accuracyCircle=null;markerLayer=null;markerById.clear();}
-  map=L.map('map').setView([tour.stops[0].lat,tour.stops[0].lng],16);L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
-  renderSiteMarkers();
-  currentIndex=-1;plan=[];visited=new Set();home=null;startedAt=null;position=null;lastPlanAt=0; updateTourButtons(); updateProgress();
+  currentIndex=-1;plan=[];visited=new Set();home=null;startedAt=null;position=null;lastPlanAt=0;currentRoute=null;
   document.body.classList.remove('started');
   const key=storageKeyBase+'-'+currentCityId;
   try{
@@ -586,6 +604,15 @@ async function loadCity(cityId, preservePosition=false){
     if(saved?.home)home=saved.home;
     if(Array.isArray(saved?.visited))visited=new Set(saved.visited);
   }catch{}
+  if(map){map.remove();map=null;routeLine=null;routeArrowLayer=null;userMarker=null;accuracyCircle=null;markerLayer=null;markerById.clear();}
+  map=L.map('map').setView([tour.stops[0].lat,tour.stops[0].lng],16);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  renderSiteMarkers();
+  if(markerLayer && markerLayer.getLayers().length){
+    const b=markerLayer.getBounds();
+    if(!b.isValid || b.isValid())map.fitBounds(b.pad(.15));
+  }
+  updateTourButtons();updateProgress();
   if(!preservePosition){ $('planList').innerHTML='<li>Press I AM HERE to create a plan.</li>'; $('planNote').textContent=''; $('currentTitle').textContent='Not started'; $('currentMeta').textContent=''; $('photoWrap').classList.add('hidden'); $('detailText').innerHTML='<p>Choose a stop from the Map, or start the tour with I AM HERE.</p>'; $('homeTourTime').textContent='Not planned';$('homeTourStops').textContent='—';$('homeTourDistance').textContent='—';$('homeTourState').textContent='Ready'; }
 }
 $('citySelect').addEventListener('change',()=>{const u=new URL(location.href);u.searchParams.set('city',$('citySelect').value);location.href=u.toString();});

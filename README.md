@@ -1,8 +1,8 @@
-# CityGuides v0.7.1
+# CityGuides v0.7.2
 
 Mobile four-page adaptive walking guide for La Rochelle and Lewes.
 
-## v0.7.1
+## v0.7.2
 - Clear coloured map pins for all guide sites.
 - Map automatically invalidates its size and fits the visible route/sites when the Map page opens.
 - Each navigation button has its own muted colour and the corresponding page uses a related pale tint.
@@ -18,7 +18,7 @@ Mobile four-page adaptive walking guide for La Rochelle and Lewes.
 Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existing repository. Keep the existing `data/`, `status/`, icons, manifest and `reset.html`.
 
 
-## v0.7.1 change
+## v0.7.2 change
 - Preserves the v0.6.1 application structure, Leaflet/Valhalla pedestrian routing, GPS, four-page layout and audio controls.
 - Adds visited-stop tracking: selected stops become grey on the map after being visited; the progress bar is based on visited selected stops; the Map list marks visited stops in grey.
 - Next marks the stop just left as visited rather than incorrectly marking the destination as visited.
@@ -26,10 +26,20 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Only selected (blue) stops count toward Stop X of Y.
 
 
-## v0.7.1 stabilisation
+## v0.7.2 stabilisation
 - Preserves the existing v0.7.0/v0.6.1 application and route-planning logic.
 - Replaces fragile CSS site pins with inline-SVG Leaflet pins.
 - Adds direction arrows over the existing Valhalla pedestrian route.
 - Makes the Home/Map/Detail/Help colours more clearly distinguishable while keeping them muted.
 - Retains the selected navigation-button border.
 - Standardises Help headings and all Help explanatory text with a larger, consistent, readable treatment.
+
+
+## v0.7.2 runtime stabilisation
+- Correct initialisation order: state resets before marker status calculation.
+- All usable site pins render before GPS exists.
+- Marker collection uses Leaflet FeatureGroup for valid bounds.
+- Returning to Map preserves the user's zoom.
+- Existing route-selection/planner logic is retained.
+- Route arrows have corrected compass orientation.
+- Routing failure clears stale route graphics and reports the failure visibly.
