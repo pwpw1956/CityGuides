@@ -1,5 +1,5 @@
 {
-  "version": "0.7.2",
-  "build": "2026-08-26 19:05 UTC",
-  "release": "corrected map initialisation; pre-GPS pins; route failure reporting; stable map zoom"
+  "version": "0.7.3",
+  "build": "2026-08-26 20:25 UTC",
+  "release": "Lewes coordinate audit; numbered selected pins; current-stop highlight; visible re-plan result; UI refinements"
 }
