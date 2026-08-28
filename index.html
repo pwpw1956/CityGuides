@@ -1,7 +1,7 @@
 <!--
   CITY GUIDES
   Version: 0.7.7
-  Build: 2026-08-28 11:45 UTC
+  Build: 2026-08-28 14:25 UTC
   Release: access-point and linear-site routing; network-matrix planning; backtracking penalty; Detail-space refinements
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
@@ -90,7 +90,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.7 · Build 2026-08-28 11:45 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.7 · Build 2026-08-28 14:25 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -157,7 +157,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   </div>
   <div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.7.7 · Build 2026-08-28 11:45 UTC</p>
+    <p>CityGuides v0.7.7 · Build 2026-08-28 14:25 UTC</p>
     <p>This release adds practical pedestrian access points, area/linear-site routing, network-matrix selection/order and a backtracking penalty. The station routes to its public Station Road entrance, while Keere Street and Cliffe can be traversed as linear features. It also removes the unnecessary Guide badge and expands Detail text space.</p>
   </div>
 </section>
@@ -215,7 +215,7 @@ function updateDetailFollow(){
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
 const APP_VERSION='0.7.7';
-const BUILD='2026-08-28 11:45 UTC';
+const BUILD='2026-08-28 14:25 UTC';
 let currentCityId='';
 let currentCity=null;
 const storageKeyBase='cityguides-v0.7.7';
@@ -333,7 +333,10 @@ function routeLocationsForPlan(start,stops){
       }else{
         seq=forwardApproach<=reverseApproach?forward:reverse;
       }
-      for(const p of seq)out.push({lat:p.lat,lng:p.lng,kind:'via',siteId:st.id});
+      for(let k=0;k<seq.length;k++){
+        const p=seq[k];
+        out.push({lat:p.lat,lng:p.lng,kind:k===seq.length-1?'stop':'via',siteId:st.id});
+      }
       cur=seq[seq.length-1];
     }else{
       const a=routeAnchor(st);out.push({lat:a.lat,lng:a.lng,kind:'stop',siteId:st.id});cur=a;
@@ -501,7 +504,7 @@ function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central')
   }
   return best;
 }
-async function routeRequest(locations){
+async function routeRequestSingle(locations){
   const payload={locations:locations.map(x=>({lat:x.lat,lon:x.lng,type:x.kind==='via'?'via':'break'})),costing:'pedestrian',costing_options:{pedestrian:pedestrianCostingOptions()},units:'kilometers',directions_options:{units:'kilometers'}};
   try{
     const r=await fetch(VALHALLA,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-LaRochelle-v2'},body:JSON.stringify(payload)});
@@ -509,6 +512,36 @@ async function routeRequest(locations){
     const j=await r.json();
     return {shape:j.trip.legs.flatMap((leg,i)=>{const a=decodePolyline(leg.shape);return i?a.slice(1):a}),meters:j.trip.summary.length*1000,minutes:j.trip.summary.time/60};
   }catch(e){return null;}
+}
+
+async function routeRequest(locations){
+  // v0.7.7 corrective build: route the tour in bounded legs rather than
+  // sending every stop and every linear shaping point in one large request.
+  if(!Array.isArray(locations)||locations.length<2)return null;
+
+  // Split at real stops/endpoints. 'via' points stay with the leg they shape.
+  const legs=[];
+  let leg=[locations[0]];
+  for(let i=1;i<locations.length;i++){
+    leg.push(locations[i]);
+    const p=locations[i];
+    if(p.kind==='stop' || p.kind==='end' || i===locations.length-1){
+      if(leg.length>=2)legs.push(leg);
+      leg=[p];
+    }
+  }
+  if(!legs.length)legs.push(locations);
+
+  let shape=[],meters=0,minutes=0;
+  for(const legLocations of legs){
+    const r=await routeRequestSingle(legLocations);
+    if(!r)return null;
+    if(shape.length && r.shape.length)shape.push(...r.shape.slice(1));
+    else shape.push(...r.shape);
+    meters+=Number(r.meters||0);
+    minutes+=Number(r.minutes||0);
+  }
+  return {shape,meters,minutes};
 }
 function decodePolyline(str,precision=6){let idx=0,lat=0,lng=0,out=[];const factor=Math.pow(10,precision);while(idx<str.length){let shift=0,result=0,b;do{b=str.charCodeAt(idx++)-63;result|=(b&31)<<shift;shift+=5}while(b>=32);lat+=result&1?~(result>>1):(result>>1);shift=0;result=0;do{b=str.charCodeAt(idx++)-63;result|=(b&31)<<shift;shift+=5}while(b>=32);lng+=result&1?~(result>>1):(result>>1);out.push([lat/factor,lng/factor]);}return out;}
 function estimatePlan(start,budget,speed,mode){
@@ -745,7 +778,7 @@ async function drawRoute(){
     if(routeLine){routeLine.remove();routeLine=null;}
     if(routeArrowLayer)routeArrowLayer.clearLayers();
     if(finishMarker){finishMarker.remove();finishMarker=null;}
-    $('planNote').textContent='Pedestrian route could not be calculated. The selected stops are still shown as pins; try Re-plan again when routing is available.';
+    $('planNote').textContent='Selected sights are ready, but the pedestrian route could not be assembled. Try Re-plan again when routing is available.';
     $('setupStatus').textContent='Tour stops selected, but the pedestrian route service did not return a route.';
   }
 }

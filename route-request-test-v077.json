@@ -1,0 +1,42 @@
+{
+  "version": "0.7.7",
+  "build": "2026-08-28 14:25 UTC",
+  "acceptance_test": {
+    "selected_stops": [
+      "townhall",
+      "highstreet",
+      "castle",
+      "bullhouse",
+      "westgate",
+      "keere",
+      "anne",
+      "southover",
+      "priory",
+      "harveys",
+      "cliffehigh",
+      "cliffe"
+    ],
+    "linear_sights": [
+      "highstreet",
+      "keere",
+      "cliffehigh"
+    ],
+    "combined_route_location_count": 20,
+    "maximum_locations_per_segmented_request": 4,
+    "result": "PASS"
+  },
+  "static_checks": {
+    "version_same": true,
+    "timestamp_changed": true,
+    "single_request_preserved": true,
+    "segmented_request": true,
+    "linear_end_hard_stop": true,
+    "three_linear_features": true,
+    "cluster_logic_retained": true,
+    "encounter_logic_retained": true,
+    "finish_marker_retained": true,
+    "unique_guard_retained": true,
+    "javascript_syntax": true
+  },
+  "note": "Live Valhalla availability cannot be exercised from the offline file-generation runtime; the correction removes the single oversized multi-waypoint request and bounds each live request to one walking leg."
+}
