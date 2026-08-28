@@ -1,7 +1,7 @@
 <!--
   CITY GUIDES
-  Version: 0.7.5
-  Build: 2026-08-27 22:55 UTC
+  Version: 0.7.6
+  Build: 2026-08-28 02:45 UTC
   Release: access-point and linear-site routing; network-matrix planning; backtracking penalty; Detail-space refinements
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
@@ -88,7 +88,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.5 · Build 2026-08-27 22:55 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.6 · Build 2026-08-28 02:45 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -152,7 +152,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   </div>
   <div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.7.5 · Build 2026-08-27 22:55 UTC</p>
+    <p>CityGuides v0.7.6 · Build 2026-08-28 02:45 UTC</p>
     <p>This release adds practical pedestrian access points, area/linear-site routing, network-matrix selection/order and a backtracking penalty. The station routes to its public Station Road entrance, while Keere Street and Cliffe can be traversed as linear features. It also removes the unnecessary Guide badge and expands Detail text space.</p>
   </div>
 </section>
@@ -209,11 +209,11 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.7.5';
-const BUILD='2026-08-27 22:55 UTC';
+const APP_VERSION='0.7.6';
+const BUILD='2026-08-28 02:45 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.7.5';
+const storageKeyBase='cityguides-v0.7.6';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -341,6 +341,13 @@ function turnbackPenalty(prev,cur,next){
   const cos=Math.max(-1,Math.min(1,(vx*wx+vy*wy)/(a*b))),angle=Math.acos(cos)*180/Math.PI;
   return angle>145?3:angle>115?1.5:0;
 }
+function assertUniquePlan(stops,context='plan'){
+  const ids=stops.map(s=>s.id);
+  if(ids.length!==new Set(ids).size){
+    throw new Error('Planner integrity error: duplicate site IDs in '+context+': '+ids.join(', '));
+  }
+  return stops;
+}
 async function estimatePlanNetwork(start,budget,speed,mode){
   const reserve=Number($('buffer').value),remainStart=Math.max(0,budget-reserve);
   const candidates=tour.stops.filter(st=>available(st)&&!visited.has(st.id));
@@ -392,11 +399,13 @@ async function estimatePlanNetwork(start,budget,speed,mode){
     out.push(best.st);
     remain-=best.total;
     prevPoint=curPoint;curPoint=best.anchor;curIdx=best.idx;
-    unused.splice(unused.indexOf(best),1);
+    const chosenIndex=unused.findIndex(x=>x.idx===best.idx);
+    if(chosenIndex<0)throw new Error('Planner integrity error: selected candidate is not in the unused pool.');
+    unused.splice(chosenIndex,1);
     if(out.length>=12)break;
   }
 
-  const ordered=improveOrderNetwork(out,start,candidates,matrix,finishMode);
+  const ordered=assertUniquePlan(improveOrderNetwork(out,start,candidates,matrix,finishMode),'network plan');
   return {stops:ordered,candidates,matrix,finishMode};
 }
 function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central'){
@@ -537,6 +546,9 @@ function renderSiteMarkers(){
     markerById.set(st.id,m);
   });
 }
+function selectedUniqueIds(){
+  return [...new Set(plan.map(s=>s.id))];
+}
 function refreshMarkerStyles(){
   updateSiteStatuses();
   markerById.forEach((m,id)=>{
@@ -553,8 +565,9 @@ async function makePlan(reason='initial'){
   const network=await estimatePlanNetwork(position,budget,speed,mode);
   let proposed,plannerLabel;
   if(network){proposed=network.stops;plannerLabel='pedestrian-network planner';}
-  else{proposed=improveOrder(estimatePlan(position,budget,speed,mode),position,mode);plannerLabel='fallback distance planner';}
+  else{proposed=assertUniquePlan(improveOrder(estimatePlan(position,budget,speed,mode),position,mode),'fallback plan');plannerLabel='fallback distance planner';}
   if(!proposed.length){$('planNote').textContent='No suitable stop fits the remaining time from your current position.';refreshMarkerStyles();return;}
+  proposed=assertUniquePlan(proposed,'proposed plan');
   const oldIds=plan.map(x=>x.id),newIds=proposed.map(x=>x.id),changed=oldIds.join(',')!==newIds.join(',');
   const accept=async()=>{plan=proposed;await renderPlan();$('planNote').textContent=(changed?'Route re-planned':'Route checked — no change needed')+' using the '+plannerLabel+': '+plan.length+' stops · '+$('planTime').textContent+' · '+$('planDistance').textContent+'.';};
   if(changed&&plan.length&&reason!=='initial'){
@@ -565,6 +578,7 @@ async function makePlan(reason='initial'){
   lastPlanAt=Date.now();refreshMarkerStyles();
 }
 async function renderPlan(){
+  assertUniquePlan(plan,'render plan');
   $('planList').innerHTML='';
   plan.forEach((s,i)=>{
     const li=document.createElement('li');

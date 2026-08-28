@@ -1,0 +1,66 @@
+{
+  "release": "0.7.6",
+  "scenarios": 180,
+  "note": "Algorithmic regression simulations using the same candidate-removal rule and a network-like distance proxy.",
+  "checks": {
+    "all_180_scenarios_nonempty": true,
+    "all_180_unique": true,
+    "long_scenarios_select_many": true,
+    "varied_first_stop": true
+  },
+  "townhall_regression_plan": [
+    "highstreet",
+    "townhall",
+    "battle",
+    "castle",
+    "bullhouse",
+    "southover",
+    "priory",
+    "anne",
+    "keere",
+    "westgate",
+    "harveys",
+    "cliffe"
+  ],
+  "sample_results": {
+    "station_central_90": [
+      "station",
+      "southover",
+      "battle",
+      "castle",
+      "highstreet",
+      "townhall",
+      "bullhouse",
+      "westgate",
+      "keere",
+      "anne",
+      "priory"
+    ],
+    "west_offham_central_90": [
+      "battle",
+      "castle",
+      "highstreet",
+      "townhall",
+      "bullhouse",
+      "southover",
+      "priory",
+      "anne",
+      "keere",
+      "westgate"
+    ],
+    "cliffe_none_120": [
+      "cliffe",
+      "harveys",
+      "highstreet",
+      "townhall",
+      "battle",
+      "castle",
+      "bullhouse",
+      "southover",
+      "priory",
+      "anne",
+      "keere",
+      "westgate"
+    ]
+  }
+}
