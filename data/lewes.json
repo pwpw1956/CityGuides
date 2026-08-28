@@ -8,7 +8,18 @@
     "provider": "Valhalla",
     "endpoint": "https://valhalla1.openstreetmap.de/route",
     "costing": "pedestrian",
-    "note": "Public demonstration service; fair use applies. The app falls back to conservative estimates if routing is unavailable."
+    "note": "Public demonstration service; fair use applies. The app falls back to conservative estimates if routing is unavailable.",
+    "pedestrianPreferences": {
+      "walkway_factor": 0.78,
+      "sidewalk_factor": 0.78,
+      "alley_factor": 2.5,
+      "driveway_factor": 8.0,
+      "step_penalty": 180,
+      "private_access_penalty": 3600,
+      "gate_penalty": 300,
+      "max_hiking_difficulty": 0,
+      "use_hills": 0.2
+    }
   },
   "sourcesNote": "Lewes descriptions and current visitor information are based primarily on Visit Lewes and Sussex Past; opening information is deliberately treated as provisional and should be refreshed from official sources before a real visit.",
   "stops": [
@@ -476,5 +487,10 @@
     }
   ],
   "routingSchema": "1.0",
-  "routingNotes": "routeType point/area/linear; approach gives pedestrian access; linear traverse points must be passed through in order."
+  "routingNotes": "v0.7.5: pedestrian routing strongly favours mapped footways/sidewalks, penalises driveways/private access and steps, and uses route/end constraints. These preferences can only work where OpenStreetMap contains the relevant tags.",
+  "centralEnd": {
+    "label": "Central Lewes — Town Hall / High Street",
+    "lat": 50.87354,
+    "lng": 0.01037
+  }
 }
