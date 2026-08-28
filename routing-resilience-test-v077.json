@@ -1,0 +1,21 @@
+{
+  "version": "0.7.7",
+  "build": "2026-08-28 15:18 UTC",
+  "matrix_timeout_seconds": 10,
+  "final_route_timeout_seconds": 12,
+  "final_route_requests": 1,
+  "fallback": "Numbered pins remain usable; no artificial straight-line route.",
+  "checks": {
+    "release_077": true,
+    "build": true,
+    "one_final_route_request": true,
+    "segmentation_removed": true,
+    "matrix_10s": true,
+    "route_12s": true,
+    "pin_fallback": true,
+    "clusters_retained": true,
+    "encounter_retained": true,
+    "finish_retained": true,
+    "javascript_syntax": true
+  }
+}
