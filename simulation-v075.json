@@ -1,0 +1,489 @@
+{
+  "note": "Algorithmic multi-start simulation using a network-like distance proxy; not a substitute for live OSM/Valhalla path validation.",
+  "starts": {
+    "west_offham_edge": {
+      "lat": 50.878,
+      "lng": 0.0
+    },
+    "north_pells": {
+      "lat": 50.879,
+      "lng": 0.0095
+    },
+    "station": {
+      "lat": 50.87035,
+      "lng": 0.01125
+    },
+    "southover": {
+      "lat": 50.8688,
+      "lng": 0.0055
+    },
+    "cliffe_east": {
+      "lat": 50.8742,
+      "lng": 0.019
+    },
+    "castle_centre": {
+      "lat": 50.8729,
+      "lng": 0.0084
+    },
+    "south_east": {
+      "lat": 50.8675,
+      "lng": 0.017
+    },
+    "north_west": {
+      "lat": 50.8795,
+      "lng": 0.002
+    }
+  },
+  "results": {
+    "west_offham_edge": {
+      "central": {
+        "first": "battle",
+        "count": 10,
+        "remaining_proxy_min": 7.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      },
+      "none": {
+        "first": "battle",
+        "count": 10,
+        "remaining_proxy_min": 7.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      },
+      "first": {
+        "first": "battle",
+        "count": 10,
+        "remaining_proxy_min": 7.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      }
+    },
+    "north_pells": {
+      "central": {
+        "first": "pells",
+        "count": 11,
+        "remaining_proxy_min": 11.8,
+        "plan": [
+          "pells",
+          "highstreet",
+          "townhall",
+          "battle",
+          "castle",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      },
+      "none": {
+        "first": "pells",
+        "count": 12,
+        "remaining_proxy_min": 3.3,
+        "plan": [
+          "pells",
+          "highstreet",
+          "townhall",
+          "battle",
+          "castle",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate",
+          "station"
+        ]
+      },
+      "first": {
+        "first": "pells",
+        "count": 10,
+        "remaining_proxy_min": 14.8,
+        "plan": [
+          "pells",
+          "highstreet",
+          "townhall",
+          "battle",
+          "castle",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere"
+        ]
+      }
+    },
+    "station": {
+      "central": {
+        "first": "station",
+        "count": 11,
+        "remaining_proxy_min": 19.5,
+        "plan": [
+          "station",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere",
+          "anne",
+          "priory"
+        ]
+      },
+      "none": {
+        "first": "station",
+        "count": 12,
+        "remaining_proxy_min": 0.5,
+        "plan": [
+          "station",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere",
+          "anne",
+          "priory",
+          "harveys"
+        ]
+      },
+      "first": {
+        "first": "station",
+        "count": 11,
+        "remaining_proxy_min": 19.5,
+        "plan": [
+          "station",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere",
+          "anne",
+          "priory"
+        ]
+      }
+    },
+    "southover": {
+      "central": {
+        "first": "anne",
+        "count": 11,
+        "remaining_proxy_min": 15.6,
+        "plan": [
+          "anne",
+          "priory",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere",
+          "station"
+        ]
+      },
+      "none": {
+        "first": "anne",
+        "count": 12,
+        "remaining_proxy_min": 5.5,
+        "plan": [
+          "anne",
+          "priory",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere",
+          "harveys",
+          "cliffe"
+        ]
+      },
+      "first": {
+        "first": "anne",
+        "count": 11,
+        "remaining_proxy_min": 15.6,
+        "plan": [
+          "anne",
+          "priory",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere",
+          "station"
+        ]
+      }
+    },
+    "cliffe_east": {
+      "central": {
+        "first": "cliffe",
+        "count": 12,
+        "remaining_proxy_min": 11.3,
+        "plan": [
+          "cliffe",
+          "harveys",
+          "highstreet",
+          "townhall",
+          "battle",
+          "castle",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      },
+      "none": {
+        "first": "cliffe",
+        "count": 12,
+        "remaining_proxy_min": 11.3,
+        "plan": [
+          "cliffe",
+          "harveys",
+          "highstreet",
+          "townhall",
+          "battle",
+          "castle",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      },
+      "first": {
+        "first": "cliffe",
+        "count": 10,
+        "remaining_proxy_min": 22.3,
+        "plan": [
+          "cliffe",
+          "harveys",
+          "highstreet",
+          "townhall",
+          "battle",
+          "castle",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne"
+        ]
+      }
+    },
+    "castle_centre": {
+      "central": {
+        "first": "battle",
+        "count": 11,
+        "remaining_proxy_min": 12.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate",
+          "station"
+        ]
+      },
+      "none": {
+        "first": "battle",
+        "count": 12,
+        "remaining_proxy_min": 3.0,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate",
+          "harveys",
+          "cliffe"
+        ]
+      },
+      "first": {
+        "first": "battle",
+        "count": 11,
+        "remaining_proxy_min": 12.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate",
+          "station"
+        ]
+      }
+    },
+    "south_east": {
+      "central": {
+        "first": "priory",
+        "count": 10,
+        "remaining_proxy_min": 12.6,
+        "plan": [
+          "priory",
+          "anne",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere"
+        ]
+      },
+      "none": {
+        "first": "priory",
+        "count": 11,
+        "remaining_proxy_min": 3.8,
+        "plan": [
+          "priory",
+          "anne",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere",
+          "station"
+        ]
+      },
+      "first": {
+        "first": "priory",
+        "count": 10,
+        "remaining_proxy_min": 12.6,
+        "plan": [
+          "priory",
+          "anne",
+          "southover",
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "westgate",
+          "keere"
+        ]
+      }
+    },
+    "north_west": {
+      "central": {
+        "first": "battle",
+        "count": 10,
+        "remaining_proxy_min": 6.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      },
+      "none": {
+        "first": "battle",
+        "count": 10,
+        "remaining_proxy_min": 6.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      },
+      "first": {
+        "first": "battle",
+        "count": 10,
+        "remaining_proxy_min": 6.5,
+        "plan": [
+          "battle",
+          "castle",
+          "highstreet",
+          "townhall",
+          "bullhouse",
+          "southover",
+          "priory",
+          "anne",
+          "keere",
+          "westgate"
+        ]
+      }
+    }
+  },
+  "checks": {
+    "all_scenarios_plan": true,
+    "varied_first_stops": true,
+    "central_not_identical_all": true,
+    "finish_modes_affect_some_routes": true
+  }
+}

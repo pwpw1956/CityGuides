@@ -1,7 +1,7 @@
 <!--
   CITY GUIDES
-  Version: 0.7.4
-  Build: 2026-08-26 23:30 UTC
+  Version: 0.7.5
+  Build: 2026-08-27 22:55 UTC
   Release: access-point and linear-site routing; network-matrix planning; backtracking penalty; Detail-space refinements
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
@@ -75,6 +75,10 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
       <div><label for="buffer">Keep for return</label><select id="buffer"><option value="0">No reserved return time</option><option value="10" selected>10 minutes</option><option value="15">15 minutes</option><option value="20">20 minutes</option></select></div>
       <div><label for="mode">Planning style</label><select id="mode"><option value="history" selected>History first</option><option value="balanced">Balanced</option><option value="scenic">Scenic & relaxed</option></select></div>
     </div>
+    <div class="grid2" style="margin-top:9px">
+      <div><label for="finishMode">Finish tour</label><select id="finishMode"><option value="central" selected>Central area</option><option value="none">No fixed end</option><option value="first">Return to Sight 1</option></select></div>
+      <div><label for="autoReplan">Automatic re-planning</label><select id="autoReplan"><option value="off" selected>Off</option><option value="on">On — only for material delays</option></select></div>
+    </div>
     <div class="controls"><button id="refresh">Refresh today's information</button><button id="locate">Show my location</button></div>
     <p class="status" id="setupStatus">Press I AM HERE when you are at the place where you want the tour to begin. That place becomes Home.</p>
     <div class="row"><span class="badge" id="gpsBadge">GPS not started</span><span class="status" id="gpsStatus">No position yet.</span></div>
@@ -84,7 +88,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.4 · Build 2026-08-26 23:30 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.5 · Build 2026-08-27 22:55 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -93,6 +97,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <button class="legendButton" id="legendButton"><i class="dot blue"></i> Today's tour <span class="legendSep">•</span><i class="dot orange"></i> Not selected <span class="legendSep">•</span><i class="dot red"></i> Unavailable <span class="legendSep">•</span><i class="dot green"></i> Optional</button>
     <div class="progress"><div id="progressFill"></div></div><div class="progressText" id="progressText">No route planned</div>
     <div class="controls"><button id="prev">← Previous</button><button class="primary" id="next">Next →</button><button id="replan">Re-plan</button><button id="auto">Auto-follow: ON</button></div>
+    <div class="controls"><button id="showRoute">Show whole route</button><span class="small" id="autoReplanState">Auto-replan: OFF</span></div>
   </div>
   <div class="panel"><div class="routeSummary"><div class="statbox"><strong id="planTime">—</strong><br><span>planned tour time</span></div><div class="statbox"><strong id="planDistance">—</strong><br><span>walking distance</span></div></div><ol id="planList"><li>Press I AM HERE to create a plan.</li></ol><p class="small" id="planNote"></p></div>
 </section>
@@ -120,7 +125,10 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
       <li>Use <strong>Map</strong> for the pedestrian route and site pins. Selected stops are numbered in route order. Use <strong>Previous</strong> and <strong>Next</strong> to move the displayed guide section through today's selected stops.</li>
       <li>The pin whose description is currently displayed on <strong>Detail</strong> has a bright yellow outline. Moving Previous/Next moves that highlight.</li>
       <li>With <strong>Auto-follow ON</strong>, GPS can change the displayed guide section when you enter the defined zone for a site. With it OFF, you control the sections manually.</li>
-      <li><strong>Re-plan</strong> recalculates the proposed selection/order from your current position. The app now reports whether the plan changed or whether no change was needed.</li>
+      <li><strong>Re-plan</strong> recalculates the proposed selection/order from your current position. The app reports whether the plan changed or no change was needed.</li>
+      <li><strong>Finish tour</strong> can favour a central finish, have no fixed endpoint, or return to Sight 1. GET ME HOME remains a separate emergency/early-finish action.</li>
+      <li><strong>Automatic re-planning</strong> is OFF by default. If switched on, it is checked after a visited stop and only prompts when the estimated overrun is material — at least 15 minutes or about 15% of remaining time.</li>
+      <li>Pedestrian routing strongly favours mapped footways and sidewalks and penalises mapped steps, private access and driveways. It can only use barriers, steps and pavements that exist in the underlying OpenStreetMap data.</li>
       <li>Visited selected sites can be shown grey. <strong>GET ME HOME</strong> remains disabled until a tour is active and requires confirmation before routing back to the recorded Home position.</li>
     </ol>
   </div>
@@ -144,7 +152,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   </div>
   <div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.7.4 · Build 2026-08-26 23:30 UTC</p>
+    <p>CityGuides v0.7.5 · Build 2026-08-27 22:55 UTC</p>
     <p>This release adds practical pedestrian access points, area/linear-site routing, network-matrix selection/order and a backtracking penalty. The station routes to its public Station Road entrance, while Keere Street and Cliffe can be traversed as linear features. It also removes the unnecessary Guide badge and expands Detail text space.</p>
   </div>
 </section>
@@ -159,7 +167,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
 <script>
 let tour,statusData,map,routeLine,routeArrowLayer,userMarker,accuracyCircle,watchId=null,autoMode=true,speechRate=1.0;
 let markerLayer=null, markerById=new Map(), siteStatus=new Map();
-let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null;
+let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null, mapUserMoved=false, fitNextRoute=false, autoReplan=false, lastAutoReplanPromptAt=0;
 const $=id=>document.getElementById(id);
 const pages=['home','map','detail','help'];
 function showPage(name){
@@ -201,11 +209,11 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.7.4';
-const BUILD='2026-08-26 23:30 UTC';
+const APP_VERSION='0.7.5';
+const BUILD='2026-08-27 22:55 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.7.4';
+const storageKeyBase='cityguides-v0.7.5';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -250,6 +258,29 @@ function candidateScore(s,mode){
   if(visited.has(s.id))score-=1000;
   return score;
 }
+function pedestrianCostingOptions(){
+  const configured=tour?.routing?.pedestrianPreferences||{};
+  return {
+    walkway_factor:configured.walkway_factor??0.80,
+    sidewalk_factor:configured.sidewalk_factor??0.80,
+    alley_factor:configured.alley_factor??2.5,
+    driveway_factor:configured.driveway_factor??8.0,
+    step_penalty:configured.step_penalty??180,
+    private_access_penalty:configured.private_access_penalty??3600,
+    gate_penalty:configured.gate_penalty??300,
+    max_hiking_difficulty:configured.max_hiking_difficulty??0,
+    use_hills:configured.use_hills??0.20
+  };
+}
+function finishAnchor(mode,stops){
+  if(mode==='central' && tour?.centralEnd && Number.isFinite(tour.centralEnd.lat) && Number.isFinite(tour.centralEnd.lng))
+    return {lat:tour.centralEnd.lat,lng:tour.centralEnd.lng,kind:'finish',label:tour.centralEnd.label||'Central area'};
+  if(mode==='first' && stops?.length){
+    const a=routeAnchor(stops[0]);
+    return {lat:a.lat,lng:a.lng,kind:'finish',label:'Sight 1'};
+  }
+  return null;
+}
 function routeAnchor(stop){
   if(stop?.approach && Number.isFinite(stop.approach.lat) && Number.isFinite(stop.approach.lng))return stop.approach;
   if(Array.isArray(stop?.traverse) && stop.traverse.length){
@@ -263,7 +294,6 @@ function routeLocationsForPlan(start,stops){
   for(const st of stops){
     if(st.routeType==='linear' && Array.isArray(st.traverse) && st.traverse.length>=2){
       const a=st.traverse[0],z=st.traverse[st.traverse.length-1];
-      // Enter the linear feature from whichever end is more sensible from the previous route point.
       const seq=hav(cur,a)<=hav(cur,z)?st.traverse:st.traverse.slice().reverse();
       for(const p of seq)out.push({lat:p.lat,lng:p.lng,kind:'via',siteId:st.id});
       cur=seq[seq.length-1];
@@ -271,17 +301,31 @@ function routeLocationsForPlan(start,stops){
       const a=routeAnchor(st);out.push({lat:a.lat,lng:a.lng,kind:'stop',siteId:st.id});cur=a;
     }
   }
+  const end=finishAnchor($('finishMode')?.value||'central',stops);
+  if(end){
+    const last=out[out.length-1];
+    if(hav(last,end)>8)out.push(end);
+  }
   return out;
 }
-async function matrixRequest(start,stops){
+async function matrixRequest(start,stops,endAnchor=null){
   const anchors=[{lat:start.lat,lng:start.lng},...stops.map(routeAnchor)];
-  const payload={sources:anchors.map(p=>({lat:p.lat,lon:p.lng})),targets:anchors.map(p=>({lat:p.lat,lon:p.lng})),costing:'pedestrian',units:'kilometers',verbose:false};
+  let endIdx=null;
+  if(endAnchor){endIdx=anchors.length;anchors.push({lat:endAnchor.lat,lng:endAnchor.lng});}
+  const payload={
+    sources:anchors.map(p=>({lat:p.lat,lon:p.lng})),
+    targets:anchors.map(p=>({lat:p.lat,lon:p.lng})),
+    costing:'pedestrian',
+    costing_options:{pedestrian:pedestrianCostingOptions()},
+    units:'kilometers',
+    verbose:false
+  };
   try{
-    const r=await fetch(VALHALLA_MATRIX,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-v074'},body:JSON.stringify(payload)});
+    const r=await fetch(VALHALLA_MATRIX,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-v075'},body:JSON.stringify(payload)});
     if(!r.ok)throw new Error('Matrix service returned '+r.status);
     const j=await r.json(),m=j.sources_to_targets;
     if(!m?.durations||!m?.distances)return null;
-    return {durations:m.durations,distances:m.distances};
+    return {durations:m.durations,distances:m.distances,endIdx};
   }catch(e){return null;}
 }
 function matrixMinutes(matrix,i,j){
@@ -300,45 +344,92 @@ function turnbackPenalty(prev,cur,next){
 async function estimatePlanNetwork(start,budget,speed,mode){
   const reserve=Number($('buffer').value),remainStart=Math.max(0,budget-reserve);
   const candidates=tour.stops.filter(st=>available(st)&&!visited.has(st.id));
-  const matrix=await matrixRequest(start,candidates);
+  const finishMode=$('finishMode')?.value||'central';
+  const provisionalEnd=finishMode==='central'?finishAnchor('central',[]):null;
+  const matrix=await matrixRequest(start,candidates,provisionalEnd);
   if(!matrix)return null;
-  let remain=remainStart,curIdx=0,prevPoint=start,curPoint=start;
+
+  let remain=remainStart,curIdx=0,prevPoint=start,curPoint=start,firstIdx=null;
   const unused=candidates.map((st,i)=>({st,idx:i+1})),out=[];
+
+  const requiredFinishMinutes=(fromIdx)=>{
+    if(finishMode==='none')return 0;
+    if(finishMode==='central' && matrix.endIdx!==null)return matrixMinutes(matrix,fromIdx,matrix.endIdx);
+    if(finishMode==='first' && firstIdx!==null)return matrixMinutes(matrix,fromIdx,firstIdx);
+    return 0;
+  };
+
   while(unused.length){
     let best=null;
     for(const c of unused){
       const travel=matrixMinutes(matrix,curIdx,c.idx);if(!Number.isFinite(travel))continue;
-      const total=travel+c.st.listen;if(total>remain)continue;
+      const finishReserve=requiredFinishMinutes(c.idx);
+      const total=travel+c.st.listen;
+      if(total+finishReserve>remain)continue;
+
       const score=candidateScore(c.st,mode),anchor=routeAnchor(c.st);
       const reversal=turnbackPenalty(prevPoint,curPoint,anchor);
-      const efficiency=score/(1+total/9)-reversal;
+
+      // Connector reward: a sight is especially cheap when visiting it scarcely
+      // increases the network time to another worthwhile unvisited sight.
+      let connectorBonus=0;
+      for(const n of unused){
+        if(n===c)continue;
+        const direct=matrixMinutes(matrix,curIdx,n.idx);
+        const via=travel+matrixMinutes(matrix,c.idx,n.idx);
+        if(Number.isFinite(direct)&&Number.isFinite(via)){
+          const detour=Math.max(0,via-direct);
+          const importance=Math.max(0,candidateScore(n.st,mode))/50;
+          connectorBonus=Math.max(connectorBonus,Math.max(0,4-detour)*importance);
+        }
+      }
+
+      const efficiency=score/(1+total/9)-reversal+connectorBonus;
       if(!best||efficiency>best.efficiency)best={...c,travel,total,efficiency,anchor};
     }
     if(!best)break;
-    out.push(best.st);remain-=best.total;
+    if(firstIdx===null)firstIdx=best.idx;
+    out.push(best.st);
+    remain-=best.total;
     prevPoint=curPoint;curPoint=best.anchor;curIdx=best.idx;
-    unused.splice(unused.findIndex(x=>x.idx===best.idx),1);
+    unused.splice(unused.indexOf(best),1);
     if(out.length>=12)break;
   }
-  return {stops:improveOrderNetwork(out,start,candidates,matrix),matrix,candidates};
+
+  const ordered=improveOrderNetwork(out,start,candidates,matrix,finishMode);
+  return {stops:ordered,candidates,matrix,finishMode};
 }
-function improveOrderNetwork(stops,start,candidates,matrix){
-  if(stops.length<3)return stops;
+function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central'){
+  if(stops.length<2)return stops;
   const idx=new Map(candidates.map((s,i)=>[s.id,i+1]));
   const cost=arr=>{
     let t=0,from=0,prev=start,cur=start;
-    for(const st of arr){const to=idx.get(st.id),m=matrixMinutes(matrix,from,to);if(!Number.isFinite(m))return Infinity;t+=m+turnbackPenalty(prev,cur,routeAnchor(st));prev=cur;cur=routeAnchor(st);from=to;}
+    for(const st of arr){
+      const to=idx.get(st.id),m=matrixMinutes(matrix,from,to);
+      if(!Number.isFinite(m))return Infinity;
+      t+=m+1.8*turnbackPenalty(prev,cur,routeAnchor(st));
+      prev=cur;cur=routeAnchor(st);from=to;
+    }
+    if(finishMode==='central' && matrix.endIdx!==null){
+      const m=matrixMinutes(matrix,from,matrix.endIdx);if(Number.isFinite(m))t+=m;
+    }else if(finishMode==='first' && arr.length){
+      const first=idx.get(arr[0].id),m=matrixMinutes(matrix,from,first);if(Number.isFinite(m))t+=m;
+    }
     return t;
   };
   let best=stops.slice(),bestCost=cost(best),changed=true,guard=0;
-  while(changed&&guard++<4){changed=false;for(let i=0;i<best.length-1;i++)for(let j=i+1;j<best.length;j++){
-    const cand=best.slice();cand.splice(i,j-i+1,...cand.slice(i,j+1).reverse());const c=cost(cand);
-    if(c<bestCost-.35){best=cand;bestCost=c;changed=true;}
-  }}
+  while(changed&&guard++<7){
+    changed=false;
+    for(let i=0;i<best.length-1;i++)for(let j=i+1;j<best.length;j++){
+      const cand=best.slice();cand.splice(i,j-i+1,...cand.slice(i,j+1).reverse());
+      const c=cost(cand);
+      if(c<bestCost-.20){best=cand;bestCost=c;changed=true;}
+    }
+  }
   return best;
 }
 async function routeRequest(locations){
-  const payload={locations:locations.map(x=>({lat:x.lat,lon:x.lng,type:x.kind==='via'?'via':'break'})),costing:'pedestrian',units:'kilometers',directions_options:{units:'kilometers'}};
+  const payload={locations:locations.map(x=>({lat:x.lat,lon:x.lng,type:x.kind==='via'?'via':'break'})),costing:'pedestrian',costing_options:{pedestrian:pedestrianCostingOptions()},units:'kilometers',directions_options:{units:'kilometers'}};
   try{
     const r=await fetch(VALHALLA,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-LaRochelle-v2'},body:JSON.stringify(payload)});
     if(!r.ok)throw new Error('Routing service returned '+r.status);
@@ -485,7 +576,8 @@ async function renderPlan(){
   const speed=Number($('speed').value);let total=plan.reduce((a,s)=>a+s.listen,0),dist=0,cur=position;
   for(const s of plan){const a=routeAnchor(s);dist+=hav(cur,a);total+=walkMin(hav(cur,a),speed);cur=a;}
   $('planTime').textContent=fmtMin(total);$('planDistance').textContent=(dist/1000).toFixed(1)+' km';$('homeTourTime').textContent=fmtMin(total);$('homeTourStops').textContent=plan.length;$('homeTourDistance').textContent=(dist/1000).toFixed(1)+' km';$('homeTourState').textContent='Planned';
-  $('planNote').textContent=plan.length+' selected sites from '+tour.stops.length+' available candidates. The selection can change as you move, spend time, or encounter a closure.';
+  const finishLabel=$('finishMode').value==='central'?'central finish':$('finishMode').value==='first'?'return to Sight 1':'no fixed finish';
+  $('planNote').textContent=plan.length+' selected sites from '+tour.stops.length+' available candidates · '+finishLabel+'.';
   if(plan.length && currentIndex<0)showStop(plan[0]);
   await drawRoute();
 }
@@ -546,7 +638,10 @@ function drawRouteShape(shape){
       L.marker(b,{icon,interactive:false,zIndexOffset:500}).addTo(routeArrowLayer);
     }
   }
-  map.fitBounds(routeLine.getBounds().pad(.12));
+  if(fitNextRoute || !mapUserMoved){
+    map.fitBounds(routeLine.getBounds().pad(.12));
+    fitNextRoute=false;
+  }
 }
 function showStop(s){
   currentIndex=tour.stops.findIndex(x=>x.id===s.id);$('currentTitle').textContent=s.title; updateProgress();refreshMarkerStyles();
@@ -559,6 +654,21 @@ function showStop(s){
   $('availability').className=av.open?'good':'notice';
   resetAudio();
 }
+async function maybeAutoReplanAfterVisit(){
+  if(!autoReplan||!startedAt||!position||!plan.length)return;
+  if(Date.now()-lastAutoReplanPromptAt<10*60*1000)return;
+  const remainingStops=plan.filter(x=>!visited.has(x.id));
+  if(!remainingStops.length)return;
+  const elapsed=(Date.now()-startedAt)/60000;
+  const budgetRemaining=Math.max(0,Number($('budget').value)-elapsed-Number($('buffer').value));
+  const currentEstimate=currentRoute?Math.max(0,currentRoute.minutes+remainingStops.reduce((a,x)=>a+x.listen,0)):Infinity;
+  const over=currentEstimate-budgetRemaining;
+  const material=Math.max(15,budgetRemaining*.15);
+  if(over>material){
+    lastAutoReplanPromptAt=Date.now();
+    await makePlan('progress');
+  }
+}
 function markVisited(s){
   if(!s || !plan.some(x=>x.id===s.id))return;
   if(!visited.has(s.id)){
@@ -567,6 +677,7 @@ function markVisited(s){
     refreshMarkerStyles();
     renderPlan();
     updateProgress();
+    maybeAutoReplanAfterVisit();
   }
 }
 function applyPosition(pos){
@@ -597,7 +708,7 @@ function startGPS(){
     watchId=navigator.geolocation.watchPosition(async pos=>{
       applyPosition(pos);
       $('gpsBadge').textContent='GPS active';
-      if(plan.length && Date.now()-lastPlanAt>120000 && startedAt) await makePlan('progress');
+      // Automatic re-planning is event-driven, not timer-driven.
     },err=>{
       watchId=null;
       $('gpsBadge').textContent='GPS not started';
@@ -630,6 +741,19 @@ function requestCurrentPosition(){
   });
 }
 
+$('showRoute').onclick=()=>{
+  if(routeLine){
+    mapUserMoved=false;
+    map.fitBounds(routeLine.getBounds().pad(.12));
+  }else if(markerLayer&&markerLayer.getLayers().length){
+    mapUserMoved=false;
+    map.fitBounds(markerLayer.getBounds().pad(.15));
+  }
+};
+$('autoReplan').onchange=()=>{
+  autoReplan=$('autoReplan').value==='on';
+  $('autoReplanState').textContent='Auto-replan: '+(autoReplan?'ON':'OFF');
+};
 $('iamhere').onclick=async()=>{
   $('iamhere').disabled=true;
   $('setupStatus').textContent='Finding your location…';
@@ -639,6 +763,7 @@ $('iamhere').onclick=async()=>{
     home={...position};
     startedAt=Date.now();
     visited=new Set();
+    fitNextRoute=true;
     updateTourButtons();
     $('setupStatus').textContent='Home recorded at your current position. Building a route from here…';
     await makePlan('initial');
@@ -744,11 +869,15 @@ async function loadCity(cityId, preservePosition=false){
   if(map){map.remove();map=null;routeLine=null;routeArrowLayer=null;userMarker=null;accuracyCircle=null;markerLayer=null;markerById.clear();}
   map=L.map('map').setView([tour.stops[0].lat,tour.stops[0].lng],16);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+  mapUserMoved=false;fitNextRoute=false;
+  map.on('zoomstart dragstart',()=>{mapUserMoved=true;});
   renderSiteMarkers();
   if(markerLayer && markerLayer.getLayers().length){
     const b=markerLayer.getBounds();
     if(!b.isValid || b.isValid())map.fitBounds(b.pad(.15));
   }
+  autoReplan=$('autoReplan')?.value==='on';
+  if($('autoReplanState'))$('autoReplanState').textContent='Auto-replan: '+(autoReplan?'ON':'OFF');
   updateTourButtons();updateProgress();
   if(!preservePosition){ $('planList').innerHTML='<li>Press I AM HERE to create a plan.</li>'; $('planNote').textContent=''; $('currentTitle').textContent='Not started'; $('currentMeta').textContent=''; $('photoWrap').classList.add('hidden'); $('detailText').innerHTML='<p>Choose a stop from the Map, or start the tour with I AM HERE.</p>'; $('homeTourTime').textContent='Not planned';$('homeTourStops').textContent='—';$('homeTourDistance').textContent='—';$('homeTourState').textContent='Ready'; }
 }

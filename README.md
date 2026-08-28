@@ -1,8 +1,8 @@
-# CityGuides v0.7.4
+# CityGuides v0.7.5
 
 Mobile four-page adaptive walking guide for La Rochelle and Lewes.
 
-## v0.7.4
+## v0.7.5
 - Clear coloured map pins for all guide sites.
 - Map automatically invalidates its size and fits the visible route/sites when the Map page opens.
 - Each navigation button has its own muted colour and the corresponding page uses a related pale tint.
@@ -18,7 +18,7 @@ Mobile four-page adaptive walking guide for La Rochelle and Lewes.
 Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existing repository. Keep the existing `data/`, `status/`, icons, manifest and `reset.html`.
 
 
-## v0.7.4 change
+## v0.7.5 change
 - Preserves the v0.6.1 application structure, Leaflet/Valhalla pedestrian routing, GPS, four-page layout and audio controls.
 - Adds visited-stop tracking: selected stops become grey on the map after being visited; the progress bar is based on visited selected stops; the Map list marks visited stops in grey.
 - Next marks the stop just left as visited rather than incorrectly marking the destination as visited.
@@ -26,7 +26,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Only selected (blue) stops count toward Stop X of Y.
 
 
-## v0.7.4 stabilisation
+## v0.7.5 stabilisation
 - Preserves the existing v0.7.0/v0.6.1 application and route-planning logic.
 - Replaces fragile CSS site pins with inline-SVG Leaflet pins.
 - Adds direction arrows over the existing Valhalla pedestrian route.
@@ -35,7 +35,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Standardises Help headings and all Help explanatory text with a larger, consistent, readable treatment.
 
 
-## v0.7.4 runtime stabilisation
+## v0.7.5 runtime stabilisation
 - Correct initialisation order: state resets before marker status calculation.
 - All usable site pins render before GPS exists.
 - Marker collection uses Leaflet FeatureGroup for valid bounds.
@@ -45,7 +45,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Routing failure clears stale route graphics and reports the failure visibly.
 
 
-## v0.7.4 mapping-integrity release
+## v0.7.5 mapping-integrity release
 - Audits all 15 Lewes fixed-site coordinates against named/geotagged references.
 - Selected route pins are numbered; non-selected pins remain unnumbered.
 - The site currently shown on Detail gets a yellow outline without losing its semantic pin colour.
@@ -57,7 +57,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Route-selection intelligence itself is intentionally NOT redesigned here.
 
 
-## v0.7.4 route-planning release
+## v0.7.5 route-planning release
 - Adds routeType point/area/linear and separate pedestrian approach/traverse data.
 - Moves Lewes station routing/marker to the public Station Road approach instead of the internal railway-station node.
 - Forces linear sights such as Keere Street and Cliffe High Street through ordered traversal points.
@@ -65,3 +65,15 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Adds a mild reversal/backtracking penalty to route ordering.
 - Keeps I AM HERE as the route origin.
 - Removes the Detail 'Guide' badge and increases useful Detail text space.
+
+
+## v0.7.5 route-quality release
+- Adds explicit Finish tour modes: Central area (default), No fixed end, Return to Sight 1.
+- Keeps GET ME HOME separate from normal tour-ending logic.
+- Uses network look-ahead to reward useful connector sights and stronger reversal/backtracking penalties.
+- Applies the same pedestrian costing preferences to matrix and route requests.
+- Strongly favours mapped footways/sidewalks; penalises mapped steps, private access and driveways.
+- Auto-replan is OFF by default and no longer runs on a timer.
+- If enabled, automatic re-planning is considered only after a visit and only for a material overrun (>=15 min or >=15% remaining time).
+- Manual map pan/zoom is preserved; Show whole route explicitly restores the full route view.
+- I AM HERE still defines the route origin. Initial route fitting is deliberate once; later replans do not steal the user's zoom.

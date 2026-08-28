@@ -1,5 +1,5 @@
 {
-  "version": "0.7.4",
-  "build": "2026-08-26 23:30 UTC",
-  "release": "access-point/linear routing; network matrix planner; backtracking penalty; Detail-space refinements"
+  "version": "0.7.5",
+  "build": "2026-08-27 22:55 UTC",
+  "release": "route-quality refinement; end-of-tour modes; manual map zoom; Auto-replan OFF by default; multi-start simulation"
 }
