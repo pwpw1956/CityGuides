@@ -1,0 +1,29 @@
+{
+  "release": "0.7.7",
+  "static_checks": {
+    "one_document": true,
+    "version_077": true,
+    "unique_plan_guards": true,
+    "encounter_order": true,
+    "encounter_pass_cap": true,
+    "finish_marker": true,
+    "finish_none_supported": true,
+    "keere_preference": true,
+    "keere_detour_allowance": true,
+    "detour_cap": true,
+    "raw_then_scenic": true,
+    "route_quality_retained": true,
+    "auto_replan_off": true,
+    "manual_zoom": true,
+    "leaflet": true,
+    "valhalla": true,
+    "unique_dom_ids": true,
+    "javascript_syntax": true
+  },
+  "targeted_tests": {
+    "encounter_order_synthetic": "PASS \u2014 later-listed B is encountered before A",
+    "keere_downhill_allowance": "PASS",
+    "finish_endpoint_data": "PASS"
+  },
+  "note": "Detailed live street routing still depends on Valhalla/OpenStreetMap; tests verify application logic and invariants."
+}

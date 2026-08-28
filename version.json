@@ -1,5 +1,5 @@
 {
-  "version": "0.7.6",
-  "build": "2026-08-28 02:45 UTC",
-  "release": "planner integrity correction; unique-stop invariant; duplicate-plan guard; extended simulations"
+  "version": "0.7.7",
+  "build": "2026-08-28 11:45 UTC",
+  "release": "encounter-order correction; downhill linear preference; capped anti-backtracking detours; explicit finish marker"
 }

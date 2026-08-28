@@ -1,7 +1,7 @@
 <!--
   CITY GUIDES
-  Version: 0.7.6
-  Build: 2026-08-28 02:45 UTC
+  Version: 0.7.7
+  Build: 2026-08-28 11:45 UTC
   Release: access-point and linear-site routing; network-matrix planning; backtracking penalty; Detail-space refinements
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
@@ -31,6 +31,8 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .progress{height:8px;background:#dfe8eb;border-radius:99px;overflow:hidden;margin:8px 0 3px}.progress>div{height:100%;background:var(--map);width:0;transition:width .3s ease}.progressText{font-size:.75rem;color:var(--muted)}
 .cityGuideSitePin{background:transparent!important;border:0!important}
 .cityGuideSitePin svg{display:block;filter:drop-shadow(0 2px 2px #0005)}
+.finishMarker{background:transparent!important;border:0!important}
+.finishFlag{font-size:30px;line-height:30px;color:#20252a;text-shadow:0 0 2px #fff,0 0 4px #fff}
 .routeDirectionArrow{background:transparent!important;border:0!important;pointer-events:none}
 .routeDirectionArrow span{display:block;width:24px;height:24px;line-height:24px;text-align:center;font-size:21px;font-weight:900;color:#17384a;text-shadow:0 0 2px #fff,0 0 4px #fff}
 .mapPin{width:28px;height:36px;position:relative;filter:drop-shadow(0 1px 2px #0004)}.mapPin:before{content:"";position:absolute;left:3px;top:1px;width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--pin);transform:rotate(-45deg);border:2px solid #fff}.mapPin span{position:absolute;left:11px;top:9px;width:7px;height:7px;border-radius:50%;background:#fff;z-index:1}
@@ -88,7 +90,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.6 · Build 2026-08-28 02:45 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.7 · Build 2026-08-28 11:45 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -126,7 +128,9 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
       <li>The pin whose description is currently displayed on <strong>Detail</strong> has a bright yellow outline. Moving Previous/Next moves that highlight.</li>
       <li>With <strong>Auto-follow ON</strong>, GPS can change the displayed guide section when you enter the defined zone for a site. With it OFF, you control the sections manually.</li>
       <li><strong>Re-plan</strong> recalculates the proposed selection/order from your current position. The app reports whether the plan changed or no change was needed.</li>
-      <li><strong>Finish tour</strong> can favour a central finish, have no fixed endpoint, or return to Sight 1. GET ME HOME remains a separate emergency/early-finish action.</li>
+      <li><strong>Finish tour</strong> can favour a central finish, have no fixed endpoint, or return to Sight 1. A small finish flag shows the endpoint on the map. GET ME HOME remains a separate emergency/early-finish action.</li>
+      <li>After a detailed route is calculated, CityGuides checks the order in which the route actually encounters the selected sights. If it passes a later sight first, the numbering is corrected and the route is recalculated.</li>
+      <li>For linear sights, a city guide can state a preferred walking direction. Lewes currently prefers Keere Street downhill unless reaching the preferred end would add an unreasonable approach detour.</li>
       <li><strong>Automatic re-planning</strong> is OFF by default. If switched on, it is checked after a visited stop and only prompts when the estimated overrun is material — at least 15 minutes or about 15% of remaining time.</li>
       <li>Pedestrian routing strongly favours mapped footways and sidewalks and penalises mapped steps, private access and driveways. It can only use barriers, steps and pavements that exist in the underlying OpenStreetMap data.</li>
       <li>Visited selected sites can be shown grey. <strong>GET ME HOME</strong> remains disabled until a tour is active and requires confirmation before routing back to the recorded Home position.</li>
@@ -152,7 +156,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   </div>
   <div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.7.6 · Build 2026-08-28 02:45 UTC</p>
+    <p>CityGuides v0.7.7 · Build 2026-08-28 11:45 UTC</p>
     <p>This release adds practical pedestrian access points, area/linear-site routing, network-matrix selection/order and a backtracking penalty. The station routes to its public Station Road entrance, while Keere Street and Cliffe can be traversed as linear features. It also removes the unnecessary Guide badge and expands Detail text space.</p>
   </div>
 </section>
@@ -165,7 +169,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
 <dialog id="legendDialog"><div class="dialogBody"><h2>Map marker colours</h2><div class="keyRow"><i class="keyDot blue"></i><strong>Blue — Today's tour</strong><span>Selected for the current itinerary.</span></div><div class="keyRow"><i class="keyDot orange"></i><strong>Orange — Not selected</strong><span>Available, but left out because of time, priority or route efficiency.</span></div><div class="keyRow"><i class="keyDot red"></i><strong>Red — Unavailable</strong><span>Closed or otherwise unavailable at the time checked.</span></div><div class="keyRow"><i class="keyDot green"></i><strong>Green — Optional</strong><span>Doable if time permits, but not currently prioritised.</span></div><div class="keyRow"><i class="keyDot grey"></i><strong>Grey — Visited</strong><span>A selected stop already visited during this tour.</span></div><div class="controls"><button id="legendClose" class="primary">Close</button></div></div></dialog>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
-let tour,statusData,map,routeLine,routeArrowLayer,userMarker,accuracyCircle,watchId=null,autoMode=true,speechRate=1.0;
+let tour,statusData,map,routeLine,routeArrowLayer,finishMarker,userMarker,accuracyCircle,watchId=null,autoMode=true,speechRate=1.0;
 let markerLayer=null, markerById=new Map(), siteStatus=new Map();
 let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null, mapUserMoved=false, fitNextRoute=false, autoReplan=false, lastAutoReplanPromptAt=0;
 const $=id=>document.getElementById(id);
@@ -209,11 +213,11 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.7.6';
-const BUILD='2026-08-28 02:45 UTC';
+const APP_VERSION='0.7.7';
+const BUILD='2026-08-28 11:45 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.7.6';
+const storageKeyBase='cityguides-v0.7.7';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -293,8 +297,18 @@ function routeLocationsForPlan(start,stops){
   let cur={lat:start.lat,lng:start.lng};
   for(const st of stops){
     if(st.routeType==='linear' && Array.isArray(st.traverse) && st.traverse.length>=2){
-      const a=st.traverse[0],z=st.traverse[st.traverse.length-1];
-      const seq=hav(cur,a)<=hav(cur,z)?st.traverse:st.traverse.slice().reverse();
+      const forward=st.traverse,reverse=st.traverse.slice().reverse();
+      const forwardApproach=hav(cur,forward[0]),reverseApproach=hav(cur,reverse[0]);
+      let seq;
+      if(st.preferredTraverseDirection==='forward'){
+        const allowance=Number(st.preferredDirectionMaxExtraApproachMeters??250);
+        seq=forwardApproach<=reverseApproach+allowance?forward:(forwardApproach<=reverseApproach?forward:reverse);
+      }else if(st.preferredTraverseDirection==='reverse'){
+        const allowance=Number(st.preferredDirectionMaxExtraApproachMeters??250);
+        seq=reverseApproach<=forwardApproach+allowance?reverse:(reverseApproach<=forwardApproach?reverse:forward);
+      }else{
+        seq=forwardApproach<=reverseApproach?forward:reverse;
+      }
       for(const p of seq)out.push({lat:p.lat,lng:p.lng,kind:'via',siteId:st.id});
       cur=seq[seq.length-1];
     }else{
@@ -411,13 +425,12 @@ async function estimatePlanNetwork(start,budget,speed,mode){
 function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central'){
   if(stops.length<2)return stops;
   const idx=new Map(candidates.map((s,i)=>[s.id,i+1]));
-  const cost=arr=>{
-    let t=0,from=0,prev=start,cur=start;
+  const rawCost=arr=>{
+    let t=0,from=0;
     for(const st of arr){
       const to=idx.get(st.id),m=matrixMinutes(matrix,from,to);
       if(!Number.isFinite(m))return Infinity;
-      t+=m+1.8*turnbackPenalty(prev,cur,routeAnchor(st));
-      prev=cur;cur=routeAnchor(st);from=to;
+      t+=m;from=to;
     }
     if(finishMode==='central' && matrix.endIdx!==null){
       const m=matrixMinutes(matrix,from,matrix.endIdx);if(Number.isFinite(m))t+=m;
@@ -426,13 +439,39 @@ function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central')
     }
     return t;
   };
-  let best=stops.slice(),bestCost=cost(best),changed=true,guard=0;
+  const scenicCost=arr=>{
+    let t=rawCost(arr),prev=start,cur=start;
+    if(!Number.isFinite(t))return Infinity;
+    for(const st of arr){
+      t+=Math.min(3.0,1.35*turnbackPenalty(prev,cur,routeAnchor(st)));
+      prev=cur;cur=routeAnchor(st);
+    }
+    return t;
+  };
+
+  // First find a locally short order with no backtracking penalty.
+  let fastest=stops.slice(),fastCost=rawCost(fastest),changed=true,guard=0;
   while(changed&&guard++<7){
     changed=false;
+    for(let i=0;i<fastest.length-1;i++)for(let j=i+1;j<fastest.length;j++){
+      const cand=fastest.slice();cand.splice(i,j-i+1,...cand.slice(i,j+1).reverse());
+      const c=rawCost(cand);
+      if(c<fastCost-.20){fastest=cand;fastCost=c;changed=true;}
+    }
+  }
+
+  // Then allow a less repetitive order, but never at the cost of more than
+  // five extra walking minutes over the fastest order we found.
+  const MAX_SCENIC_DETOUR_MIN=5;
+  let best=fastest.slice(),bestCost=scenicCost(best),changed2=true,guard2=0;
+  while(changed2&&guard2++<7){
+    changed2=false;
     for(let i=0;i<best.length-1;i++)for(let j=i+1;j<best.length;j++){
       const cand=best.slice();cand.splice(i,j-i+1,...cand.slice(i,j+1).reverse());
-      const c=cost(cand);
-      if(c<bestCost-.20){best=cand;bestCost=c;changed=true;}
+      const raw=rawCost(cand);
+      if(raw>fastCost+MAX_SCENIC_DETOUR_MIN)continue;
+      const c=scenicCost(cand);
+      if(c<bestCost-.20){best=cand;bestCost=c;changed2=true;}
     }
   }
   return best;
@@ -595,10 +634,54 @@ async function renderPlan(){
   if(plan.length && currentIndex<0)showStop(plan[0]);
   await drawRoute();
 }
+function siteEncounterTargets(st){
+  if(st.routeType==='linear' && Array.isArray(st.traverse) && st.traverse.length)return st.traverse;
+  const a=routeAnchor(st);
+  return [a];
+}
+function firstEncounterIndex(shape,st){
+  if(!Array.isArray(shape)||!shape.length)return Infinity;
+  const targets=siteEncounterTargets(st);
+  const threshold=Math.min(32,Math.max(18,Number(st.radius)||22));
+  for(let i=0;i<shape.length;i++){
+    const p={lat:shape[i][0],lng:shape[i][1]};
+    for(const t of targets)if(hav(p,t)<=threshold)return i;
+  }
+  return Infinity;
+}
+function encounterOrderedPlan(shape,stops){
+  const tagged=stops.map((st,original)=>({st,original,encounter:firstEncounterIndex(shape,st)}));
+  const finite=tagged.filter(x=>Number.isFinite(x.encounter));
+  if(finite.length<2)return stops;
+  tagged.sort((a,b)=>{
+    if(Number.isFinite(a.encounter)&&Number.isFinite(b.encounter)){
+      if(a.encounter!==b.encounter)return a.encounter-b.encounter;
+      return a.original-b.original;
+    }
+    if(Number.isFinite(a.encounter))return -1;
+    if(Number.isFinite(b.encounter))return 1;
+    return a.original-b.original;
+  });
+  return tagged.map(x=>x.st);
+}
+function updateFinishMarker(){
+  if(finishMarker){finishMarker.remove();finishMarker=null;}
+  const mode=$('finishMode')?.value||'central';
+  const end=finishAnchor(mode,plan);
+  if(!end||!map)return;
+  const icon=L.divIcon({
+    className:'finishMarker',
+    html:'<div class="finishFlag">⚑</div>',
+    iconSize:[30,34],iconAnchor:[8,30],popupAnchor:[4,-28]
+  });
+  finishMarker=L.marker([end.lat,end.lng],{icon,title:'Tour finish',zIndexOffset:800}).addTo(map);
+  finishMarker.bindTooltip('Finish — '+(end.label||'tour endpoint'),{direction:'top'});
+}
 async function drawRoute(){
   if(!position||!plan.length){
     if(routeLine){routeLine.remove();routeLine=null;}
     if(routeArrowLayer)routeArrowLayer.clearLayers();
+    if(finishMarker){finishMarker.remove();finishMarker=null;}
     currentRoute=null;
     return;
   }
@@ -606,7 +689,20 @@ async function drawRoute(){
   $('planNote').textContent='Calculating pedestrian route…';
   const r=await routeRequest(pts);
   if(r){
-    currentRoute=r;drawRouteShape(r.shape);
+    // Second-stage common-sense correction: number selected sights in the
+    // order in which the detailed walking route actually reaches them.
+    const encountered=assertUniquePlan(encounterOrderedPlan(r.shape,plan),'encounter order');
+    const oldIds=plan.map(x=>x.id).join(','),newIds=encountered.map(x=>x.id).join(',');
+    window._encounterPass=window._encounterPass||0;
+    if(newIds!==oldIds && window._encounterPass<2){
+      window._encounterPass++;
+      plan=encountered;
+      await renderPlan();
+      return;
+    }
+    window._encounterPass=0;
+
+    currentRoute=r;drawRouteShape(r.shape);updateFinishMarker();
     let listen=plan.reduce((a,s)=>a+s.listen,0), total=r.minutes+listen;
     const elapsed=startedAt?((Date.now()-startedAt)/60000):0, remaining=Math.max(0,Number($('budget').value)-elapsed-Number($('buffer').value));
     if(total>remaining+1 && plan.length>1 && !window._routePruning){
@@ -623,6 +719,7 @@ async function drawRoute(){
     currentRoute=null;
     if(routeLine){routeLine.remove();routeLine=null;}
     if(routeArrowLayer)routeArrowLayer.clearLayers();
+    if(finishMarker){finishMarker.remove();finishMarker=null;}
     $('planNote').textContent='Pedestrian route could not be calculated. The selected stops are still shown as pins; try Re-plan again when routing is available.';
     $('setupStatus').textContent='Tour stops selected, but the pedestrian route service did not return a route.';
   }
@@ -764,6 +861,10 @@ $('showRoute').onclick=()=>{
     map.fitBounds(markerLayer.getBounds().pad(.15));
   }
 };
+$('finishMode').onchange=()=>{
+  updateFinishMarker();
+  $('planNote').textContent='Finish preference changed. Press Re-plan to optimise the route for the new endpoint.';
+};
 $('autoReplan').onchange=()=>{
   autoReplan=$('autoReplan').value==='on';
   $('autoReplanState').textContent='Auto-replan: '+(autoReplan?'ON':'OFF');
@@ -880,7 +981,7 @@ async function loadCity(cityId, preservePosition=false){
     if(saved?.home)home=saved.home;
     if(Array.isArray(saved?.visited))visited=new Set(saved.visited);
   }catch{}
-  if(map){map.remove();map=null;routeLine=null;routeArrowLayer=null;userMarker=null;accuracyCircle=null;markerLayer=null;markerById.clear();}
+  if(map){map.remove();map=null;routeLine=null;routeArrowLayer=null;finishMarker=null;userMarker=null;accuracyCircle=null;markerLayer=null;markerById.clear();}
   map=L.map('map').setView([tour.stops[0].lat,tour.stops[0].lng],16);
   L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
   mapUserMoved=false;fitNextRoute=false;
