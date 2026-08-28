@@ -131,6 +131,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
       <li><strong>Finish tour</strong> can favour a central finish, have no fixed endpoint, or return to Sight 1. A small finish flag shows the endpoint on the map. GET ME HOME remains a separate emergency/early-finish action.</li>
       <li>After a detailed route is calculated, CityGuides checks the order in which the route actually encounters the selected sights. If it passes a later sight first, the numbering is corrected and the route is recalculated.</li>
       <li>For linear sights, a city guide can state a preferred walking direction. Lewes currently prefers Keere Street downhill unless reaching the preferred end would add an unreasonable approach detour.</li>
+      <li>Some very close sights can share an internal <strong>cluster</strong>. They remain separate numbered sights, but once one cluster member is selected the others become cheaper to add, and the planner prefers to keep selected members together.</li>
       <li><strong>Automatic re-planning</strong> is OFF by default. If switched on, it is checked after a visited stop and only prompts when the estimated overrun is material — at least 15 minutes or about 15% of remaining time.</li>
       <li>Pedestrian routing strongly favours mapped footways and sidewalks and penalises mapped steps, private access and driveways. It can only use barriers, steps and pavements that exist in the underlying OpenStreetMap data.</li>
       <li>Visited selected sites can be shown grey. <strong>GET ME HOME</strong> remains disabled until a tour is active and requires confirmation before routing back to the recorded Home position.</li>
@@ -253,6 +254,29 @@ function liveStatusText(s){
   return o.note||null;
 }
 function available(s){return true;}
+function clusterDefinition(id){
+  return id && tour?.clusters ? tour.clusters[id]||null : null;
+}
+function clusterSelectionBonus(st,selected){
+  if(!st?.cluster)return 0;
+  const def=clusterDefinition(st.cluster);
+  if(!def)return 0;
+  return selected.some(x=>x.cluster===st.cluster) ? Number(def.selectionBonus||0) : 0;
+}
+function clusterSeparationPenalty(arr){
+  if(!tour?.clusters)return 0;
+  let penalty=0;
+  for(const [clusterId,def] of Object.entries(tour.clusters)){
+    if(!def?.preferConsecutive)continue;
+    const positions=[];
+    arr.forEach((st,i)=>{if(st.cluster===clusterId)positions.push(i);});
+    if(positions.length<2)continue;
+    const span=positions[positions.length-1]-positions[0]+1;
+    const gaps=Math.max(0,span-positions.length);
+    penalty+=gaps*Number(def.separationPenaltyMinutes||0);
+  }
+  return penalty;
+}
 function candidateScore(s,mode){
   let score=s.priority*10;
   if(mode==='history')score+=s.id==='townhall'||s.id==='chain'||s.id==='lanterne'||s.id==='clock'?8:0;
@@ -388,7 +412,7 @@ async function estimatePlanNetwork(start,budget,speed,mode){
       const total=travel+c.st.listen;
       if(total+finishReserve>remain)continue;
 
-      const score=candidateScore(c.st,mode),anchor=routeAnchor(c.st);
+      const score=candidateScore(c.st,mode)+clusterSelectionBonus(c.st,out),anchor=routeAnchor(c.st);
       const reversal=turnbackPenalty(prevPoint,curPoint,anchor);
 
       // Connector reward: a sight is especially cheap when visiting it scarcely
@@ -446,6 +470,7 @@ function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central')
       t+=Math.min(3.0,1.35*turnbackPenalty(prev,cur,routeAnchor(st)));
       prev=cur;cur=routeAnchor(st);
     }
+    t+=clusterSeparationPenalty(arr);
     return t;
   };
 
@@ -495,7 +520,7 @@ function estimatePlan(start,budget,speed,mode){
     for(const st of pool){
       const travel=walkMin(hav(cur,st),speed), total=travel+st.listen;
       if(total>remain)continue;
-      const score=candidateScore(st,mode);
+      const score=candidateScore(st,mode)+clusterSelectionBonus(st,out);
       // Strongly reward interest, but penalise long detours. The penalty increases
       // as the remaining time becomes scarce, producing useful short-tour behaviour.
       const efficiency=score/(1+total/9);
