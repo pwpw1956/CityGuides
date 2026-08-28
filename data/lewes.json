@@ -245,7 +245,10 @@
         "lat": 50.87143666666666,
         "lng": 0.00633
       },
-      "routeNote": "Traverse Keere Street from one end to the other; do not merely visit its midpoint."
+      "routeNote": "Traverse Keere Street from one end to the other; do not merely visit its midpoint.",
+      "preferredTraverseDirection": "forward",
+      "preferredTraverseReason": "Downhill from the High Street end towards Southover.",
+      "preferredDirectionMaxExtraApproachMeters": 250
     },
     {
       "id": "harveys",
