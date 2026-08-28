@@ -1,5 +1,5 @@
 {
-  "version": "0.7.7",
-  "build": "2026-08-28 11:45 UTC",
-  "release": "encounter-order correction; downhill linear preference; capped anti-backtracking detours; explicit finish marker"
+  "version": "0.7.8",
+  "build": "2026-08-28 18:04 UTC",
+  "release": "map integrity fixes; synchronized map/list selection; audio pause-resume repair; Home/Detail refinements; generalized selection model"
 }

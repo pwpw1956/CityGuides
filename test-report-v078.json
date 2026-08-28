@@ -1,0 +1,37 @@
+{
+  "version": "0.7.8",
+  "build": "2026-08-28 18:04 UTC",
+  "static_checks": {
+    "one_html_document": true,
+    "version_078": true,
+    "red_unavailable": true,
+    "linear_midpoint_encounter": true,
+    "no_marker_tooltip": true,
+    "map_selection": true,
+    "list_selection": true,
+    "forced_choices": true,
+    "selection_survives_replan": true,
+    "audio_no_resume_api": true,
+    "audio_resume_label": true,
+    "chequered_flag": true,
+    "detail_expanded": true,
+    "home_refined": true,
+    "cluster_logic_retained": true,
+    "routing_retained": true,
+    "fixed_nav_retained": true,
+    "unique_dom_ids": true,
+    "javascript_syntax": true
+  },
+  "data_checks": {
+    "lewes_revision": true,
+    "lewes_15": true,
+    "clusters": true,
+    "three_linear": true
+  },
+  "acceptance_notes": {
+    "red_site": "closed/red sights are filtered from planner candidate pools",
+    "manual_selection": "map popup and complete list use same toggle function",
+    "audio": "Pause cancels browser speech safely; Resume restarts current paragraph",
+    "route_numbering": "linear sight encounter is measured at route anchor/midpoint rather than first edge"
+  }
+}

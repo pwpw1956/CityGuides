@@ -1,8 +1,8 @@
-# CityGuides v0.7.7
+# CityGuides v0.7.8
 
 Mobile four-page adaptive walking guide for La Rochelle and Lewes.
 
-## v0.7.7
+## v0.7.8
 - Clear coloured map pins for all guide sites.
 - Map automatically invalidates its size and fits the visible route/sites when the Map page opens.
 - Each navigation button has its own muted colour and the corresponding page uses a related pale tint.
@@ -18,7 +18,7 @@ Mobile four-page adaptive walking guide for La Rochelle and Lewes.
 Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existing repository. Keep the existing `data/`, `status/`, icons, manifest and `reset.html`.
 
 
-## v0.7.7 change
+## v0.7.8 change
 - Preserves the v0.6.1 application structure, Leaflet/Valhalla pedestrian routing, GPS, four-page layout and audio controls.
 - Adds visited-stop tracking: selected stops become grey on the map after being visited; the progress bar is based on visited selected stops; the Map list marks visited stops in grey.
 - Next marks the stop just left as visited rather than incorrectly marking the destination as visited.
@@ -26,7 +26,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Only selected (blue) stops count toward Stop X of Y.
 
 
-## v0.7.7 stabilisation
+## v0.7.8 stabilisation
 - Preserves the existing v0.7.0/v0.6.1 application and route-planning logic.
 - Replaces fragile CSS site pins with inline-SVG Leaflet pins.
 - Adds direction arrows over the existing Valhalla pedestrian route.
@@ -35,7 +35,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Standardises Help headings and all Help explanatory text with a larger, consistent, readable treatment.
 
 
-## v0.7.7 runtime stabilisation
+## v0.7.8 runtime stabilisation
 - Correct initialisation order: state resets before marker status calculation.
 - All usable site pins render before GPS exists.
 - Marker collection uses Leaflet FeatureGroup for valid bounds.
@@ -45,7 +45,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Routing failure clears stale route graphics and reports the failure visibly.
 
 
-## v0.7.7 mapping-integrity release
+## v0.7.8 mapping-integrity release
 - Audits all 15 Lewes fixed-site coordinates against named/geotagged references.
 - Selected route pins are numbered; non-selected pins remain unnumbered.
 - The site currently shown on Detail gets a yellow outline without losing its semantic pin colour.
@@ -57,7 +57,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Route-selection intelligence itself is intentionally NOT redesigned here.
 
 
-## v0.7.7 route-planning release
+## v0.7.8 route-planning release
 - Adds routeType point/area/linear and separate pedestrian approach/traverse data.
 - Moves Lewes station routing/marker to the public Station Road approach instead of the internal railway-station node.
 - Forces linear sights such as Keere Street and Cliffe High Street through ordered traversal points.
@@ -67,7 +67,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Removes the Detail 'Guide' badge and increases useful Detail text space.
 
 
-## v0.7.7 route-quality release
+## v0.7.8 route-quality release
 - Adds explicit Finish tour modes: Central area (default), No fixed end, Return to Sight 1.
 - Keeps GET ME HOME separate from normal tour-ending logic.
 - Uses network look-ahead to reward useful connector sights and stronger reversal/backtracking penalties.
@@ -79,7 +79,7 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - I AM HERE still defines the route origin. Initial route fitting is deliberate once; later replans do not steal the user's zoom.
 
 
-## v0.7.7 planner integrity correction
+## v0.7.8 planner integrity correction
 - Fixes the v0.7.5 candidate-removal bug that could select the same sight repeatedly.
 - Candidate removal now uses the stable matrix/candidate index rather than JavaScript object identity.
 - Adds hard unique-site invariants to network planning, fallback planning, plan acceptance and rendering.
@@ -87,10 +87,24 @@ Replace only `index.html`, `version.json`, `sw.js` and `README.md` in the existi
 - Retains v0.7.5 route-quality, end-of-tour, map-zoom and Auto-replan changes.
 
 
-## v0.7.7 route-order refinement
+## v0.7.8 route-order refinement
 - After the detailed pedestrian route is returned, selected sights are rechecked against the route geometry and renumbered in first-encounter order.
 - At most two encounter-order correction passes are allowed, preventing reroute loops.
 - Keere Street carries a downhill preferred traversal direction, used unless reaching that end would add more than 250 m of approach.
 - Anti-backtracking optimisation is bounded: a less repetitive order may add at most 5 walking minutes over the locally fastest order found.
 - Central/Return-to-Sight-1 endings now display an explicit finish flag; No fixed end displays none.
 - v0.7.6 unique-stop integrity guards remain in place.
+
+
+## v0.7.8 — 2026-08-28 18:04 UTC
+- Fixes planner availability: red/closed sights are not eligible for selection.
+- For linear sights, route encounter numbering uses the meaningful route anchor/midpoint instead of the first edge of the street.
+- Removes the competing Leaflet tooltip so each pin has one consistent information/action popup.
+- Adds synchronized Add/Remove selection on map pins and the complete candidate list below the map.
+- Explicit user inclusions/exclusions survive Re-plan; explicit inclusions may exceed the original time target by user choice.
+- Manual selection changes are applied immediately to colours/numbers/list; one Re-plan then optimises the route.
+- Replaces unreliable browser speechSynthesis.pause()/resume() with a token-safe Pause/Resume state machine; Resume restarts the current paragraph.
+- Enlarges the useful Detail content area and slightly reduces audio-control height.
+- Darkens/refines the Home page treatment without removing controls.
+- Finish marker is now a red-and-white chequered flag.
+- Selection/cluster/point/area/linear logic remains data-driven and city-agnostic for future guides.
