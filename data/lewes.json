@@ -21,7 +21,7 @@
       "use_hills": 0.2
     }
   },
-  "sourcesNote": "Lewes descriptions and current visitor information are based primarily on Visit Lewes and Sussex Past; opening information is deliberately treated as provisional and should be refreshed from official sources before a real visit.",
+  "sourcesNote": "Lewes data re-engineered for walking-tour use: fixed buildings are separated from linear streets; Cliffe Bridge/River Ouse is a true point stop; Cliffe High Street is a linear walk; the Battle of Lewes story is attached to the Castle rather than a misleading standalone pin; nearby sights can share internal clusters.",
   "stops": [
     {
       "id": "castle",
@@ -34,7 +34,7 @@
       "required": false,
       "indoor": true,
       "steep": true,
-      "text": "Lewes Castle is the most obvious reminder that the town was reshaped after the Norman Conquest. William de Warenne built a motte-and-bailey castle here soon after 1066, and the site was developed over the following centuries. What you see today is unusual because the castle has two surviving mottes: the main keep mound and the Brack Mount, with the Barbican forming the later defensive entrance. The climb is steep, so for a gentle walking tour we treat the interior as optional. Even from below, the castle explains Lewes's geography: the Norman stronghold dominates the medieval town and commands the surrounding valley. If you do climb, the reward is a broad view over the town and the South Downs. The nearby Barbican House Museum adds archaeological context, but the outdoor viewpoint is enough to make the castle one of the tour's key stops.",
+      "text": "Lewes Castle is the most obvious reminder that the town was reshaped after the Norman Conquest. William de Warenne built a motte-and-bailey castle here soon after 1066, and the site was developed over the following centuries. What you see today is unusual because the castle has two surviving mottes: the main keep mound and the Brack Mount, with the Barbican forming the later defensive entrance. The climb is steep, so for a gentle walking tour we treat the interior as optional. Even from below, the castle explains Lewes's geography: the Norman stronghold dominates the medieval town and commands the surrounding valley. If you do climb, the reward is a broad view over the town and the South Downs. The nearby Barbican House Museum adds archaeological context, but the outdoor viewpoint is enough to make the castle one of the tour's key stops.\n\nThe castle is also the best compact place in the town-centre tour to introduce the Battle of Lewes of 1264. Simon de Montfort's victory over Henry III reshaped the political crisis of the period. The battlefield extends beyond the gentle central walking circuit, so CityGuides now treats this as part of the castle story rather than inventing a separate town-centre pin for a battlefield that is not actually at that pin.",
       "tip": "The castle climb is steep and includes stairs. Exterior viewing is much easier.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Castle%20Gate%20Lewes%20-%20geograph.org.uk%20-%203236886.jpg?width=1200",
       "credit": "Wikimedia Commons",
@@ -77,7 +77,8 @@
         "lat": 50.86895,
         "lng": 0.00392
       },
-      "routeNote": "Public/café-side approach is used rather than the centre of the house polygon."
+      "routeNote": "Public/café-side approach is used rather than the centre of the house polygon.",
+      "cluster": "southover-quarter"
     },
     {
       "id": "priory",
@@ -133,7 +134,8 @@
         "lat": 50.87057,
         "lng": 0.00827
       },
-      "routeNote": "Garden-side access point; wider GPS zone remains around the gardens."
+      "routeNote": "Garden-side access point; wider GPS zone remains around the gardens.",
+      "cluster": "southover-quarter"
     },
     {
       "id": "highstreet",
@@ -146,7 +148,7 @@
       "required": false,
       "indoor": false,
       "steep": false,
-      "text": "Lewes High Street is best understood as a landscape rather than a single building. The street follows the historic spine of the town, climbing gently between the medieval centre and the castle. Look at the mixture of timber framing, Georgian fronts, shop windows, inns and narrow side passages. Lewes's survival as a small county town has left an unusually rich concentration of older buildings. The street also demonstrates how history is still part of ordinary life: independent shops occupy buildings whose proportions and plots can be centuries old. From here, the castle rises above you and the routes towards Southover and the Priory lead downhill. This makes the High Street an excellent orientation zone. Rather than stopping at one exact doorway, take a few minutes to look in both directions and compare the changing scale and age of the buildings.",
+      "text": "Lewes High Street is best understood by walking along it rather than standing at one doorway. This selected section follows the historic spine through the upper town, where medieval plots, timber-framed buildings, Georgian fronts, inns and independent shops sit side by side. The Town Hall is a separate point stop; here the subject is the street itself and the way Lewes grew along this ridge above the lower town.",
       "tip": "Mostly level along the central section, though the street rises towards the castle.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Lewes%20High%20Street.jpg?width=1200",
       "credit": "Wikimedia Commons",
@@ -175,11 +177,12 @@
         "lat": 50.87357,
         "lng": 0.011366666666666666
       },
-      "routeNote": "Traverse a representative central section of the historic High Street."
+      "routeNote": "Traverse a representative central section of the historic High Street.",
+      "cluster": null
     },
     {
       "id": "townhall",
-      "title": "Lewes Town Hall and Market Square",
+      "title": "Lewes Town Hall",
       "lat": 50.87354,
       "lng": 0.01037,
       "radius": 55,
@@ -188,8 +191,8 @@
       "required": false,
       "indoor": false,
       "steep": false,
-      "text": "The Town Hall area is a useful place to pause because it connects Lewes's civic life with its commercial history. The town has long functioned as the administrative centre of the county and as a market town serving the surrounding villages. From the square, look at the layers around you: civic buildings, shops, older houses and routes leading towards the castle and the lower town. Lewes also has a long tradition of local independence, something that remains visible today in its strong independent shopping culture and even its own local currency, the Lewes Pound. This is not a stop where one building tells the whole story. Instead, it is a chance to understand Lewes as a living town whose historic centre still performs the same basic jobs it did in earlier centuries: meeting, trading, governing and passing through.",
-      "tip": "Level square; good place to orientate yourself and rest.",
+      "text": "Lewes Town Hall is the civic landmark of the upper High Street. The present building reflects Lewes's long role as an administrative and market centre. Pause here to look at the civic frontage and the surrounding historic street pattern. The wider story of the High Street is treated separately as a linear walking section, so this stop concentrates on the Town Hall itself and the town's tradition of local government.",
+      "tip": "Level stop on the High Street; useful orientation point.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Lewes%20Town%20Hall.jpg?width=1200",
       "credit": "Wikimedia Commons",
       "source": "https://www.visitlewes.co.uk/explore/lewes-town",
@@ -203,7 +206,8 @@
         "lat": 50.87354,
         "lng": 0.01037
       },
-      "routeNote": "Town Hall/Market Square frontage."
+      "routeNote": "Town Hall/Market Square frontage.",
+      "cluster": null
     },
     {
       "id": "keere",
@@ -248,11 +252,12 @@
       "routeNote": "Traverse Keere Street from one end to the other; do not merely visit its midpoint.",
       "preferredTraverseDirection": "forward",
       "preferredTraverseReason": "Downhill from the High Street end towards Southover.",
-      "preferredDirectionMaxExtraApproachMeters": 250
+      "preferredDirectionMaxExtraApproachMeters": 250,
+      "cluster": "westgate-quarter"
     },
     {
       "id": "harveys",
-      "title": "Harvey's Brewery and Cliffe High Street",
+      "title": "Harvey's Brewery",
       "lat": 50.87423,
       "lng": 0.01654,
       "radius": 55,
@@ -261,8 +266,8 @@
       "required": false,
       "indoor": false,
       "steep": false,
-      "text": "Harvey's Brewery is one of Lewes's most distinctive modern continuities. The brewery describes itself as the oldest independent brewery in Sussex, and the Harvey family has been associated with the business since 1790. The brewery stands beside the River Ouse in the Cliffe area, where the town's commercial life historically connected to river transport and trade. You cannot reproduce the experience of a working brewery simply by looking at the outside, but the buildings and the smell of brewing can make the history unusually immediate. Cliffe High Street itself is worth seeing as a separate part of Lewes: it has a strong independent character and a different feel from the more formal upper High Street. This is an especially good stop if you want the tour to include the town's continuing identity rather than only its medieval past.",
-      "tip": "Level. Brewery tours are separate; exterior and shop are enough for the walking guide.",
+      "text": "Harvey's Brewery is one of Lewes's strongest links between past and present. The Harvey family has been associated with brewing here since the eighteenth century, and the working brewery remains a defining feature of the town beside the River Ouse. This stop concentrates on the brewery buildings, the continuing craft of brewing and the commercial importance of the riverside. Cliffe High Street and the river crossing now have their own separate guide stops.",
+      "tip": "Level exterior stop; brewery tours and shop opening are separate.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Harvey%27s%20Brewery%2C%20Lewes.jpg?width=1200",
       "credit": "Wikimedia Commons",
       "source": "https://www.visitlewes.co.uk/things-to-do/harveys-brewery-p1095811",
@@ -276,49 +281,78 @@
         "lat": 50.87423,
         "lng": 0.01654
       },
-      "routeNote": "Brewery/Cliffe High Street frontage."
+      "routeNote": "Brewery/Cliffe High Street frontage.",
+      "cluster": "cliffe-riverside"
     },
     {
       "id": "cliffe",
-      "title": "Cliffe High Street and the Ouse",
-      "lat": 50.87416,
-      "lng": 0.01795,
-      "radius": 80,
+      "title": "Cliffe Bridge and the River Ouse",
+      "lat": 50.874129,
+      "lng": 0.016015,
+      "radius": 45,
       "listen": 2,
       "priority": 4,
       "required": false,
       "indoor": false,
       "steep": false,
-      "text": "Cliffe occupies the lower eastern side of Lewes beside the River Ouse. Historically this was an important commercial area, and the river helped connect Lewes with the wider Sussex economy. Today the area is one of the best places to experience the town's independent shops and everyday atmosphere. Look for the way the street falls towards the river and notice how different the architecture feels from the castle quarter. This is also a useful place to understand why Lewes developed where it did: the river, the crossing point and the defensible high ground all contributed to the town's importance. The app treats the whole area as a zone rather than asking you to stand at a single doorway, because the story makes more sense when you can see the street, river and hillside together.",
-      "tip": "Level and spacious by Lewes standards.",
+      "text": "This is the point where Cliffe High Street crosses the River Ouse. The bridge and river explain a great deal about Lewes: the crossing linked the upper town with Cliffe, while the river supported trade and transport. The present listed bridge occupies a historic crossing point. Pause where you can see both the river and the street, rather than treating the whole eastern end of Cliffe High Street as one vague zone.",
+      "tip": "Level bridge viewpoint with pavements; good place to pause and look both ways along the river.",
       "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Cliffe%20High%20Street%2C%20Lewes.jpg?width=1200",
       "credit": "Wikimedia Commons",
       "source": "https://www.visitlewes.co.uk/explore/lewes-town",
       "availability": {
         "type": "always"
       },
-      "coordChecked": "2026-08-26",
-      "coordSource": "Cliffe High Street — postcode/OpenStreetMap street reference",
+      "coordChecked": "2026-08-28",
+      "coordSource": "Historic England listing 1353014, NGR TQ41940 10228 converted to WGS84",
+      "routeType": "point",
+      "approach": {
+        "lat": 50.874129,
+        "lng": 0.016015
+      },
+      "routeNote": "Traverse the Cliffe High Street section towards the Ouse rather than touching a single point.",
+      "cluster": "cliffe-riverside"
+    },
+    {
+      "id": "cliffehigh",
+      "title": "Cliffe High Street",
+      "lat": 50.87417,
+      "lng": 0.01705,
+      "radius": 55,
+      "priority": 4,
+      "listen": 2,
+      "indoor": false,
+      "steep": false,
       "routeType": "linear",
+      "cluster": "cliffe-riverside",
+      "approach": {
+        "lat": 50.87417,
+        "lng": 0.01705
+      },
       "traverse": [
         {
-          "lat": 50.87414,
-          "lng": 0.0157
+          "lat": 50.87413,
+          "lng": 0.01618
         },
         {
-          "lat": 50.87419,
-          "lng": 0.01685
+          "lat": 50.87417,
+          "lng": 0.01705
         },
         {
-          "lat": 50.87416,
-          "lng": 0.01795
+          "lat": 50.87415,
+          "lng": 0.01815
         }
       ],
-      "approach": {
-        "lat": 50.874163333333335,
-        "lng": 0.016833333333333336
+      "text": "Cliffe High Street has a character of its own, distinct from the upper High Street. Walk this section to see a dense run of historic shopfronts, older houses and independent businesses. The route is deliberately linear: the interest lies in moving along the street, not in standing at one arbitrary pin. The bridge and River Ouse are treated as a separate point stop at the western end of this section.",
+      "tip": "Mostly level and pedestrian-friendly; walk the street rather than treating it as a single point.",
+      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Cliffe%20High%20Street%2C%20Lewes.jpg?width=1200",
+      "credit": "Wikimedia Commons",
+      "source": "Historic England Cliffe High Street listings and CityGuides route audit, 2026-08-28",
+      "availability": {
+        "type": "always"
       },
-      "routeNote": "Traverse the Cliffe High Street section towards the Ouse rather than touching a single point."
+      "coordChecked": "2026-08-28",
+      "coordSource": "Cliffe High Street linear segment aligned to bridge and listed-building street references"
     },
     {
       "id": "stannes",
@@ -374,7 +408,8 @@
         "lat": 50.87188,
         "lng": 0.00668
       },
-      "routeNote": "Bull House frontage on the public street."
+      "routeNote": "Bull House frontage on the public street.",
+      "cluster": "westgate-quarter"
     },
     {
       "id": "westgate",
@@ -402,7 +437,8 @@
         "lat": 50.8718,
         "lng": 0.00677
       },
-      "routeNote": "Historic Westgate/chapel street frontage."
+      "routeNote": "Historic Westgate/chapel street frontage.",
+      "cluster": "westgate-quarter"
     },
     {
       "id": "pells",
@@ -459,34 +495,6 @@
         "lng": 0.011254
       },
       "routeNote": "Station Road public entrance/forecourt; avoids routing onto platforms behind the ticket barrier."
-    },
-    {
-      "id": "battle",
-      "title": "Battle of Lewes — the 1264 story",
-      "lat": 50.87287,
-      "lng": 0.00765,
-      "radius": 90,
-      "listen": 3,
-      "priority": 5,
-      "required": false,
-      "indoor": false,
-      "steep": false,
-      "text": "Lewes is unusually important in the history of medieval constitutional conflict because of the Battle of Lewes on 14 May 1264. Simon de Montfort and his rebel barons defeated the forces of King Henry III and Prince Edward. The victory led to the Mise of Lewes, an attempt to force the king to accept constraints on royal government, and the episode is often remembered in Lewes as part of the long development of parliamentary government. The battlefield itself lies beyond the compact centre, so this guide uses a broad story zone rather than pretending that one modern street corner is the battlefield. The castle and priory provide the strongest physical links to the event: the castle was the dominant stronghold, while the priory became the place where Henry III ultimately surrendered. If your time is short, hearing this story at either site is more useful than making a special detour.",
-      "tip": "Use as a story zone near the historic centre; the full battlefield lies outside the gentle town circuit.",
-      "image": "https://commons.wikimedia.org/wiki/Special:FilePath/Lewes%20Castle%20from%20the%20south.jpg?width=1200",
-      "credit": "Wikimedia Commons",
-      "source": "https://www.visitlewes.co.uk/things-to-do/sport-and-leisure",
-      "availability": {
-        "type": "always"
-      },
-      "coordChecked": "2026-08-26",
-      "coordSource": "Battle of Lewes interpretation marker at castle — geotagged historical marker",
-      "routeType": "area",
-      "approach": {
-        "lat": 50.87287,
-        "lng": 0.00765
-      },
-      "routeNote": "Interpretation/story zone near the castle rather than the full battlefield."
     }
   ],
   "routingSchema": "1.0",
@@ -495,5 +503,29 @@
     "label": "Central Lewes — Town Hall / High Street",
     "lat": 50.87354,
     "lng": 0.01037
-  }
+  },
+  "clusters": {
+    "westgate-quarter": {
+      "label": "Westgate quarter",
+      "preferConsecutive": true,
+      "selectionBonus": 12,
+      "separationPenaltyMinutes": 4,
+      "maxGapMeters": 140
+    },
+    "cliffe-riverside": {
+      "label": "Cliffe riverside",
+      "preferConsecutive": true,
+      "selectionBonus": 11,
+      "separationPenaltyMinutes": 4,
+      "maxGapMeters": 180
+    },
+    "southover-quarter": {
+      "label": "Southover quarter",
+      "preferConsecutive": true,
+      "selectionBonus": 7,
+      "separationPenaltyMinutes": 2.5,
+      "maxGapMeters": 260
+    }
+  },
+  "dataRevision": "2026-08-28-cluster-and-sight-audit"
 }
