@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES
-  Version: 0.7.8
-  Build: 2026-08-28 18:04 UTC
-  Release: map integrity fixes; synchronized map/list selection; audio pause-resume repair; Home/Detail refinements; generalized selection model
+  Version: 0.7.9
+  Build: 2026-08-29 20:45 UTC
+  Release: persistent repeatable map-pin popups; synchronized popup/list selection; paragraph-resume test
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
 :root{
@@ -90,7 +90,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.8 · Build 2026-08-28 18:04 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.8 · Build 2026-08-29 20:45 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -159,8 +159,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   </div>
   <div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.7.8 · Build 2026-08-28 18:04 UTC</p>
-    <p>This release adds practical pedestrian access points, area/linear-site routing, network-matrix selection/order and a backtracking penalty. The station routes to its public Station Road entrance, while Keere Street and Cliffe can be traversed as linear features. It also removes the unnecessary Guide badge and expands Detail text space.</p>
+    <p>CityGuides v0.7.9 · Build 2026-08-29 20:45 UTC</p><p>This release gives every map pin one persistent, repeatable popup. Pin and list Add/Remove use the same selection function. Routing is otherwise unchanged.</p>
   </div>
 </section>
 </main>
@@ -216,11 +215,11 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.7.8';
-const BUILD='2026-08-28 18:04 UTC';
+const APP_VERSION='0.7.9';
+const BUILD='2026-08-29 20:45 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.7.8';
+const storageKeyBase='cityguides-v0.7.9';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -635,22 +634,29 @@ function markerRouteNumber(id){
 function markerIsCurrent(id){
   return currentIndex>=0 && tour.stops[currentIndex]?.id===id;
 }
+function markerPopupHtml(st){
+  const latest=siteStatus.get(st.id)||{label:'Available',reason:'Available for selection.'};
+  const chosen=plan.some(x=>x.id===st.id), canChoose=available(st);
+  const action=canChoose?'<button class="siteAction" data-site-toggle="'+st.id+'">'+(chosen?'Remove from today’s tour':'Select for today’s tour')+'</button>':'<button class="siteAction" disabled>Unavailable</button>';
+  return '<strong>'+st.title+'</strong><br><b>'+latest.label+'</b><br><span>'+latest.reason+'</span><div style="margin-top:7px">'+action+'</div>';
+}
+function wireMarkerPopup(m,st){
+  const btn=m.getPopup()?.getElement()?.querySelector('[data-site-toggle]');
+  if(btn)btn.onclick=(ev)=>{ev.preventDefault();ev.stopPropagation();toggleSiteSelection(st.id);m.setPopupContent(markerPopupHtml(st));setTimeout(()=>{m.openPopup();wireMarkerPopup(m,st);},0);};
+}
+function refreshOpenMarkerPopup(st){
+  const m=markerById.get(st.id);if(!m)return;m.setPopupContent(markerPopupHtml(st));
+  if(m.isPopupOpen())setTimeout(()=>wireMarkerPopup(m,st),0);
+}
 function renderSiteMarkers(){
   if(!markerLayer)markerLayer=L.featureGroup().addTo(map);
   markerLayer.clearLayers(); markerById.clear(); updateSiteStatuses();
   tour.stops.forEach(st=>{
     const info=siteStatus.get(st.id)||{state:'orange',label:'Not selected',reason:'Not currently selected.'};
     const m=L.marker([st.lat,st.lng],{icon:markerIcon(info.state,markerRouteNumber(st.id),markerIsCurrent(st.id)),alt:st.title,zIndexOffset:700}).addTo(markerLayer);
-    m.on('click',()=>{
-      showStop(st);
-      const latest=siteStatus.get(st.id)||info;
-      const chosen=plan.some(x=>x.id===st.id);
-      const canChoose=available(st);
-      const action=canChoose
-        ? '<button class="siteAction" onclick="toggleSiteSelection(\''+st.id+'\')">'+(chosen?'Remove from today’s tour':'Select for today’s tour')+'</button>'
-        : '<button class="siteAction" disabled>Unavailable</button>';
-      m.bindPopup('<strong>'+st.title+'</strong><br><b>'+latest.label+'</b><br><span>'+latest.reason+'</span><div style="margin-top:7px">'+action+'</div>').openPopup();
-    });
+    m.bindPopup(markerPopupHtml(st),{closeButton:true,autoClose:true,closeOnClick:false});
+    m.on('click',()=>{showStop(st);m.setPopupContent(markerPopupHtml(st));m.openPopup();setTimeout(()=>wireMarkerPopup(m,st),0);});
+    m.on('popupopen',()=>{m.setPopupContent(markerPopupHtml(st));setTimeout(()=>wireMarkerPopup(m,st),0);});
     markerById.set(st.id,m);
   });
 }
@@ -757,6 +763,7 @@ function toggleSiteSelection(id){
   }
   refreshMarkerStyles();
   renderCandidateList();
+  refreshOpenMarkerPopup(st);
   updateProgress();
   updateFinishMarker();
   $('planTime').textContent='Re-plan';

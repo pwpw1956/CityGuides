@@ -1,0 +1,16 @@
+{
+  "version": "0.7.9",
+  "build": "2026-08-29 20:45 UTC",
+  "checks": {
+    "version": true,
+    "persistent": true,
+    "repeat": true,
+    "shared": true,
+    "refresh": true,
+    "list": true,
+    "audio": true,
+    "route": true,
+    "paragraphs": true,
+    "javascript": true
+  }
+}

@@ -1,5 +1,5 @@
 {
-  "version": "0.7.8",
-  "build": "2026-08-28 18:04 UTC",
-  "release": "map integrity fixes; synchronized map/list selection; audio pause-resume repair; Home/Detail refinements; generalized selection model"
+  "version": "0.7.9",
+  "build": "2026-08-29 20:45 UTC",
+  "release": "persistent repeatable map-pin popups; synchronized popup/list selection; paragraph-resume test"
 }
