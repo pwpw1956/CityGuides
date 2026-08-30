@@ -1,5 +1,5 @@
 {
-  "version": "0.7.9",
-  "build": "2026-08-29 20:45 UTC",
-  "release": "persistent repeatable map-pin popups; synchronized popup/list selection; paragraph-resume test"
+  "version": "0.8.0",
+  "build": "2026-08-30 20:20 UTC",
+  "release": "Map/Detail space refinement; map-overlay legend; reverse route; Return to Home finish; compact detail facts; offset finish flag"
 }

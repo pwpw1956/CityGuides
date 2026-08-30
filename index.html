@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES
-  Version: 0.7.9
-  Build: 2026-08-29 20:45 UTC
-  Release: persistent repeatable map-pin popups; synchronized popup/list selection; paragraph-resume test
+  Version: 0.8.0
+  Build: 2026-08-30 20:20 UTC
+  Release: Map/Detail space refinement; map-overlay legend; reverse route; Return to Home finish; compact detail facts; offset finish flag
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
 :root{
@@ -19,7 +19,7 @@ main{max-width:900px;margin:0 auto;padding:10px 10px 14px}.page{display:none}.pa
 .panel{background:var(--paper);margin:0 0 10px;border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:0 2px 7px #19394a0b}
 .page.home .panel{background:linear-gradient(180deg,var(--home-pale),#f7fafc 48%,var(--paper));box-shadow:0 3px 9px #17384a12}
 .page.map .panel{background:linear-gradient(180deg,var(--map-pale),var(--paper) 46%)}
-.page.detail .panel{background:linear-gradient(180deg,var(--detail-pale),var(--paper) 42%);min-height:calc(100vh - 112px);display:flex;flex-direction:column;padding-bottom:8px}
+.page.detail .panel{background:linear-gradient(180deg,var(--detail-pale),var(--paper) 42%);min-height:calc(100vh - 92px);display:flex;flex-direction:column;padding-bottom:8px}
 .page.help .panel{background:linear-gradient(180deg,var(--help-pale),var(--paper) 46%)}
 h2{font-size:1.16rem;margin:2px 0 8px}h3{font-size:1rem;margin:4px 0 7px}.small{font-size:.78rem;color:var(--muted)}.status{font-size:.82rem;color:var(--muted)}
 label{font-weight:700;display:block;margin-bottom:4px;font-size:.9rem}select,input,button{font:inherit}select,input[type=number]{width:100%;padding:9px 10px;border:1px solid #b9c9cf;border-radius:9px;background:#fff;color:var(--ink);min-height:43px}
@@ -27,8 +27,8 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:9px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.badge{display:inline-block;padding:3px 8px;border-radius:999px;background:#e4eef1;color:#28596a;font-size:.72rem;font-weight:800}
 .setupHero{padding:8px 0 2px}.setupHero p{margin:4px 0}.startButtons{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:10px}.startButtons button{min-height:48px}.homeStatus{margin-top:9px;padding:8px 10px;border-radius:9px;background:#fff;border:1px solid var(--line);font-size:.8rem;color:var(--muted)}
 .statusCard{min-height:110px;display:flex;flex-direction:column;justify-content:center}.statusGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.statbox{background:#f3f7f8;border:1px solid var(--line);border-radius:10px;padding:8px}.statbox strong{font-size:1rem}.statbox span{font-size:.75rem;color:var(--muted)}
-#map{height:60vh;min-height:360px;max-height:610px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
-.progress{height:8px;background:#dfe8eb;border-radius:99px;overflow:hidden;margin:8px 0 3px}.progress>div{height:100%;background:var(--map);width:0;transition:width .3s ease}.progressText{font-size:.75rem;color:var(--muted)}
+.mapWrap{position:relative}#map{height:66vh;min-height:400px;max-height:690px;border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.progress{height:8px;background:#dfe8eb;border-radius:99px;overflow:hidden;margin:8px 0 3px}.progress>div{height:100%;background:var(--map);width:0;transition:width .3s ease}.progressText{font-size:.75rem;color:var(--muted)}.progressLine{display:flex;justify-content:space-between;align-items:center;gap:8px}.mapNavControls{margin-top:11px}.mapUtilityControls{margin-top:8px;margin-bottom:2px}
 .cityGuideSitePin{background:transparent!important;border:0!important}
 .cityGuideSitePin svg{display:block;filter:drop-shadow(0 2px 2px #0005)}
 .finishMarker{background:transparent!important;border:0!important}
@@ -36,11 +36,12 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .routeDirectionArrow{background:transparent!important;border:0!important;pointer-events:none}
 .routeDirectionArrow span{display:block;width:24px;height:24px;line-height:24px;text-align:center;font-size:21px;font-weight:900;color:#17384a;text-shadow:0 0 2px #fff,0 0 4px #fff}
 .mapPin{width:28px;height:36px;position:relative;filter:drop-shadow(0 1px 2px #0004)}.mapPin:before{content:"";position:absolute;left:3px;top:1px;width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--pin);transform:rotate(-45deg);border:2px solid #fff}.mapPin span{position:absolute;left:11px;top:9px;width:7px;height:7px;border-radius:50%;background:#fff;z-index:1}
-.legendButton{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:7px;padding:7px 8px;min-height:38px;font-size:.72rem;font-weight:700;background:#f5f8f9;border:1px solid var(--line)}
-.legendButton .dot{width:9px;height:9px}.legendSep{opacity:.45}
+.mapLegendButton{position:absolute;z-index:650;right:10px;top:10px;width:38px;height:38px;min-height:38px;padding:0;border-radius:8px;background:#fff;color:#2879c7;border:2px solid #9fb7c0;box-shadow:0 1px 5px #0003;font-size:22px;line-height:34px}
+.mapLegendButton:after{content:"?";position:absolute;right:3px;bottom:0;font-size:11px;color:#17384a;font-weight:900}
 .legend span{display:inline-flex;align-items:center;gap:5px}.dot{width:11px;height:11px;border-radius:50%;display:inline-block;border:1px solid #fff;box-shadow:0 0 0 1px #888}.blue{background:#2879c7}.orange{background:#d78321}.red{background:#ad4b4b}.green{background:#4e806e}.grey{background:#7d8588}
 #photoWrap{position:relative;margin-bottom:7px}.photoFrame{position:relative}.photoFrame img{display:block;width:100%;height:auto;max-height:30vh;min-height:120px;object-fit:cover;border-radius:11px;cursor:zoom-in}.photoClose{position:absolute;right:7px;top:7px;width:36px;min-height:36px;padding:0;border:0;border-radius:50%;background:#17384acc;color:#fff;font-size:1.15rem}.caption{font-size:.7rem;color:var(--muted);margin-top:3px}
-.detailHeading{display:flex;gap:8px;align-items:flex-start;flex:none}.detailTitle{margin:0}.detailMeta{font-size:.76rem;color:var(--muted);margin:2px 0 7px}.detailText{height:auto;min-height:290px;max-height:none;flex:1 1 380px;overflow-y:auto;padding:2px 5px 2px 1px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);scroll-behavior:smooth}.detailText p{margin:8px 0}.detailText p.speaking{background:#e7f1f3;border-radius:7px;padding:4px 6px}.audioRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:auto;padding-top:10px}.audioRow button{min-height:32px;padding:3px 8px}.audioRow2{display:grid;grid-template-columns:minmax(160px,45%) 1fr;gap:8px;margin-top:7px}.speedControl{display:grid;grid-template-columns:46px 1fr 46px;gap:5px;align-items:center}.speedControl button{min-height:32px;padding:3px 10px;font-size:1.1rem}.speedLabel{text-align:center;font-weight:800;font-size:1.02rem}.audioFollow{min-height:32px;padding:3px 8px}.follow{margin-top:7px}
+.detailHeading{display:flex;gap:8px;align-items:flex-start;flex:none}.detailTitle{margin:0}.detailMeta{font-size:.76rem;color:var(--muted);margin:2px 0 7px}.detailText{height:auto;min-height:330px;max-height:none;flex:1 1 430px;overflow-y:auto;padding:2px 5px 2px 1px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);scroll-behavior:smooth}.detailText p{margin:8px 0}.detailText p.speaking{background:#e7f1f3;border-radius:7px;padding:4px 6px}.audioRow{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px;margin-top:auto;padding-top:10px}.audioRow button{height:32px;min-height:32px;padding:2px 8px}.audioRow2{display:grid;grid-template-columns:minmax(160px,45%) 1fr;gap:8px;margin-top:7px}.speedControl{display:grid;grid-template-columns:46px 1fr 46px;gap:5px;align-items:center}.speedControl button{height:32px;min-height:32px;padding:2px 10px;font-size:1.1rem}.speedLabel{text-align:center;font-weight:800;font-size:1.02rem}.audioFollow{height:32px;min-height:32px;padding:2px 8px}.follow{margin-top:7px}
+.detailFacts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin:5px 0 3px}.compactFact{display:inline-flex;align-items:center;min-height:25px;padding:3px 7px!important;margin:0!important;border-radius:7px;font-size:.75rem}.detailFacts .small{border:1px solid var(--line);background:#f5f8f9;color:var(--muted)}
 .notice{background:#fff7e6;border:1px solid #ead3a2;padding:8px 10px;border-radius:9px;font-size:.8rem}.good{background:#edf6f1;border:1px solid #c0d9cd;padding:8px 10px;border-radius:9px;font-size:.8rem}.reason{margin-top:7px;padding:8px 10px;border-radius:9px;background:#f3f7f8;border:1px solid var(--line);font-size:.8rem}.hidden{display:none!important}.muted{opacity:.55}
 #planList{margin:8px 0 0;padding:0}.siteRow{display:grid;grid-template-columns:30px 1fr auto;gap:7px;align-items:center;padding:7px 4px;border-bottom:1px solid #e4ecef;font-size:.86rem}.siteRow.current{font-weight:800;background:#fff8d9;border-radius:8px}.siteRow.visited{color:#7d8588}.siteMiniPin{width:23px;height:23px;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:.69rem;font-weight:900;border:2px solid #fff;box-shadow:0 0 0 1px #9aabb1}.siteMiniPin.selected{background:#1976d2}.siteMiniPin.orange{background:#d78321}.siteMiniPin.green{background:#4e806e}.siteMiniPin.closed{background:#b84e4e}.siteMiniPin.grey{background:#7d8588}.siteNameButton{appearance:none;border:0;background:transparent;text-align:left;padding:1px 0;min-height:32px;font-weight:700;color:inherit}.siteAction{min-height:32px;padding:3px 8px;font-size:.74rem}.routeSummary{display:grid;grid-template-columns:1fr 1fr;gap:8px}.routeSummary .statbox{text-align:center}
 .bottomNav{position:fixed;z-index:1200;left:0;right:0;bottom:0;padding:7px max(8px,env(safe-area-inset-left)) max(7px,env(safe-area-inset-bottom));background:#f8fbfbf5;border-top:1px solid var(--line);box-shadow:0 -2px 8px #0001;backdrop-filter:blur(8px)}.navGrid{max-width:900px;margin:auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.navBtn{min-height:47px;padding:5px 3px;font-size:.73rem;color:#fff;border-color:transparent}.navBtn:nth-child(1){background:#416f98}.navBtn:nth-child(2){background:#268594}.navBtn:nth-child(3){background:#7061a2}.navBtn:nth-child(4){background:#4f8569}.navBtn span{display:block;font-size:1rem;line-height:1}.navBtn.active{box-shadow:inset 0 0 0 3px #fff8,0 2px 5px #0002;transform:translateY(-1px)}
@@ -53,7 +54,7 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 footer{font-size:.7rem;color:var(--muted);text-align:center;margin:10px 0}.helpList{padding-left:20px}.helpList li{margin:7px 0}.keyRow{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:.82rem}.keyDot{width:13px;height:13px;border-radius:50%;flex:none}.planItem.visited{color:#7d8588;text-decoration:none}.planItem.current{font-weight:800}
 dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 24px);box-shadow:0 10px 40px #0004}dialog::backdrop{background:#0007}.dialogBody{padding:17px}.dialogBody .controls{margin-top:12px}.lightbox img{max-width:100%;max-height:75vh;display:block;border-radius:9px}.lightbox{padding:0;background:#101c22;border:0}.lightbox .close{position:absolute;right:8px;top:8px;background:#fff;color:#17384a;border:0;border-radius:50%;min-width:40px;padding:0}
 @media(min-width:700px){body{font-size:18px}.controls{grid-template-columns:repeat(4,1fr)}#map{height:62vh}.detailText{min-height:340px}}
-@media(max-width:430px){.audioRow2{grid-template-columns:minmax(135px,46%) 1fr}.navBtn{font-size:.68rem}.navBtn span{font-size:.92rem}.grid2{gap:7px}}
+@media(max-width:430px){#map{height:64vh;min-height:390px}.audioRow2{grid-template-columns:minmax(135px,46%) 1fr}.navBtn{font-size:.68rem}.navBtn span{font-size:.92rem}.grid2{gap:7px}}
 </style></head><body>
 <header><div class="headerLine"><div class="brand">CityGuides</div><div class="pageName" id="pageLabel">Home</div><div class="pageContext" id="pageContext"></div></div></header>
 <main>
@@ -78,7 +79,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
       <div><label for="mode">Planning style</label><select id="mode"><option value="history" selected>History first</option><option value="balanced">Balanced</option><option value="scenic">Scenic & relaxed</option></select></div>
     </div>
     <div class="grid2" style="margin-top:9px">
-      <div><label for="finishMode">Finish tour</label><select id="finishMode"><option value="central" selected>Central area</option><option value="none">No fixed end</option><option value="first">Return to Sight 1</option></select></div>
+      <div><label for="finishMode">Finish tour</label><select id="finishMode"><option value="central" selected>Central area</option><option value="none">No fixed end</option><option value="first">Return to Sight 1</option><option value="home">Return to Home</option></select></div>
       <div><label for="autoReplan">Automatic re-planning</label><select id="autoReplan"><option value="off" selected>Off</option><option value="on">On — only for material delays</option></select></div>
     </div>
     <div class="controls"><button id="refresh">Refresh today's information</button><button id="locate">Show my location</button></div>
@@ -90,16 +91,16 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.8 · Build 2026-08-29 20:45 UTC</p></div>
+  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.8 · Build 2026-08-30 20:20 UTC</p></div>
 </section>
 
 <section class="page map" id="page-map">
   <div class="panel">
-    <div id="map"></div>
-    <button class="legendButton" id="legendButton"><i class="dot blue"></i> Today's tour <span class="legendSep">•</span><i class="dot orange"></i> Not selected <span class="legendSep">•</span><i class="dot red"></i> Unavailable <span class="legendSep">•</span><i class="dot green"></i> Optional</button>
-    <div class="progress"><div id="progressFill"></div></div><div class="progressText" id="progressText">No route planned</div>
-    <div class="controls"><button id="prev">← Previous</button><button class="primary" id="next">Next →</button><button id="replan">Re-plan</button><button id="auto">Auto-follow: ON</button></div>
-    <div class="controls"><button id="showRoute">Show whole route</button><span class="small" id="autoReplanState">Auto-replan: OFF</span></div>
+    <div class="mapWrap"><div id="map"></div><button class="mapLegendButton" id="legendButton" aria-label="Map pin colour key" title="Map pin colour key">●</button></div>
+    <div class="progress"><div id="progressFill"></div></div>
+    <div class="progressLine"><div class="progressText" id="progressText">No route planned</div><span class="small" id="autoReplanState">Auto-replan: OFF</span></div>
+    <div class="controls mapNavControls"><button id="prev">← Previous</button><button class="primary" id="next">Next →</button><button id="replan">Re-plan</button><button id="auto">Auto-follow: ON</button></div>
+    <div class="controls mapUtilityControls"><button id="showRoute">Show whole route</button><button id="reverseRoute">Reverse route</button></div>
   </div>
   <div class="panel"><div class="routeSummary"><div class="statbox"><strong id="planTime">—</strong><br><span>planned tour time</span></div><div class="statbox"><strong id="planDistance">—</strong><br><span>walking distance</span></div></div><div id="planList"><div class="small">Press I AM HERE to create a plan.</div></div><p class="small" id="planNote"></p></div>
 </section>
@@ -109,8 +110,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="detailHeading"><div><h2 class="detailTitle" id="currentTitle">Not started</h2><div class="detailMeta" id="currentMeta"></div></div></div>
     <div id="photoWrap" class="hidden"><div class="photoFrame"><img id="photo" alt=""><button class="photoClose" id="photoClose" aria-label="Close photograph">×</button></div><div class="caption" id="credit"></div></div>
     <div id="detailText" class="detailText" data-follow="1"><p>Choose a stop from the Map, or start the tour with I AM HERE.</p></div>
-    <p class="notice" id="availability"></p>
-    <p class="small" id="tip"></p>
+    <div class="detailFacts"><span class="compactFact notice" id="availability"></span><span class="compactFact small" id="tip"></span></div>
     <div class="audioRow"><button class="primary" id="speak">▶ Play</button><button id="pause">❚❚ Pause</button><button id="stop">■ Stop</button></div>
     <div class="audioRow2"><div class="speedControl"><button id="slower" aria-label="Slower">−</button><div class="speedLabel" id="speedLabel">1.0×</div><button id="faster" aria-label="Faster">+</button></div><button id="followAudio" class="audioFollow">Follow audio: ON</button></div>
     <div class="controls"><button id="install" class="hidden">Install guide</button></div>
@@ -128,9 +128,9 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
       <li>The pin whose description is currently displayed on <strong>Detail</strong> has a bright yellow outline. Moving Previous/Next moves that highlight.</li>
       <li>With <strong>Auto-follow ON</strong>, GPS can change the displayed guide section when you enter the defined zone for a site. With it OFF, you control the sections manually.</li>
       <li><strong>Re-plan</strong> recalculates the proposed selection/order from your current position. The app reports whether the plan changed or no change was needed.</li>
-      <li><strong>Finish tour</strong> can favour a central finish, have no fixed endpoint, or return to Sight 1. A small finish flag shows the endpoint on the map. GET ME HOME remains a separate emergency/early-finish action.</li>
+      <li><strong>Finish tour</strong> can favour a central finish, have no fixed endpoint, return to Sight 1, or <strong>Return to Home</strong>. Return to Home includes the actual final walking leg and automatically uses no separate return-time reserve. A chequered flag shows the endpoint.</li>
       <li>After a detailed route is calculated, CityGuides checks the order in which the route actually encounters the selected sights. If it passes a later sight first, the numbering is corrected and the route is recalculated.</li>
-      <li>For linear sights, a city guide can state a preferred walking direction. Lewes currently prefers Keere Street downhill unless reaching the preferred end would add an unreasonable approach detour.</li>
+      <li>For linear sights, a city guide can state a preferred walking direction. Lewes currently prefers Keere Street downhill unless reaching the preferred end would add an unreasonable approach detour.</li><li><strong>Reverse route</strong> lets you try the same selected sights in the opposite direction. This manual choice temporarily overrides normal preferred-direction logic for linear sights.</li>
       <li>Some very close sights can share an internal <strong>cluster</strong>. They remain separate numbered sights, but once one cluster member is selected the others become cheaper to add, and the planner prefers to keep selected members together.</li>
       <li>On the Map page, every candidate sight is shown both as a coloured pin and in the list below the map. <strong>Add/Remove</strong> works in either view; both views update immediately. Your explicit choices are retained when you press Re-plan.</li>
       <li>Red/unavailable sights cannot be added to today's tour. Blue sights are selected and numbered; green/orange sights remain available alternatives.</li>
@@ -159,7 +159,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   </div>
   <div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.7.9 · Build 2026-08-29 20:45 UTC</p><p>This release gives every map pin one persistent, repeatable popup. Pin and list Add/Remove use the same selection function. Routing is otherwise unchanged.</p>
+    <p>CityGuides v0.8.0 · Build 2026-08-30 20:20 UTC</p><p>This release concentrates on usable screen space and manual control: a compact map-overlay colour key, larger map/detail areas, compact Detail facts, Reverse route, Return to Home planning, and an offset chequered finish flag.</p>
   </div>
 </section>
 </main>
@@ -173,7 +173,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
 <script>
 let tour,statusData,map,routeLine,routeArrowLayer,finishMarker,userMarker,accuracyCircle,watchId=null,autoMode=true,speechRate=1.0;
 let markerLayer=null, markerById=new Map(), siteStatus=new Map();
-let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null, mapUserMoved=false, fitNextRoute=false, autoReplan=false, lastAutoReplanPromptAt=0, forcedInclude=new Set(), forcedExclude=new Set(), selectionDirty=false;
+let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null, mapUserMoved=false, fitNextRoute=false, autoReplan=false, lastAutoReplanPromptAt=0, forcedInclude=new Set(), forcedExclude=new Set(), selectionDirty=false, routeReversed=false, savedReturnBuffer='10';
 const $=id=>document.getElementById(id);
 const pages=['home','map','detail','help'];
 function showPage(name){
@@ -215,11 +215,11 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.7.9';
-const BUILD='2026-08-29 20:45 UTC';
+const APP_VERSION='0.8.0';
+const BUILD='2026-08-30 20:20 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.7.9';
+const storageKeyBase='cityguides-v0.8.0';
 
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
@@ -335,6 +335,8 @@ function finishAnchor(mode,stops){
     const a=routeAnchor(stops[0]);
     return {lat:a.lat,lng:a.lng,kind:'finish',label:'Sight 1'};
   }
+  if(mode==='home' && home && Number.isFinite(home.lat) && Number.isFinite(home.lng))
+    return {lat:home.lat,lng:home.lng,kind:'finish',label:'Home'};
   return null;
 }
 function routeAnchor(stop){
@@ -361,6 +363,7 @@ function routeLocationsForPlan(start,stops){
       }else{
         seq=forwardApproach<=reverseApproach?forward:reverse;
       }
+      if(routeReversed)seq=seq.slice().reverse();
       for(const p of seq)out.push({lat:p.lat,lng:p.lng,kind:'via',siteId:st.id});
       cur=seq[seq.length-1];
     }else{
@@ -424,7 +427,7 @@ async function estimatePlanNetwork(start,budget,speed,mode){
   const reserve=Number($('buffer').value),remainStart=Math.max(0,budget-reserve);
   const candidates=tour.stops.filter(st=>available(st)&&!visited.has(st.id)&&!forcedExclude.has(st.id));
   const finishMode=$('finishMode')?.value||'central';
-  const provisionalEnd=finishMode==='central'?finishAnchor('central',[]):null;
+  const provisionalEnd=(finishMode==='central'||finishMode==='home')?finishAnchor(finishMode,[]):null;
   const matrix=await matrixRequest(start,candidates,provisionalEnd);
   if(!matrix)return null;
 
@@ -433,7 +436,7 @@ async function estimatePlanNetwork(start,budget,speed,mode){
 
   const requiredFinishMinutes=(fromIdx)=>{
     if(finishMode==='none')return 0;
-    if(finishMode==='central' && matrix.endIdx!==null)return matrixMinutes(matrix,fromIdx,matrix.endIdx);
+    if((finishMode==='central'||finishMode==='home') && matrix.endIdx!==null)return matrixMinutes(matrix,fromIdx,matrix.endIdx);
     if(finishMode==='first' && firstIdx!==null)return matrixMinutes(matrix,fromIdx,firstIdx);
     return 0;
   };
@@ -490,7 +493,7 @@ function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central')
       if(!Number.isFinite(m))return Infinity;
       t+=m;from=to;
     }
-    if(finishMode==='central' && matrix.endIdx!==null){
+    if((finishMode==='central'||finishMode==='home') && matrix.endIdx!==null){
       const m=matrixMinutes(matrix,from,matrix.endIdx);if(Number.isFinite(m))t+=m;
     }else if(finishMode==='first' && arr.length){
       const first=idx.get(arr[0].id),m=matrixMinutes(matrix,from,first);if(Number.isFinite(m))t+=m;
@@ -689,6 +692,7 @@ async function makePlan(reason='initial'){
   }
   if(!proposed.length){$('planNote').textContent='No suitable stop fits the remaining time from your current position.';refreshMarkerStyles();return;}
   proposed=assertUniquePlan(proposed,'proposed plan');
+  if(routeReversed)proposed=proposed.slice().reverse();
   const oldIds=plan.map(x=>x.id),newIds=proposed.map(x=>x.id),changed=oldIds.join(',')!==newIds.join(',');
   const accept=async()=>{plan=proposed;selectionDirty=false;await renderPlan();$('planNote').textContent=(changed?'Route re-planned':'Route checked — no change needed')+' using the '+plannerLabel+': '+plan.length+' stops · '+$('planTime').textContent+' · '+$('planDistance').textContent+'.';};
   if(changed&&plan.length&&reason!=='initial'){
@@ -825,7 +829,7 @@ function updateFinishMarker(){
   const icon=L.divIcon({
     className:'finishMarker',
     html:'<div class="finishFlag"></div>',
-    iconSize:[30,34],iconAnchor:[8,30],popupAnchor:[4,-28]
+    iconSize:[30,34],iconAnchor:[-4,31],popupAnchor:[10,-28]
   });
   finishMarker=L.marker([end.lat,end.lng],{icon,title:'Tour finish',zIndexOffset:800}).addTo(map);
   finishMarker.bindTooltip('Finish — '+(end.label||'tour endpoint'),{direction:'top'});
@@ -844,10 +848,10 @@ async function drawRoute(){
   if(r){
     // Second-stage common-sense correction: number selected sights in the
     // order in which the detailed walking route actually reaches them.
-    const encountered=assertUniquePlan(encounterOrderedPlan(r.shape,plan),'encounter order');
+    const encountered=routeReversed?plan:assertUniquePlan(encounterOrderedPlan(r.shape,plan),'encounter order');
     const oldIds=plan.map(x=>x.id).join(','),newIds=encountered.map(x=>x.id).join(',');
     window._encounterPass=window._encounterPass||0;
-    if(newIds!==oldIds && window._encounterPass<2){
+    if(!routeReversed && newIds!==oldIds && window._encounterPass<2){
       window._encounterPass++;
       plan=encountered;
       await renderPlan();
@@ -910,12 +914,12 @@ function drawRouteShape(shape){
 function showStop(s){
   currentIndex=tour.stops.findIndex(x=>x.id===s.id);$('currentTitle').textContent=s.title; updateProgress();refreshMarkerStyles();renderCandidateList();
   $('currentMeta').textContent='Audio ~'+s.listen+' min • priority '+s.priority+'/5';
-  $('detailText').innerHTML=(s.text||'').split(/\n\s*\n/).map((p,i)=>'<p data-para="'+i+'">'+p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p>').join('');$('tip').textContent=s.tip;
+  $('detailText').innerHTML=(s.text||'').split(/\n\s*\n/).map((p,i)=>'<p data-para="'+i+'">'+p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p>').join('');$('tip').textContent=(s.tip||'').replace('Flat and short stop; exterior only','Flat · short · exterior').replace('Open-air / exterior stop','Exterior');
   $('photo').src=s.image;$('photo').alt=s.title;$('photo').classList.remove('hidden');$('photo').onerror=()=>{$('photo').classList.add('hidden');$('credit').textContent='Image unavailable; continue with the description.';};
   $('photoWrap').classList.remove('hidden');
   $('credit').textContent=s.credit+' · source: '+s.source;
-  const av=openingText(s),live=liveStatusText(s);$('availability').textContent=(live?live+' — ':'')+av.label;
-  $('availability').className=av.open?'good':'notice';
+  const av=openingText(s),live=liveStatusText(s);let avText=(live?live+' — ':'')+av.label;avText=avText.replace('Open-air / exterior stop','Exterior');$('availability').textContent=avText;
+  $('availability').className='compactFact '+(av.open?'good':'notice');
   resetAudio();
 }
 async function maybeAutoReplanAfterVisit(){
@@ -1005,6 +1009,15 @@ function requestCurrentPosition(){
   });
 }
 
+$('reverseRoute').onclick=async()=>{
+  if(!plan.length)return;
+  routeReversed=!routeReversed;
+  plan=plan.slice().reverse();
+  fitNextRoute=true;
+  $('reverseRoute').textContent=routeReversed?'Restore direction':'Reverse route';
+  $('planNote').textContent=routeReversed?'Route direction reversed by you. Recalculating…':'Original route direction restored. Recalculating…';
+  await renderPlan();
+};
 $('showRoute').onclick=()=>{
   if(routeLine){
     mapUserMoved=false;
@@ -1015,8 +1028,16 @@ $('showRoute').onclick=()=>{
   }
 };
 $('finishMode').onchange=()=>{
+  const homeFinish=$('finishMode').value==='home';
+  if(homeFinish){
+    if(!$('buffer').disabled)savedReturnBuffer=$('buffer').value;
+    $('buffer').value='0';$('buffer').disabled=true;
+  }else{
+    $('buffer').disabled=false;
+    if($('buffer').value==='0' && savedReturnBuffer)$('buffer').value=savedReturnBuffer;
+  }
   updateFinishMarker();
-  $('planNote').textContent='Finish preference changed. Press Re-plan to optimise the route for the new endpoint.';
+  $('planNote').textContent=homeFinish?'Return to Home selected — the final leg back to Home is included in planning; no separate return reserve is used.':'Finish preference changed. Press Re-plan to optimise the route for the new endpoint.';
 };
 $('autoReplan').onchange=()=>{
   autoReplan=$('autoReplan').value==='on';
@@ -1031,7 +1052,7 @@ $('iamhere').onclick=async()=>{
     home={...position};
     startedAt=Date.now();
     visited=new Set();
-    forcedInclude=new Set();forcedExclude=new Set();selectionDirty=false;
+    forcedInclude=new Set();forcedExclude=new Set();selectionDirty=false;routeReversed=false;$('reverseRoute').textContent='Reverse route';
     fitNextRoute=true;
     updateTourButtons();
     $('setupStatus').textContent='Home recorded at your current position. Building a route from here…';
@@ -1151,7 +1172,7 @@ async function loadCity(cityId, preservePosition=false){
   $('homeCityLabel').textContent=tour.city;
   $('pageLabel').textContent='Home';
   $('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';
-  currentIndex=-1;plan=[];visited=new Set();forcedInclude=new Set();forcedExclude=new Set();selectionDirty=false;home=null;startedAt=null;position=null;lastPlanAt=0;currentRoute=null;
+  currentIndex=-1;plan=[];visited=new Set();forcedInclude=new Set();forcedExclude=new Set();selectionDirty=false;routeReversed=false;home=null;startedAt=null;position=null;lastPlanAt=0;currentRoute=null;
   document.body.classList.remove('started');
   const key=storageKeyBase+'-'+currentCityId;
   try{

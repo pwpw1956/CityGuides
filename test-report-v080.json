@@ -1,0 +1,28 @@
+{
+  "version": "0.8.0",
+  "build": "2026-08-30 20:20 UTC",
+  "checks": {
+    "version": true,
+    "legend_overlay": true,
+    "wide_legend_removed": true,
+    "map_larger": true,
+    "auto_status_line": true,
+    "reverse_button": true,
+    "return_home_option": true,
+    "home_finish_anchor": true,
+    "home_matrix_end": true,
+    "buffer_zero_home": true,
+    "finish_offset": true,
+    "compact_detail": true,
+    "audio_same_height": true,
+    "audio_retained": true,
+    "popup_retained": true,
+    "routing_one_request": true,
+    "javascript_syntax": true
+  },
+  "scope": {
+    "route_scoring": "unchanged",
+    "reverse": "manual sequence reversal and linear traversal override",
+    "return_home": "endpoint included in planning; reserve forced to zero"
+  }
+}
