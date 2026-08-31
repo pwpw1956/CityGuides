@@ -1,4 +1,4 @@
-const CACHE_NAME = 'cityguides-v0.8.0';
+const CACHE_NAME = 'cityguides-v0.8.1';
 const APP_SHELL = [
   './', './index.html', './cities.json', './manifest.webmanifest',
   './icon-192.png', './icon-512.png', './reset.html', './version.json'

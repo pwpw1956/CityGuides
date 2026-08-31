@@ -1,5 +1,5 @@
 {
-  "version": "0.8.0",
-  "build": "2026-08-30 20:20 UTC",
-  "release": "Map/Detail space refinement; map-overlay legend; reverse route; Return to Home finish; compact detail facts; offset finish flag"
+  "version": "0.8.1",
+  "build": "2026-08-31 01:50 UTC",
+  "release": "Add Sight / My Places foundation; user photographs; local persistence; edit/delete/export; unified version/status display"
 }

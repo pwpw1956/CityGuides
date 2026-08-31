@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES
-  Version: 0.8.0
-  Build: 2026-08-30 20:20 UTC
-  Release: Map/Detail space refinement; map-overlay legend; reverse route; Return to Home finish; compact detail facts; offset finish flag
+  Version: 0.8.1
+  Build: 2026-08-31 01:50 UTC
+  Release: Add Sight / My Places foundation; user photographs; local persistence; edit/delete/export; unified version/status display
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
 :root{
@@ -52,6 +52,13 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .page.help .small{font-size:1rem;line-height:1.52;color:var(--ink)}
 .page.help .helpList{padding-left:23px}.page.help .helpList li{margin:9px 0}
 footer{font-size:.7rem;color:var(--muted);text-align:center;margin:10px 0}.helpList{padding-left:20px}.helpList li{margin:7px 0}.keyRow{display:flex;gap:8px;align-items:center;margin:6px 0;font-size:.82rem}.keyDot{width:13px;height:13px;border-radius:50%;flex:none}.planItem.visited{color:#7d8588;text-decoration:none}.planItem.current{font-weight:800}
+
+.builderGrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.builderGrid .wide{grid-column:1/-1}
+.builderDialog .dialogBody{max-height:82vh;overflow:auto}.builderDialog label{font-size:.82rem}.builderDialog textarea{width:100%;min-height:86px;padding:8px;border:1px solid #b9c9cf;border-radius:9px;font:inherit;resize:vertical}
+.builderDialog input[type=text],.builderDialog input[type=number],.builderDialog select{width:100%;min-height:40px;padding:7px 8px;border:1px solid #b9c9cf;border-radius:9px;background:#fff}
+.builderPhotoPreview{display:block;max-width:100%;max-height:180px;margin:7px auto;border-radius:10px}
+.mySightRow{display:grid;grid-template-columns:1fr auto auto;gap:6px;align-items:center;padding:7px 0;border-bottom:1px solid var(--line)}.mySightRow button{min-height:34px;padding:4px 7px}
+.builderNote{font-size:.76rem;color:var(--muted);margin:4px 0 8px}
 dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 24px);box-shadow:0 10px 40px #0004}dialog::backdrop{background:#0007}.dialogBody{padding:17px}.dialogBody .controls{margin-top:12px}.lightbox img{max-width:100%;max-height:75vh;display:block;border-radius:9px}.lightbox{padding:0;background:#101c22;border:0}.lightbox .close{position:absolute;right:8px;top:8px;background:#fff;color:#17384a;border:0;border-radius:50%;min-width:40px;padding:0}
 @media(min-width:700px){body{font-size:18px}.controls{grid-template-columns:repeat(4,1fr)}#map{height:62vh}.detailText{min-height:340px}}
 @media(max-width:430px){#map{height:64vh;min-height:390px}.audioRow2{grid-template-columns:minmax(135px,46%) 1fr}.navBtn{font-size:.68rem}.navBtn span{font-size:.92rem}.grid2{gap:7px}}
@@ -91,7 +98,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="statusGrid"><div class="statbox"><strong id="homeTourTime">Not planned</strong><br><span>planned time</span></div><div class="statbox"><strong id="homeTourStops">—</strong><br><span>selected stops</span></div><div class="statbox"><strong id="homeTourDistance">—</strong><br><span>walking</span></div><div class="statbox"><strong id="homeTourState">Ready</strong><br><span>tour status</span></div></div>
     <p class="small" id="liveStatus" style="margin:8px 0 0"></p>
   </div>
-  <div class="panel"><p class="small" style="margin:0">CityGuides v0.7.8 · Build 2026-08-30 20:20 UTC</p></div>
+  <div class="panel"><p class="small" id="homeVersion" style="margin:0"></p></div>
 </section>
 
 <section class="page map" id="page-map">
@@ -158,14 +165,46 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <p>At present, orange means a place was left out because time, walking involved or priority made another combination preferable. Green marks a useful optional stop. Red means unavailable; blue means selected.</p>
   </div>
   <div class="panel">
+    <h3>Guide Builder</h3>
+    <p>Add a place you discover to the currently selected city. My sights are stored on this device and immediately appear on the Map and in the candidate list.</p>
+    <div class="controls"><button class="primary" id="addSightButton">Add a sight</button><button id="manageSightsButton">My sights</button></div>
+    <div class="controls"><button id="exportSightsButton">Export my additions</button><button id="createCityFuture" disabled>Create a city — coming next</button></div>
+    <p class="small">A sight can include a photograph taken with this phone. Photographs are resized before being stored locally.</p>
+  </div>
+<div class="panel">
     <h3>About this version</h3>
-    <p>CityGuides v0.8.0 · Build 2026-08-30 20:20 UTC</p><p>This release concentrates on usable screen space and manual control: a compact map-overlay colour key, larger map/detail areas, compact Detail facts, Reverse route, Return to Home planning, and an offset chequered finish flag.</p>
+    <p id="aboutVersion"></p>
+    <p>v0.8.1 introduces the first Guide Builder function: personal sights can be created, photographed, edited, deleted and exported without changing the built-in city file.</p>
   </div>
 </section>
 </main>
 
 <nav class="bottomNav" aria-label="Main navigation"><div class="navGrid"><button class="navBtn active" data-page="home"><span>⌂</span>Home</button><button class="navBtn" data-page="map"><span>▣</span>Map</button><button class="navBtn" data-page="detail"><span>▶</span>Detail</button><button class="navBtn" data-page="help"><span>?</span>Help</button></div></nav>
 
+<dialog id="sightBuilderDialog" class="builderDialog"><div class="dialogBody">
+  <h2 id="sightBuilderTitle">Add a sight</h2>
+  <input type="hidden" id="builderSightId">
+  <div class="builderGrid">
+    <div class="wide"><label for="builderName">Name</label><input id="builderName" type="text" maxlength="120" placeholder="e.g. Interesting doorway"></div>
+    <div><label for="builderType">What kind of sight?</label><select id="builderType"><option value="point">Building / fixed place</option><option value="area">Area / square / garden</option><option value="linear">Street / path / riverside</option></select></div>
+    <div><label for="builderPriority">Importance</label><select id="builderPriority"><option value="2">2 — minor</option><option value="3" selected>3 — worthwhile</option><option value="4">4 — important</option><option value="5">5 — must-see</option></select></div>
+    <div><label for="builderListen">Visit / audio time</label><select id="builderListen"><option value="1">1 min</option><option value="2" selected>2 min</option><option value="3">3 min</option><option value="4">4 min</option><option value="5">5 min</option></select></div>
+    <div><label for="builderIndoor">Setting</label><select id="builderIndoor"><option value="false" selected>Exterior / open-air</option><option value="true">Indoor / opening hours may matter</option></select></div>
+    <div><label for="builderLat">Latitude / entrance</label><input id="builderLat" type="number" step="0.000001" placeholder="Latitude"></div>
+    <div><label for="builderLng">Longitude / entrance</label><input id="builderLng" type="number" step="0.000001" placeholder="Longitude"></div>
+    <div class="wide"><button id="builderUseLocation">Use my current location</button><p class="builderNote">For a building, stand at the useful entrance or viewing point rather than its geographical centre.</p></div>
+    <div class="wide"><label for="builderDescription">What is interesting about it?</label><textarea id="builderDescription" placeholder="A note is enough for now; it can later be developed into a full narration."></textarea></div>
+    <div class="wide"><label for="builderAccess">Practical / access note</label><input id="builderAccess" type="text" maxlength="180" placeholder="e.g. Flat pavement; exterior only"></div>
+    <div class="wide" id="linearFields"><div class="builderGrid">
+      <div><label for="builderEndLat">Linear end latitude</label><input id="builderEndLat" type="number" step="0.000001"></div>
+      <div><label for="builderEndLng">Linear end longitude</label><input id="builderEndLng" type="number" step="0.000001"></div>
+    </div><p class="builderNote">For a street/path, the first coordinate is the start and this second coordinate is the end. More elaborate bends can be added later.</p></div>
+    <div class="wide"><label for="builderPhoto">Photograph</label><input id="builderPhoto" type="file" accept="image/*" capture="environment"><img id="builderPhotoPreview" class="builderPhotoPreview hidden" alt="Selected photograph"><p class="builderNote">On most phones this can offer the camera as well as existing photographs.</p></div>
+  </div>
+  <p class="notice hidden" id="builderError"></p>
+  <div class="controls"><button id="builderCancel">Cancel</button><button class="primary" id="builderSave">Save sight</button></div>
+</div></dialog>
+<dialog id="mySightsDialog" class="builderDialog"><div class="dialogBody"><h2>My sights in this city</h2><div id="mySightsList"></div><div class="controls"><button id="mySightsClose" class="primary">Close</button></div></div></dialog>
 <dialog id="confirmDialog"><div class="dialogBody"><h2 id="dialogTitle">Change today's plan?</h2><div id="dialogText"></div><div class="controls"><button id="dialogCancel">Cancel</button><button class="primary" id="dialogOk">Confirm</button></div></div></dialog>
 <dialog id="photoLightbox" class="lightbox"><button class="close" id="lightboxClose">×</button><img id="lightboxImage" alt="Expanded photograph"></dialog>
 <dialog id="legendDialog"><div class="dialogBody"><h2>Map marker colours</h2><div class="keyRow"><i class="keyDot blue"></i><strong>Blue — Today's tour</strong><span>Selected for the current itinerary.</span></div><div class="keyRow"><i class="keyDot orange"></i><strong>Orange — Not selected</strong><span>Available, but left out because of time, priority or route efficiency.</span></div><div class="keyRow"><i class="keyDot red"></i><strong>Red — Unavailable</strong><span>Closed or otherwise unavailable at the time checked.</span></div><div class="keyRow"><i class="keyDot green"></i><strong>Green — Optional</strong><span>Doable if time permits, but not currently prioritised.</span></div><div class="keyRow"><i class="keyDot grey"></i><strong>Grey — Visited</strong><span>A selected stop already visited during this tour.</span></div><div class="controls"><button id="legendClose" class="primary">Close</button></div></div></dialog>
@@ -173,7 +212,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
 <script>
 let tour,statusData,map,routeLine,routeArrowLayer,finishMarker,userMarker,accuracyCircle,watchId=null,autoMode=true,speechRate=1.0;
 let markerLayer=null, markerById=new Map(), siteStatus=new Map();
-let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null, mapUserMoved=false, fitNextRoute=false, autoReplan=false, lastAutoReplanPromptAt=0, forcedInclude=new Set(), forcedExclude=new Set(), selectionDirty=false, routeReversed=false, savedReturnBuffer='10';
+let currentIndex=-1, plan=[], visited=new Set(), home=null, startedAt=null, lastPlanAt=0, position=null, currentRoute=null, installPrompt=null, mapUserMoved=false, fitNextRoute=false, autoReplan=false, lastAutoReplanPromptAt=0, forcedInclude=new Set(), forcedExclude=new Set(), selectionDirty=false, routeReversed=false, savedReturnBuffer='10', userSightIds=new Set(), builderPhotoData='';
 const $=id=>document.getElementById(id);
 const pages=['home','map','detail','help'];
 function showPage(name){
@@ -215,12 +254,27 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.8.0';
-const BUILD='2026-08-30 20:20 UTC';
+const APP_VERSION='0.8.1';
+const BUILD='2026-08-31 01:50 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.8.0';
+const storageKeyBase='cityguides-v0.8.1';
 
+function displayBuildInfo(){
+  const txt='CityGuides v'+APP_VERSION+' · Build '+BUILD;
+  if($('homeVersion'))$('homeVersion').textContent=txt;
+  if($('aboutVersion'))$('aboutVersion').textContent=txt;
+}
+function formatCheckedAt(value){
+  if(!value)return 'Availability data has not yet been verified';
+  const d=new Date(value);
+  if(Number.isNaN(d.getTime()))return 'Availability data last checked: '+value.replace('T',' ');
+  try{
+    const date=new Intl.DateTimeFormat('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:tour?.timezone||'Europe/London'}).format(d);
+    const time=new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:tour?.timezone||'Europe/London',timeZoneName:'short'}).format(d);
+    return 'Availability data last checked: '+date+' · '+time;
+  }catch{return 'Availability data last checked: '+value.replace('T',' ');}
+}
 function hav(a,b){const R=6371000,p=Math.PI/180,dLat=(b.lat-a.lat)*p,dLon=(b.lng-a.lng)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.lat*p)*Math.cos(b.lat*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x));}
 function walkMin(m,speed){return (m/1000)/speed*60;}
 function fmtMin(m){return Math.max(1,Math.round(m))+' min';}
@@ -261,6 +315,103 @@ function available(s){
   const av=openingText(s);
   if(s.indoor && !av.open)return false;
   return true;
+}
+const USER_DB='CityGuidesUserData',USER_DB_VERSION=1,USER_STORE='sights';
+function openUserDb(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(USER_DB,USER_DB_VERSION);
+    req.onupgradeneeded=()=>{const db=req.result;if(!db.objectStoreNames.contains(USER_STORE))db.createObjectStore(USER_STORE,{keyPath:'id'});};
+    req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+  });
+}
+async function userSightPut(sight){
+  const db=await openUserDb();return new Promise((resolve,reject)=>{const tx=db.transaction(USER_STORE,'readwrite');tx.objectStore(USER_STORE).put(sight);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});
+}
+async function userSightDelete(id){
+  const db=await openUserDb();return new Promise((resolve,reject)=>{const tx=db.transaction(USER_STORE,'readwrite');tx.objectStore(USER_STORE).delete(id);tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);});
+}
+async function userSightsForCity(cityId){
+  const db=await openUserDb();return new Promise((resolve,reject)=>{const tx=db.transaction(USER_STORE,'readonly'),req=tx.objectStore(USER_STORE).getAll();req.onsuccess=()=>resolve((req.result||[]).filter(x=>x.cityId===cityId));req.onerror=()=>reject(req.error);});
+}
+function fileToCompressedDataUrl(file){
+  return new Promise((resolve,reject)=>{
+    if(!file){resolve('');return;}
+    const fr=new FileReader();
+    fr.onerror=()=>reject(fr.error);
+    fr.onload=()=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error('Could not read photograph'));
+      img.onload=()=>{
+        const max=1280,scale=Math.min(1,max/Math.max(img.width,img.height)),w=Math.round(img.width*scale),h=Math.round(img.height*scale);
+        const c=document.createElement('canvas');c.width=w;c.height=h;c.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(c.toDataURL('image/jpeg',0.78));
+      };
+      img.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  });
+}
+function normalizeUserSight(x){
+  const linear=x.routeType==='linear'&&Number.isFinite(x.endLat)&&Number.isFinite(x.endLng);
+  return {
+    id:x.id,cityId:x.cityId,userCreated:true,title:x.title,lat:Number(x.lat),lng:Number(x.lng),
+    approach:{lat:Number(x.lat),lng:Number(x.lng)},radius:x.routeType==='area'?55:28,priority:Number(x.priority||3),listen:Number(x.listen||2),
+    indoor:!!x.indoor,steep:false,routeType:x.routeType||'point',
+    traverse:linear?[{lat:Number(x.lat),lng:Number(x.lng)},{lat:Number(x.endLat),lng:Number(x.endLng)}]:undefined,
+    text:x.text||'Personal sight added to CityGuides.',tip:x.tip||'',image:x.photoData||'',credit:x.photoData?'Your photograph':'',
+    source:'My Places',availability:{type:'always'},cluster:null
+  };
+}
+async function mergeUserSights(){
+  let items=[];try{items=await userSightsForCity(currentCityId)}catch(e){console.warn('Could not load personal sights',e);}
+  userSightIds=new Set(items.map(x=>x.id));
+  tour.stops=tour.stops.filter(x=>!x.userCreated);
+  tour.stops.push(...items.map(normalizeUserSight));
+}
+function resetBuilder(){
+  $('builderSightId').value='';$('builderName').value='';$('builderType').value='point';$('builderPriority').value='3';$('builderListen').value='2';$('builderIndoor').value='false';
+  $('builderLat').value='';$('builderLng').value='';$('builderEndLat').value='';$('builderEndLng').value='';$('builderDescription').value='';$('builderAccess').value='';
+  $('builderPhoto').value='';builderPhotoData='';$('builderPhotoPreview').src='';$('builderPhotoPreview').classList.add('hidden');$('builderError').classList.add('hidden');updateLinearBuilderFields();
+}
+function updateLinearBuilderFields(){$('linearFields').classList.toggle('hidden',$('builderType').value!=='linear');}
+function openSightBuilder(existing=null){
+  resetBuilder();$('sightBuilderTitle').textContent=existing?'Edit my sight':'Add a sight';
+  if(existing){
+    $('builderSightId').value=existing.id;$('builderName').value=existing.title;$('builderType').value=existing.routeType||'point';$('builderPriority').value=String(existing.priority||3);$('builderListen').value=String(existing.listen||2);
+    $('builderIndoor').value=String(!!existing.indoor);$('builderLat').value=existing.lat;$('builderLng').value=existing.lng;$('builderDescription').value=existing.text||'';$('builderAccess').value=existing.tip||'';
+    if(existing.traverse?.length>1){const z=existing.traverse[existing.traverse.length-1];$('builderEndLat').value=z.lat;$('builderEndLng').value=z.lng;}
+    builderPhotoData=existing.image||'';if(builderPhotoData){$('builderPhotoPreview').src=builderPhotoData;$('builderPhotoPreview').classList.remove('hidden');}
+    updateLinearBuilderFields();
+  }
+  $('sightBuilderDialog').showModal();
+}
+async function saveBuilderSight(){
+  const title=$('builderName').value.trim(),lat=Number($('builderLat').value),lng=Number($('builderLng').value),type=$('builderType').value;
+  if(!title||!Number.isFinite(lat)||!Number.isFinite(lng)){ $('builderError').textContent='Please give the sight a name and a valid entrance/location.';$('builderError').classList.remove('hidden');return;}
+  const endLat=Number($('builderEndLat').value),endLng=Number($('builderEndLng').value);
+  if(type==='linear'&&(!Number.isFinite(endLat)||!Number.isFinite(endLng))){$('builderError').textContent='A street/path needs a valid end location.';$('builderError').classList.remove('hidden');return;}
+  const file=$('builderPhoto').files?.[0];if(file)builderPhotoData=await fileToCompressedDataUrl(file);
+  const id=$('builderSightId').value||('user-'+currentCityId+'-'+Date.now());
+  const item={id,cityId:currentCityId,title,routeType:type,lat,lng,endLat:type==='linear'?endLat:null,endLng:type==='linear'?endLng:null,priority:Number($('builderPriority').value),listen:Number($('builderListen').value),indoor:$('builderIndoor').value==='true',text:$('builderDescription').value.trim(),tip:$('builderAccess').value.trim(),photoData:builderPhotoData,updatedAt:new Date().toISOString()};
+  await userSightPut(item);
+  const normalized=normalizeUserSight(item),i=tour.stops.findIndex(x=>x.id===id);if(i>=0)tour.stops[i]=normalized;else tour.stops.push(normalized);userSightIds.add(id);
+  renderSiteMarkers();renderCandidateList();$('sightBuilderDialog').close();$('planNote').textContent='My sight saved. It is now available on the map and in the sight list.';
+}
+async function renderMySights(){
+  let items=[];try{items=await userSightsForCity(currentCityId)}catch{}
+  $('mySightsList').innerHTML=items.length?'':'<p class="small">You have not added any sights to this city yet.</p>';
+  for(const raw of items){
+    const st=normalizeUserSight(raw),row=document.createElement('div');row.className='mySightRow';
+    const name=document.createElement('strong');name.textContent=st.title;
+    const edit=document.createElement('button');edit.textContent='Edit';edit.onclick=()=>{$('mySightsDialog').close();openSightBuilder(st);};
+    const del=document.createElement('button');del.textContent='Delete';del.onclick=async()=>{if(!confirm('Delete “'+st.title+'” from My sights?'))return;await userSightDelete(st.id);tour.stops=tour.stops.filter(x=>x.id!==st.id);plan=plan.filter(x=>x.id!==st.id);forcedInclude.delete(st.id);forcedExclude.delete(st.id);userSightIds.delete(st.id);renderSiteMarkers();renderCandidateList();await renderMySights();};
+    row.append(name,edit,del);$('mySightsList').appendChild(row);
+  }
+}
+async function exportUserSights(){
+  let items=[];try{items=await userSightsForCity(currentCityId)}catch{}
+  const payload={cityId:currentCityId,city:tour?.city||currentCityId,exportedAt:new Date().toISOString(),sights:items};
+  const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='CityGuides-'+currentCityId+'-my-sights.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
 }
 function clusterDefinition(id){
   return id && tour?.clusters ? tour.clusters[id]||null : null;
@@ -915,9 +1066,8 @@ function showStop(s){
   currentIndex=tour.stops.findIndex(x=>x.id===s.id);$('currentTitle').textContent=s.title; updateProgress();refreshMarkerStyles();renderCandidateList();
   $('currentMeta').textContent='Audio ~'+s.listen+' min • priority '+s.priority+'/5';
   $('detailText').innerHTML=(s.text||'').split(/\n\s*\n/).map((p,i)=>'<p data-para="'+i+'">'+p.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</p>').join('');$('tip').textContent=(s.tip||'').replace('Flat and short stop; exterior only','Flat · short · exterior').replace('Open-air / exterior stop','Exterior');
-  $('photo').src=s.image;$('photo').alt=s.title;$('photo').classList.remove('hidden');$('photo').onerror=()=>{$('photo').classList.add('hidden');$('credit').textContent='Image unavailable; continue with the description.';};
-  $('photoWrap').classList.remove('hidden');
-  $('credit').textContent=s.credit+' · source: '+s.source;
+  if(s.image){$('photo').src=s.image;$('photo').alt=s.title;$('photo').classList.remove('hidden');$('photoWrap').classList.remove('hidden');$('photo').onerror=()=>{$('photo').classList.add('hidden');$('credit').textContent='Image unavailable; continue with the description.';};$('credit').textContent=(s.credit||'')+(s.source?' · source: '+s.source:'');}
+  else{$('photoWrap').classList.add('hidden');$('photo').src='';$('credit').textContent='';}
   const av=openingText(s),live=liveStatusText(s);let avText=(live?live+' — ':'')+av.label;avText=avText.replace('Open-air / exterior stop','Exterior');$('availability').textContent=avText;
   $('availability').className='compactFact '+(av.open?'good':'notice');
   resetAudio();
@@ -1157,7 +1307,7 @@ function confirmHome(){
   };
   $('dialogCancel').onclick=()=>$('confirmDialog').close();
 }
-$('refresh').onclick=async()=>{try{statusData=await fetch(currentCity.status+'?x='+Date.now()).then(r=>r.json());$('liveStatus').textContent=statusData.checkedAt?'Live data checked '+statusData.checkedAt:'Live data not yet checked';
+$('refresh').onclick=async()=>{try{statusData=await fetch(currentCity.status+'?x='+Date.now()).then(r=>r.json());$('liveStatus').textContent=formatCheckedAt(statusData.checkedAt);
   $('homeCityLabel').textContent=tour.city; $('pageContext').textContent=tour.city; updateTourButtons();$('setupStatus').textContent='Today’s availability information refreshed.';}catch{$('setupStatus').textContent='Could not refresh live information; using cached tour rules.';}};
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();installPrompt=e;$('install').classList.remove('hidden')});
 $('install').onclick=async()=>{if(installPrompt){installPrompt.prompt();await installPrompt.userChoice;installPrompt=null;$('install').classList.add('hidden')}};
@@ -1166,6 +1316,7 @@ async function loadCity(cityId, preservePosition=false){
   if(!entry)throw new Error('City not found');
   currentCity=entry;currentCityId=entry.id;
   tour=await fetch(entry.data+'?x='+Date.now()).then(r=>r.json());
+  await mergeUserSights();
   try{statusData=await fetch(entry.status+'?x='+Date.now()).then(r=>r.json())}catch{statusData={overrides:{}}}
   document.title='City Guides — '+tour.city;
   $('pageContext').textContent=tour.city;
@@ -1202,6 +1353,16 @@ $('photo').onclick=()=>{$('photoLightbox').showModal();$('lightboxImage').src=$(
 $('lightboxClose').onclick=()=>$('photoLightbox').close();
 $('legendButton').onclick=()=>$('legendDialog').showModal();
 $('legendClose').onclick=()=>$('legendDialog').close();
+$('addSightButton').onclick=()=>openSightBuilder();
+$('manageSightsButton').onclick=async()=>{await renderMySights();$('mySightsDialog').showModal();};
+$('exportSightsButton').onclick=()=>exportUserSights();
+$('builderCancel').onclick=()=>$('sightBuilderDialog').close();
+$('builderSave').onclick=()=>saveBuilderSight();
+$('builderType').onchange=()=>updateLinearBuilderFields();
+$('builderUseLocation').onclick=async()=>{try{if(!position)await requestCurrentPosition();$('builderLat').value=position.lat.toFixed(6);$('builderLng').value=position.lng.toFixed(6);}catch{$('builderError').textContent='Could not obtain your current location.';$('builderError').classList.remove('hidden');}};
+$('builderPhoto').onchange=async()=>{const f=$('builderPhoto').files?.[0];if(!f)return;try{builderPhotoData=await fileToCompressedDataUrl(f);$('builderPhotoPreview').src=builderPhotoData;$('builderPhotoPreview').classList.remove('hidden');}catch{}};
+$('mySightsClose').onclick=()=>$('mySightsDialog').close();
+
 $('detailText').addEventListener('scroll',()=>{if(audioState==='playing'){ $('detailText').dataset.follow='0'; updateDetailFollow(); }});
 $('gethome').disabled=true;
 updateTourButtons();
@@ -1213,6 +1374,7 @@ async function init(){
   const cityId=catalogue.cities.some(c=>c.id===requested)?requested:catalogue.cities[0].id;
   $('citySelect').value=cityId;
   await loadCity(cityId);
+  displayBuildInfo();
   showPage('home');
 }
 async function updateAppIfNeeded(){

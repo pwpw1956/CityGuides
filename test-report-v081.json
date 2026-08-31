@@ -1,0 +1,34 @@
+{
+  "version": "0.8.1",
+  "build": "2026-08-31 01:50 UTC",
+  "checks": {
+    "version": true,
+    "dynamic_version": true,
+    "human_status": true,
+    "guide_builder": true,
+    "camera_input": true,
+    "photo_compression": true,
+    "indexeddb": true,
+    "merge_user_sights": true,
+    "edit_delete": true,
+    "export": true,
+    "optional_photo_detail": true,
+    "routing_retained": true,
+    "map_selection_retained": true,
+    "audio_retained": true,
+    "unique_dom_ids": true,
+    "javascript_syntax": true
+  },
+  "guide_builder": {
+    "storage": "IndexedDB on this device/browser",
+    "photo": "camera or existing image; resized/compressed locally",
+    "types": [
+      "point",
+      "area",
+      "linear"
+    ],
+    "edit_delete": true,
+    "export_json": true,
+    "create_city": "intentionally deferred"
+  }
+}
