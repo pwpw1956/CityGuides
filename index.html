@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES
-  Version: 0.8.2
-  Build: 2026-08-31 11:50 UTC
-  Release: Valhalla manoeuvre arrows; continuation/departure arrows; tappable directions; Auto-follow next-direction strip; short-spur diagnostics; My Sights capitalization
+  Version: 0.8.3
+  Build: 2026-08-31 19:45 UTC
+  Release: corrected leg-local Valhalla manoeuvres; arrival suppression; cleaner tappable arrows
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
 :root{
@@ -34,10 +34,9 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .finishMarker{background:transparent!important;border:0!important}
 .finishFlag{position:relative;width:29px;height:32px}.finishFlag:before{content:"";position:absolute;left:3px;top:1px;width:4px;height:31px;background:#40505a;border-radius:2px}.finishFlag:after{content:"";position:absolute;left:7px;top:1px;width:21px;height:16px;border:1px solid #fff;background:conic-gradient(#e53935 25%,#fff 0 50%,#e53935 0 75%,#fff 0) 0 0/10px 10px;box-shadow:0 1px 3px #0004}
 .routeDirectionArrow,.routeManeuverArrow,.routeDepartureArrow{background:transparent!important;border:0!important}
-.routeDirectionArrow{pointer-events:none}
-.routeManeuverArrow span,.routeDepartureArrow span{display:block;width:27px;height:27px;line-height:27px;text-align:center;font-size:22px;font-weight:900;color:#17384a;background:#ffffffdd;border:1px solid #8ba8b3;border-radius:50%;box-shadow:0 1px 4px #0004}
-.routeDepartureArrow span{color:#8a4f00;border-color:#d3a24f;background:#fff7df}
-.routeManeuverArrow,.routeDepartureArrow{cursor:pointer}
+.routeDirectionArrow{pointer-events:none}.routeManeuverArrow,.routeDepartureArrow{cursor:pointer;width:38px!important;height:38px!important}
+.routeManeuverArrow span,.routeDepartureArrow span{display:block;width:38px;height:38px;line-height:38px;text-align:center;font-size:25px;font-weight:900;color:#17384a;background:transparent;border:0;text-shadow:-1px -1px 0 #fff,1px -1px 0 #fff,-1px 1px 0 #fff,1px 1px 0 #fff,0 1px 3px #fff}
+.routeDepartureArrow span{color:#8a4f00}
 .nextDirection{margin:6px 0 0;padding:6px 9px;border-radius:8px;background:#eef6f8;border:1px solid #bfd4da;font-size:.78rem;color:#17384a}
 .routeDirectionArrow{background:transparent!important;border:0!important;pointer-events:none}
 .routeDirectionArrow span{display:block;width:24px;height:24px;line-height:24px;text-align:center;font-size:21px;font-weight:900;color:#17384a;text-shadow:0 0 2px #fff,0 0 4px #fff}
@@ -182,7 +181,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
 <div class="panel">
     <h3>About this version</h3>
     <p id="aboutVersion"></p>
-    <p>v0.8.2 replaces geometry-spaced arrows with Valhalla manoeuvre guidance, adds departure and continuation arrows, tappable instructions, an Auto-follow Next-direction strip, and diagnostics for short unexplained route spurs.</p>
+    <p>v0.8.3 corrects manoeuvre placement using each Valhalla leg's own geometry before joining the route. Arrival arrows are suppressed and the visible arrow backgrounds have been removed.</p>
   </div>
 </section>
 </main>
@@ -262,11 +261,11 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.8.2';
-const BUILD='2026-08-31 11:50 UTC';
+const APP_VERSION='0.8.3';
+const BUILD='2026-08-31 19:45 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.8.2';
+const storageKeyBase='cityguides-v0.8.3';
 
 function displayBuildInfo(){
   const txt='CityGuides v'+APP_VERSION+' · Build '+BUILD;
@@ -700,25 +699,18 @@ function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central')
 async function routeRequest(locations){
   const payload={locations:locations.map(x=>({lat:x.lat,lon:x.lng,type:x.kind==='via'?'via':'break'})),costing:'pedestrian',costing_options:{pedestrian:pedestrianCostingOptions()},units:'kilometers',directions_options:{units:'kilometers'}};
   try{
-    const r=await fetchWithTimeout(VALHALLA,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-v082'},body:JSON.stringify(payload,{},12000)});
+    const r=await fetchWithTimeout(VALHALLA,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-v083'},body:JSON.stringify(payload)},12000);
     if(!r.ok)throw new Error('Routing service returned '+r.status);
-    const j=await r.json();
-    const shape=[],maneuvers=[];
-    let globalOffset=0;
+    const j=await r.json(),shape=[],maneuvers=[];
     for(let li=0;li<(j.trip.legs||[]).length;li++){
       const leg=j.trip.legs[li],decoded=decodePolyline(leg.shape);
-      if(li)shape.push(...decoded.slice(1));else shape.push(...decoded);
       for(const man of (leg.maneuvers||[])){
-        const local=Number(man.begin_shape_index??0);
-        maneuvers.push({
-          shapeIndex:Math.max(0,globalOffset+local-(li?1:0)),
-          instruction:man.instruction||man.verbal_transition_alert_instruction||man.verbal_pre_transition_instruction||'Continue',
-          type:man.type,
-          streetNames:man.street_names||[]
-        });
+        const local=Math.max(0,Math.min(decoded.length-1,Number(man.begin_shape_index??0))),pt=decoded[local];
+        maneuvers.push({legIndex:li,localShapeIndex:local,point:pt?{lat:pt[0],lng:pt[1]}:null,instruction:man.instruction||man.verbal_transition_alert_instruction||man.verbal_pre_transition_instruction||'Continue',type:Number(man.type),streetNames:man.street_names||[]});
       }
-      globalOffset+=decoded.length;
+      if(li)shape.push(...decoded.slice(1));else shape.push(...decoded);
     }
+    for(const man of maneuvers)man.shapeIndex=nearestShapeIndex(shape,man.point);
     return {shape,meters:j.trip.summary.length*1000,minutes:j.trip.summary.time/60,maneuvers};
   }catch(e){return null;}
 }
@@ -1076,50 +1068,32 @@ function arrowAt(shape,index,instruction,kind='maneuver'){
   const icon=L.divIcon({
     className:kind==='departure'?'routeDepartureArrow':'routeManeuverArrow',
     html:'<span style="transform:rotate('+(bearing-90)+'deg)">➜</span>',
-    iconSize:[29,29],iconAnchor:[14,14]
+    iconSize:[38,38],iconAnchor:[19,19]
   });
   const marker=L.marker(b,{icon,interactive:true,zIndexOffset:520}).addTo(routeArrowLayer);
   marker.bindPopup('<strong>'+instruction.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</strong>');
   return {marker,index,point:shapePointObject(b),instruction,kind};
 }
+function isArrivalManeuver(man){return [4,5,6].includes(Number(man?.type)) || /(?:arriv|destination)/i.test(man?.instruction||'');}
 function routeArrowPlan(shape,maneuvers){
-  const arrows=[];
-  const tooClose=(point,metres=38)=>arrows.some(a=>hav(point,a.point)<metres);
-
-  // Meaningful Valhalla manoeuvres.
+  const arrows=[],tooClose=(point,metres=38)=>arrows.some(a=>hav(point,a.point)<metres);
   for(const man of (maneuvers||[])){
-    const i=Math.max(1,Math.min(shape.length-1,Number(man.shapeIndex||0)));
-    const point=shapePointObject(shape[i]);
-    const instruction=(man.instruction||'').trim();
-    if(!instruction||/^arrive/i.test(instruction))continue;
-    if(!tooClose(point,28)){
-      const a=arrowAt(shape,i,instruction,'maneuver');if(a)arrows.push(a);
-    }
+    if(isArrivalManeuver(man)||!man.point)continue;
+    const i=nearestShapeIndex(shape,man.point);if(i<=0||i>=shape.length)continue;
+    const point=shapePointObject(shape[i]),instruction=(man.instruction||'').trim();if(!instruction)continue;
+    if(!tooClose(point,32)){const a=arrowAt(shape,i,instruction,'maneuver');if(a)arrows.push(a);}
   }
-
-  // Departure guidance just after the start and after each selected sight.
   const departures=[{point:position,label:'Leave the starting point'}];
   plan.forEach((st,i)=>departures.push({point:routeAnchor(st),label:'Leave Stop '+(i+1)+' — '+st.title}));
   for(const dep of departures){
-    const hit=nearestShapeIndex(shape,dep.point);if(hit<0)continue;
-    let i=hit,travel=0;
-    while(i<shape.length-1&&travel<22){travel+=hav(shapePointObject(shape[i]),shapePointObject(shape[i+1]));i++;}
-    if(i>0&&i<shape.length&&!tooClose(shapePointObject(shape[i]),34)){
-      const a=arrowAt(shape,i,dep.label,'departure');if(a)arrows.push(a);
-    }
+    if(!dep.point)continue;const hit=nearestShapeIndex(shape,dep.point);if(hit<0)continue;
+    let i=hit,travel=0;while(i<shape.length-1&&travel<25){travel+=hav(shapePointObject(shape[i]),shapePointObject(shape[i+1]));i++;}
+    if(i>0&&i<shape.length&&!tooClose(shapePointObject(shape[i]),42)){const a=arrowAt(shape,i,dep.label,'departure');if(a)arrows.push(a);}
   }
-
-  // Continuation arrows every ~200 m where no manoeuvre/departure arrow already helps.
   let since=0;
   for(let i=1;i<shape.length;i++){
     since+=hav(shapePointObject(shape[i-1]),shapePointObject(shape[i]));
-    if(since>=200){
-      const point=shapePointObject(shape[i]);
-      if(!tooClose(point,55)){
-        const a=arrowAt(shape,i,'Continue on the walking route','maneuver');if(a)arrows.push(a);
-      }
-      since=0;
-    }
+    if(since>=200){const point=shapePointObject(shape[i]);if(!tooClose(point,90)){const a=arrowAt(shape,i,'Continue on the walking route','maneuver');if(a)arrows.push(a);}since=0;}
   }
   return arrows;
 }
@@ -1148,7 +1122,7 @@ function updateNextDirection(){
   const box=$('nextDirection'),txt=$('nextDirectionText');
   if(!box||!txt||!autoMode||!position||!currentRoute?.shape?.length){if(box)box.classList.add('hidden');return;}
   const here=nearestShapeIndex(currentRoute.shape,position);if(here<0){box.classList.add('hidden');return;}
-  const next=(currentRoute.maneuvers||[]).find(m=>Number(m.shapeIndex)>here+1);
+  const next=(currentRoute.maneuvers||[]).find(m=>!isArrivalManeuver(m)&&Number(m.shapeIndex)>here+1);
   if(!next){box.classList.add('hidden');return;}
   const metres=Math.round(shapeDistance(currentRoute.shape,here,Number(next.shapeIndex)));
   txt.textContent=(next.instruction||'Continue')+(Number.isFinite(metres)?' · '+metres+' m':'');

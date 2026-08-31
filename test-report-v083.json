@@ -1,0 +1,29 @@
+{
+  "version": "0.8.3",
+  "build": "2026-08-31 19:45 UTC",
+  "checks": {
+    "identity": true,
+    "leg-local": true,
+    "old-offset-gone": true,
+    "arrival-filter": true,
+    "arrival-arrow-suppression": true,
+    "next-arrival-suppression": true,
+    "continuation-clearance": true,
+    "invisible-background": true,
+    "touch-target": true,
+    "single-routeRequest": true,
+    "builder-retained": true,
+    "audio-retained": true,
+    "unique-ids": true,
+    "js-syntax": true,
+    "offset-regression-guard": true
+  },
+  "regression_target": "v0.8.2 cumulative per-leg manoeuvre displacement",
+  "navigation": {
+    "maneuvers": "leg-local before concatenation",
+    "arrival_arrows": "suppressed",
+    "continuation_spacing_m": 200,
+    "continuation_exclusion_m": 90,
+    "touch_target_px": 38
+  }
+}

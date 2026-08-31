@@ -1,5 +1,5 @@
 {
-  "version": "0.8.2",
-  "build": "2026-08-31 11:50 UTC",
-  "release": "Valhalla manoeuvre arrows; continuation/departure arrows; tappable directions; Auto-follow next-direction strip; short-spur diagnostics; My Sights capitalization"
+  "version": "0.8.3",
+  "build": "2026-08-31 19:45 UTC",
+  "release": "Corrected leg-local manoeuvre placement; arrival suppression; cleaner tappable arrows"
 }
