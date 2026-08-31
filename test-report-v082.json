@@ -1,0 +1,34 @@
+{
+  "version": "0.8.2",
+  "build": "2026-08-31 11:50 UTC",
+  "checks": {
+    "version": true,
+    "maneuvers_preserved": true,
+    "draw_uses_maneuvers": true,
+    "old_random_arrows_removed": true,
+    "maneuver_arrows": true,
+    "departure_arrows": true,
+    "continuation_200": true,
+    "tappable": true,
+    "next_strip": true,
+    "auto_updates_next": true,
+    "spur_diagnostics": true,
+    "my_sights_cap": true,
+    "single_route_request": true,
+    "guide_builder_retained": true,
+    "audio_retained": true,
+    "unique_ids": true,
+    "javascript_syntax": true
+  },
+  "navigation_design": {
+    "maneuver_source": "Valhalla trip.legs[].maneuvers[]",
+    "continuation_spacing_m": 200,
+    "departure_after_sights": true,
+    "tap_for_instruction": true,
+    "auto_follow_next_strip": true,
+    "short_spur_diagnostic": {
+      "return_radius_m": 18,
+      "path_range_m": "35\u2013180"
+    }
+  }
+}

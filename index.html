@@ -1,8 +1,8 @@
 <!--
   CITY GUIDES
-  Version: 0.8.1
-  Build: 2026-08-31 01:50 UTC
-  Release: Add Sight / My Places foundation; user photographs; local persistence; edit/delete/export; unified version/status display
+  Version: 0.8.2
+  Build: 2026-08-31 11:50 UTC
+  Release: Valhalla manoeuvre arrows; continuation/departure arrows; tappable directions; Auto-follow next-direction strip; short-spur diagnostics; My Sights capitalization
 -->
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#17384a"><meta name="description" content="CityGuides adaptive walking guide"><link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"><title>City Guides</title><style>
 :root{
@@ -33,6 +33,12 @@ button{font-weight:700;border:1px solid #b9c9cf;background:#f8fafb;color:var(--i
 .cityGuideSitePin svg{display:block;filter:drop-shadow(0 2px 2px #0005)}
 .finishMarker{background:transparent!important;border:0!important}
 .finishFlag{position:relative;width:29px;height:32px}.finishFlag:before{content:"";position:absolute;left:3px;top:1px;width:4px;height:31px;background:#40505a;border-radius:2px}.finishFlag:after{content:"";position:absolute;left:7px;top:1px;width:21px;height:16px;border:1px solid #fff;background:conic-gradient(#e53935 25%,#fff 0 50%,#e53935 0 75%,#fff 0) 0 0/10px 10px;box-shadow:0 1px 3px #0004}
+.routeDirectionArrow,.routeManeuverArrow,.routeDepartureArrow{background:transparent!important;border:0!important}
+.routeDirectionArrow{pointer-events:none}
+.routeManeuverArrow span,.routeDepartureArrow span{display:block;width:27px;height:27px;line-height:27px;text-align:center;font-size:22px;font-weight:900;color:#17384a;background:#ffffffdd;border:1px solid #8ba8b3;border-radius:50%;box-shadow:0 1px 4px #0004}
+.routeDepartureArrow span{color:#8a4f00;border-color:#d3a24f;background:#fff7df}
+.routeManeuverArrow,.routeDepartureArrow{cursor:pointer}
+.nextDirection{margin:6px 0 0;padding:6px 9px;border-radius:8px;background:#eef6f8;border:1px solid #bfd4da;font-size:.78rem;color:#17384a}
 .routeDirectionArrow{background:transparent!important;border:0!important;pointer-events:none}
 .routeDirectionArrow span{display:block;width:24px;height:24px;line-height:24px;text-align:center;font-size:21px;font-weight:900;color:#17384a;text-shadow:0 0 2px #fff,0 0 4px #fff}
 .mapPin{width:28px;height:36px;position:relative;filter:drop-shadow(0 1px 2px #0004)}.mapPin:before{content:"";position:absolute;left:3px;top:1px;width:22px;height:22px;border-radius:50% 50% 50% 0;background:var(--pin);transform:rotate(-45deg);border:2px solid #fff}.mapPin span{position:absolute;left:11px;top:9px;width:7px;height:7px;border-radius:50%;background:#fff;z-index:1}
@@ -106,6 +112,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
     <div class="mapWrap"><div id="map"></div><button class="mapLegendButton" id="legendButton" aria-label="Map pin colour key" title="Map pin colour key">●</button></div>
     <div class="progress"><div id="progressFill"></div></div>
     <div class="progressLine"><div class="progressText" id="progressText">No route planned</div><span class="small" id="autoReplanState">Auto-replan: OFF</span></div>
+    <div class="nextDirection hidden" id="nextDirection"><strong>Next:</strong> <span id="nextDirectionText"></span></div>
     <div class="controls mapNavControls"><button id="prev">← Previous</button><button class="primary" id="next">Next →</button><button id="replan">Re-plan</button><button id="auto">Auto-follow: ON</button></div>
     <div class="controls mapUtilityControls"><button id="showRoute">Show whole route</button><button id="reverseRoute">Reverse route</button></div>
   </div>
@@ -142,7 +149,8 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
       <li>On the Map page, every candidate sight is shown both as a coloured pin and in the list below the map. <strong>Add/Remove</strong> works in either view; both views update immediately. Your explicit choices are retained when you press Re-plan.</li>
       <li>Red/unavailable sights cannot be added to today's tour. Blue sights are selected and numbered; green/orange sights remain available alternatives.</li>
       <li><strong>Automatic re-planning</strong> is OFF by default. If switched on, it is checked after a visited stop and only prompts when the estimated overrun is material — at least 15 minutes or about 15% of remaining time.</li>
-      <li>Pedestrian routing strongly favours mapped footways and sidewalks and penalises mapped steps, private access and driveways. It can only use barriers, steps and pavements that exist in the underlying OpenStreetMap data.</li>
+      <li>Pedestrian routing strongly favours mapped footways and sidewalks and penalises mapped steps, private access and driveways. It can only use barriers, steps and pavements that exist in the underlying OpenStreetMap data.</li><li>Direction arrows now come primarily from Valhalla's turn-by-turn manoeuvres, with extra departure arrows after sights and continuation arrows roughly every 200 metres on long stretches. Tap an arrow to see its instruction.</li>
+      <li>With <strong>Auto-follow ON</strong>, a small Next-direction strip shows the next Valhalla instruction and approximate distance. Very short route spurs which leave and rejoin the same place without a sight are flagged for diagnosis.</li>
       <li>Visited selected sites can be shown grey. <strong>GET ME HOME</strong> remains disabled until a tour is active and requires confirmation before routing back to the recorded Home position.</li>
     </ol>
   </div>
@@ -166,15 +174,15 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   </div>
   <div class="panel">
     <h3>Guide Builder</h3>
-    <p>Add a place you discover to the currently selected city. My sights are stored on this device and immediately appear on the Map and in the candidate list.</p>
-    <div class="controls"><button class="primary" id="addSightButton">Add a sight</button><button id="manageSightsButton">My sights</button></div>
+    <p>Add a place you discover to the currently selected city. My Sights are stored on this device and immediately appear on the Map and in the candidate list.</p>
+    <div class="controls"><button class="primary" id="addSightButton">Add a sight</button><button id="manageSightsButton">My Sights</button></div>
     <div class="controls"><button id="exportSightsButton">Export my additions</button><button id="createCityFuture" disabled>Create a city — coming next</button></div>
     <p class="small">A sight can include a photograph taken with this phone. Photographs are resized before being stored locally.</p>
   </div>
 <div class="panel">
     <h3>About this version</h3>
     <p id="aboutVersion"></p>
-    <p>v0.8.1 introduces the first Guide Builder function: personal sights can be created, photographed, edited, deleted and exported without changing the built-in city file.</p>
+    <p>v0.8.2 replaces geometry-spaced arrows with Valhalla manoeuvre guidance, adds departure and continuation arrows, tappable instructions, an Auto-follow Next-direction strip, and diagnostics for short unexplained route spurs.</p>
   </div>
 </section>
 </main>
@@ -204,7 +212,7 @@ dialog{border:0;border-radius:15px;padding:0;max-width:520px;width:calc(100% - 2
   <p class="notice hidden" id="builderError"></p>
   <div class="controls"><button id="builderCancel">Cancel</button><button class="primary" id="builderSave">Save sight</button></div>
 </div></dialog>
-<dialog id="mySightsDialog" class="builderDialog"><div class="dialogBody"><h2>My sights in this city</h2><div id="mySightsList"></div><div class="controls"><button id="mySightsClose" class="primary">Close</button></div></div></dialog>
+<dialog id="mySightsDialog" class="builderDialog"><div class="dialogBody"><h2>My Sights in this city</h2><div id="mySightsList"></div><div class="controls"><button id="mySightsClose" class="primary">Close</button></div></div></dialog>
 <dialog id="confirmDialog"><div class="dialogBody"><h2 id="dialogTitle">Change today's plan?</h2><div id="dialogText"></div><div class="controls"><button id="dialogCancel">Cancel</button><button class="primary" id="dialogOk">Confirm</button></div></div></dialog>
 <dialog id="photoLightbox" class="lightbox"><button class="close" id="lightboxClose">×</button><img id="lightboxImage" alt="Expanded photograph"></dialog>
 <dialog id="legendDialog"><div class="dialogBody"><h2>Map marker colours</h2><div class="keyRow"><i class="keyDot blue"></i><strong>Blue — Today's tour</strong><span>Selected for the current itinerary.</span></div><div class="keyRow"><i class="keyDot orange"></i><strong>Orange — Not selected</strong><span>Available, but left out because of time, priority or route efficiency.</span></div><div class="keyRow"><i class="keyDot red"></i><strong>Red — Unavailable</strong><span>Closed or otherwise unavailable at the time checked.</span></div><div class="keyRow"><i class="keyDot green"></i><strong>Green — Optional</strong><span>Doable if time permits, but not currently prioritised.</span></div><div class="keyRow"><i class="keyDot grey"></i><strong>Grey — Visited</strong><span>A selected stop already visited during this tour.</span></div><div class="controls"><button id="legendClose" class="primary">Close</button></div></div></dialog>
@@ -254,11 +262,11 @@ function updateDetailFollow(){
 
 const VALHALLA='https://valhalla1.openstreetmap.de/route';
 const VALHALLA_MATRIX='https://valhalla1.openstreetmap.de/sources_to_targets';
-const APP_VERSION='0.8.1';
-const BUILD='2026-08-31 01:50 UTC';
+const APP_VERSION='0.8.2';
+const BUILD='2026-08-31 11:50 UTC';
 let currentCityId='';
 let currentCity=null;
-const storageKeyBase='cityguides-v0.8.1';
+const storageKeyBase='cityguides-v0.8.2';
 
 function displayBuildInfo(){
   const txt='CityGuides v'+APP_VERSION+' · Build '+BUILD;
@@ -399,7 +407,7 @@ async function saveBuilderSight(){
 }
 async function renderMySights(){
   let items=[];try{items=await userSightsForCity(currentCityId)}catch{}
-  $('mySightsList').innerHTML=items.length?'':'<p class="small">You have not added any sights to this city yet.</p>';
+  $('mySightsList').innerHTML=items.length?'':'<p class="small">You have not added any My Sights to this city yet.</p>';
   for(const raw of items){
     const st=normalizeUserSight(raw),row=document.createElement('div');row.className='mySightRow';
     const name=document.createElement('strong');name.textContent=st.title;
@@ -692,10 +700,26 @@ function improveOrderNetwork(stops,start,candidates,matrix,finishMode='central')
 async function routeRequest(locations){
   const payload={locations:locations.map(x=>({lat:x.lat,lon:x.lng,type:x.kind==='via'?'via':'break'})),costing:'pedestrian',costing_options:{pedestrian:pedestrianCostingOptions()},units:'kilometers',directions_options:{units:'kilometers'}};
   try{
-    const r=await fetchWithTimeout(VALHALLA,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-LaRochelle-v2'},body:JSON.stringify(payload,{},12000)});
+    const r=await fetchWithTimeout(VALHALLA,{method:'POST',headers:{'Content-Type':'application/json','X-Client-Id':'CityGuides-v082'},body:JSON.stringify(payload,{},12000)});
     if(!r.ok)throw new Error('Routing service returned '+r.status);
     const j=await r.json();
-    return {shape:j.trip.legs.flatMap((leg,i)=>{const a=decodePolyline(leg.shape);return i?a.slice(1):a}),meters:j.trip.summary.length*1000,minutes:j.trip.summary.time/60};
+    const shape=[],maneuvers=[];
+    let globalOffset=0;
+    for(let li=0;li<(j.trip.legs||[]).length;li++){
+      const leg=j.trip.legs[li],decoded=decodePolyline(leg.shape);
+      if(li)shape.push(...decoded.slice(1));else shape.push(...decoded);
+      for(const man of (leg.maneuvers||[])){
+        const local=Number(man.begin_shape_index??0);
+        maneuvers.push({
+          shapeIndex:Math.max(0,globalOffset+local-(li?1:0)),
+          instruction:man.instruction||man.verbal_transition_alert_instruction||man.verbal_pre_transition_instruction||'Continue',
+          type:man.type,
+          streetNames:man.street_names||[]
+        });
+      }
+      globalOffset+=decoded.length;
+    }
+    return {shape,meters:j.trip.summary.length*1000,minutes:j.trip.summary.time/60,maneuvers};
   }catch(e){return null;}
 }
 function decodePolyline(str,precision=6){let idx=0,lat=0,lng=0,out=[];const factor=Math.pow(10,precision);while(idx<str.length){let shift=0,result=0,b;do{b=str.charCodeAt(idx++)-63;result|=(b&31)<<shift;shift+=5}while(b>=32);lat+=result&1?~(result>>1):(result>>1);shift=0;result=0;do{b=str.charCodeAt(idx++)-63;result|=(b&31)<<shift;shift+=5}while(b>=32);lng+=result&1?~(result>>1):(result>>1);out.push([lat/factor,lng/factor]);}return out;}
@@ -1010,7 +1034,7 @@ async function drawRoute(){
     }
     window._encounterPass=0;
 
-    currentRoute=r;drawRouteShape(r.shape);updateFinishMarker();
+    currentRoute=r;drawRouteShape(r.shape,r.maneuvers);updateFinishMarker();
     let listen=plan.reduce((a,s)=>a+s.listen,0), total=r.minutes+listen;
     const elapsed=startedAt?((Date.now()-startedAt)/60000):0, remaining=Math.max(0,Number($('budget').value)-elapsed-Number($('buffer').value));
     if(total>remaining+1 && plan.length>1 && !window._routePruning){
@@ -1022,7 +1046,8 @@ async function drawRoute(){
     $('homeTourDistance').textContent=(r.meters/1000).toFixed(1)+' km';
     $('homeTourStops').textContent=plan.length;
     $('homeTourState').textContent='Active';
-    $('planNote').textContent='Walking route calculated from the live pedestrian network. Remaining tour budget: '+fmtMin(remaining)+'.';
+    const spurs=detectShortRouteSpurs(r.shape);
+    $('planNote').textContent='Walking route calculated from the live pedestrian network. Remaining tour budget: '+fmtMin(remaining)+'.'+(spurs.length?' Route check: '+spurs.length+' short unexplained out-and-back spur'+(spurs.length===1?'':'s')+' detected.':'');
   }else{
     currentRoute=null;
     if(routeLine){routeLine.remove();routeLine=null;}
@@ -1032,35 +1057,119 @@ async function drawRoute(){
     $('setupStatus').textContent='Tour ready. Pedestrian route unavailable; use the numbered map pins.';
   }
 }
+function shapePointObject(p){return {lat:p[0],lng:p[1]};}
+function nearestShapeIndex(shape,point){
+  if(!Array.isArray(shape)||!shape.length||!point)return -1;
+  let best=-1,dist=Infinity;
+  for(let i=0;i<shape.length;i++){const d=hav(point,shapePointObject(shape[i]));if(d<dist){dist=d;best=i;}}
+  return best;
+}
+function shapeDistance(shape,a,b){
+  if(!Array.isArray(shape)||a<0||b<0)return Infinity;
+  let d=0;const start=Math.min(a,b),end=Math.max(a,b);
+  for(let i=start+1;i<=end;i++)d+=hav(shapePointObject(shape[i-1]),shapePointObject(shape[i]));
+  return d;
+}
+function arrowAt(shape,index,instruction,kind='maneuver'){
+  if(index<=0||index>=shape.length)return null;
+  const a=shape[Math.max(0,index-1)],b=shape[index],bearing=routeBearing(a,b);
+  const icon=L.divIcon({
+    className:kind==='departure'?'routeDepartureArrow':'routeManeuverArrow',
+    html:'<span style="transform:rotate('+(bearing-90)+'deg)">➜</span>',
+    iconSize:[29,29],iconAnchor:[14,14]
+  });
+  const marker=L.marker(b,{icon,interactive:true,zIndexOffset:520}).addTo(routeArrowLayer);
+  marker.bindPopup('<strong>'+instruction.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</strong>');
+  return {marker,index,point:shapePointObject(b),instruction,kind};
+}
+function routeArrowPlan(shape,maneuvers){
+  const arrows=[];
+  const tooClose=(point,metres=38)=>arrows.some(a=>hav(point,a.point)<metres);
+
+  // Meaningful Valhalla manoeuvres.
+  for(const man of (maneuvers||[])){
+    const i=Math.max(1,Math.min(shape.length-1,Number(man.shapeIndex||0)));
+    const point=shapePointObject(shape[i]);
+    const instruction=(man.instruction||'').trim();
+    if(!instruction||/^arrive/i.test(instruction))continue;
+    if(!tooClose(point,28)){
+      const a=arrowAt(shape,i,instruction,'maneuver');if(a)arrows.push(a);
+    }
+  }
+
+  // Departure guidance just after the start and after each selected sight.
+  const departures=[{point:position,label:'Leave the starting point'}];
+  plan.forEach((st,i)=>departures.push({point:routeAnchor(st),label:'Leave Stop '+(i+1)+' — '+st.title}));
+  for(const dep of departures){
+    const hit=nearestShapeIndex(shape,dep.point);if(hit<0)continue;
+    let i=hit,travel=0;
+    while(i<shape.length-1&&travel<22){travel+=hav(shapePointObject(shape[i]),shapePointObject(shape[i+1]));i++;}
+    if(i>0&&i<shape.length&&!tooClose(shapePointObject(shape[i]),34)){
+      const a=arrowAt(shape,i,dep.label,'departure');if(a)arrows.push(a);
+    }
+  }
+
+  // Continuation arrows every ~200 m where no manoeuvre/departure arrow already helps.
+  let since=0;
+  for(let i=1;i<shape.length;i++){
+    since+=hav(shapePointObject(shape[i-1]),shapePointObject(shape[i]));
+    if(since>=200){
+      const point=shapePointObject(shape[i]);
+      if(!tooClose(point,55)){
+        const a=arrowAt(shape,i,'Continue on the walking route','maneuver');if(a)arrows.push(a);
+      }
+      since=0;
+    }
+  }
+  return arrows;
+}
+function detectShortRouteSpurs(shape){
+  const found=[];
+  if(!Array.isArray(shape)||shape.length<6)return found;
+  for(let i=0;i<shape.length-4;i++){
+    let travelled=0;
+    for(let j=i+2;j<Math.min(shape.length,i+35);j++){
+      travelled+=hav(shapePointObject(shape[j-1]),shapePointObject(shape[j]));
+      if(travelled>180)break;
+      const closes=hav(shapePointObject(shape[i]),shapePointObject(shape[j]))<=18;
+      if(closes&&travelled>=35){
+        const required=plan.some(st=>{
+          const a=routeAnchor(st);
+          for(let k=i;k<=j;k++)if(hav(a,shapePointObject(shape[k]))<32)return true;
+          return false;
+        });
+        if(!required){found.push({start:i,end:j,metres:Math.round(travelled)});i=j;break;}
+      }
+    }
+  }
+  return found;
+}
+function updateNextDirection(){
+  const box=$('nextDirection'),txt=$('nextDirectionText');
+  if(!box||!txt||!autoMode||!position||!currentRoute?.shape?.length){if(box)box.classList.add('hidden');return;}
+  const here=nearestShapeIndex(currentRoute.shape,position);if(here<0){box.classList.add('hidden');return;}
+  const next=(currentRoute.maneuvers||[]).find(m=>Number(m.shapeIndex)>here+1);
+  if(!next){box.classList.add('hidden');return;}
+  const metres=Math.round(shapeDistance(currentRoute.shape,here,Number(next.shapeIndex)));
+  txt.textContent=(next.instruction||'Continue')+(Number.isFinite(metres)?' · '+metres+' m':'');
+  box.classList.remove('hidden');
+}
 function routeBearing(a,b){
   const lat1=a[0]*Math.PI/180,lat2=b[0]*Math.PI/180,dLon=(b[1]-a[1])*Math.PI/180;
   const y=Math.sin(dLon)*Math.cos(lat2);
   const x=Math.cos(lat1)*Math.sin(lat2)-Math.sin(lat1)*Math.cos(lat2)*Math.cos(dLon);
   return (Math.atan2(y,x)*180/Math.PI+360)%360;
 }
-function drawRouteShape(shape){
+function drawRouteShape(shape,maneuvers=[]){
   if(routeLine)routeLine.remove();
   if(routeArrowLayer){routeArrowLayer.clearLayers();}else{routeArrowLayer=L.layerGroup().addTo(map);}
   routeLine=L.polyline(shape,{weight:6,opacity:.85}).addTo(map);
-  if(Array.isArray(shape)&&shape.length>3){
-    const targetArrows=9;
-    const step=Math.max(3,Math.floor(shape.length/(targetArrows+1)));
-    for(let i=step;i<shape.length;i+=step){
-      const a=shape[Math.max(0,i-1)],b=shape[i];
-      if(!a||!b)continue;
-      const bearing=routeBearing(a,b);
-      const icon=L.divIcon({
-        className:'routeDirectionArrow',
-        html:'<span style="transform:rotate('+(bearing-90)+'deg)">➜</span>',
-        iconSize:[24,24],iconAnchor:[12,12]
-      });
-      L.marker(b,{icon,interactive:false,zIndexOffset:500}).addTo(routeArrowLayer);
-    }
-  }
+  routeArrowPlan(shape,maneuvers);
   if(fitNextRoute || !mapUserMoved){
     map.fitBounds(routeLine.getBounds().pad(.12));
     fitNextRoute=false;
   }
+  updateNextDirection();
 }
 function showStop(s){
   currentIndex=tour.stops.findIndex(x=>x.id===s.id);$('currentTitle').textContent=s.title; updateProgress();refreshMarkerStyles();renderCandidateList();
@@ -1108,6 +1217,7 @@ function applyPosition(pos){
   else accuracyCircle.setLatLng([position.lat,position.lng]).setRadius(acc);
   $('gpsStatus').textContent='Position ±'+Math.round(acc)+' m';
   updateProgress();
+  updateNextDirection();
   if(autoMode){
     let hit=null,dd=Infinity;
     for(const st of tour.stops){const d=hav(position,st);if(d<=st.radius&&d<dd){hit=st;dd=d;}}
@@ -1214,7 +1324,7 @@ $('iamhere').onclick=async()=>{
   }
 };
 $('replan').onclick=async()=>{if(!position){$('setupStatus').textContent='Press “I AM HERE” first to establish your starting point.';return;} await makePlan('manual');};
-$('auto').onclick=()=>{autoMode=!autoMode;$('auto').textContent='Auto-follow: '+(autoMode?'ON':'OFF')};
+$('auto').onclick=()=>{autoMode=!autoMode;$('auto').textContent='Auto-follow: '+(autoMode?'ON':'OFF');updateNextDirection();};
 $('next').onclick=()=>{
   if(!plan.length)return;
   const current=tour.stops[currentIndex];

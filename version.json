@@ -1,5 +1,5 @@
 {
-  "version": "0.8.1",
-  "build": "2026-08-31 01:50 UTC",
-  "release": "Add Sight / My Places foundation; user photographs; local persistence; edit/delete/export; unified version/status display"
+  "version": "0.8.2",
+  "build": "2026-08-31 11:50 UTC",
+  "release": "Valhalla manoeuvre arrows; continuation/departure arrows; tappable directions; Auto-follow next-direction strip; short-spur diagnostics; My Sights capitalization"
 }
